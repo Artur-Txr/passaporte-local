@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Pressable,
   ScrollView,
@@ -12,13 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useVisitas } from '../contextos/VisitasContext';
 
-const categorias = [
-  'Todos',
-  'Parque',
-  'Museu',
-  'Cafeteria',
-  'Outro',
-];
+const categorias = ['Todos', 'Parque', 'Museu', 'Cafeteria', 'Outro'];
 
 function normalizar(texto: string) {
   return texto
@@ -29,18 +24,21 @@ function normalizar(texto: string) {
 }
 
 export default function Inicio() {
-  const { visitas } = useVisitas();
+  const {
+    visitas,
+    carregando,
+    erro,
+    recarregarVisitas,
+  } = useVisitas();
 
   const [busca, setBusca] = useState('');
-  const [categoriaSelecionada, setCategoriaSelecionada] =
-    useState('Todos');
+  const [categoria, setCategoria] = useState('Todos');
 
-  const totalVisitas = visitas.length;
+  const indisponivel = carregando || erro !== null;
 
   const totalCidades = new Set(
     visitas.map(
-      (visita) =>
-        `${normalizar(visita.cidade)}|${normalizar(visita.uf)}`,
+      (visita) => `${normalizar(visita.cidade)}|${visita.uf}`,
     ),
   ).size;
 
@@ -52,8 +50,7 @@ export default function Inicio() {
       normalizar(visita.cidade).includes(termo);
 
     const correspondeCategoria =
-      categoriaSelecionada === 'Todos' ||
-      visita.categoria === categoriaSelecionada;
+      categoria === 'Todos' || visita.categoria === categoria;
 
     return correspondeBusca && correspondeCategoria;
   });
@@ -69,22 +66,27 @@ export default function Inicio() {
   return (
     <SafeAreaView style={styles.screen}>
       <FlatList
-        data={visitasFiltradas}
+        data={indisponivel ? [] : visitasFiltradas}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View style={styles.header}>
-            <Pressable
-              onPress={voltar}
-              style={styles.backButton}
-            >
-              <Text style={styles.backText}>← Voltar</Text>
-            </Pressable>
+            <View style={styles.topBar}>
+              <Pressable onPress={voltar} style={styles.smallButton}>
+                <Text style={styles.linkText}>← Voltar</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => router.push('/perfil')}
+                style={styles.smallButton}
+              >
+                <Text style={styles.linkText}>Meu perfil</Text>
+              </Pressable>
+            </View>
 
             <Text style={styles.label}>MEU PASSAPORTE</Text>
             <Text style={styles.title}>Suas descobertas</Text>
-
             <Text style={styles.description}>
               Uma coleção dos lugares que marcaram sua jornada.
             </Text>
@@ -92,112 +94,87 @@ export default function Inicio() {
             <View style={styles.summary}>
               <View style={styles.summaryCard}>
                 <Text style={styles.summaryNumber}>
-                  {totalVisitas}
+                  {indisponivel ? '—' : visitas.length}
                 </Text>
-
-                <Text style={styles.summaryLabel}>
-                  {totalVisitas === 1 ? 'Visita' : 'Visitas'}
-                </Text>
+                <Text style={styles.summaryText}>Visitas registradas</Text>
               </View>
 
               <View style={styles.summaryCard}>
                 <Text style={styles.summaryNumber}>
-                  {totalCidades}
+                  {indisponivel ? '—' : totalCidades}
                 </Text>
-
-                <Text style={styles.summaryLabel}>
-                  {totalCidades === 1 ? 'Cidade' : 'Cidades'}
-                </Text>
+                <Text style={styles.summaryText}>Cidades exploradas</Text>
               </View>
             </View>
 
             <Pressable
+              disabled={indisponivel}
               onPress={() => router.push('/nova-visita')}
-              accessibilityRole="button"
               style={({ pressed }) => [
-                styles.newVisitButton,
-                pressed && styles.pressed,
+                styles.newButton,
+                (indisponivel || pressed) && styles.dimmed,
               ]}
             >
-              <Text style={styles.newVisitText}>
-                + Nova visita
-              </Text>
+              <Text style={styles.buttonText}>+ Nova visita</Text>
             </Pressable>
 
             <Pressable
+              disabled={indisponivel}
               onPress={() => router.push('/passaporte')}
-              accessibilityRole="button"
               style={({ pressed }) => [
                 styles.passportButton,
-                pressed && styles.pressed,
+                (indisponivel || pressed) && styles.dimmed,
               ]}
             >
-              <Text style={styles.passportText}>
-                Meu passaporte →
-              </Text>
+              <Text style={styles.linkText}>Ver meu passaporte</Text>
             </Pressable>
 
-            <Text style={styles.searchLabel}>
-              Buscar por lugar ou cidade
-            </Text>
-
+            <Text style={styles.searchLabel}>Buscar por lugar ou cidade</Text>
             <TextInput
-              style={styles.searchInput}
-              placeholder="Ex.: MASP ou São Paulo"
-              placeholderTextColor="#7C827A"
               value={busca}
               onChangeText={setBusca}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="search"
+              editable={!indisponivel}
+              placeholder="Ex.: MASP ou São Paulo"
+              placeholderTextColor="#8A8F89"
+              style={styles.input}
             />
 
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={styles.filters}
+              contentContainerStyle={styles.categories}
             >
-              {categorias.map((categoria) => {
-                const selecionada =
-                  categoria === categoriaSelecionada;
-
-                return (
-                  <Pressable
-                    key={categoria}
-                    onPress={() =>
-                      setCategoriaSelecionada(categoria)
-                    }
-                    accessibilityRole="button"
-                    accessibilityState={{
-                      selected: selecionada,
-                    }}
+              {categorias.map((item) => (
+                <Pressable
+                  key={item}
+                  disabled={indisponivel}
+                  onPress={() => setCategoria(item)}
+                  style={[
+                    styles.categoryButton,
+                    categoria === item && styles.categorySelected,
+                    indisponivel && styles.dimmed,
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.filterButton,
-                      selecionada &&
-                        styles.filterButtonSelected,
+                      styles.categoryText,
+                      categoria === item && styles.categoryTextSelected,
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.filterText,
-                        selecionada &&
-                          styles.filterTextSelected,
-                      ]}
-                    >
-                      {categoria}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+                    {item}
+                  </Text>
+                </Pressable>
+              ))}
             </ScrollView>
 
-            <Text style={styles.count}>
-              {visitasFiltradas.length}{' '}
-              {visitasFiltradas.length === 1
-                ? 'visita encontrada'
-                : 'visitas encontradas'}
-            </Text>
+            {!indisponivel && (
+              <Text style={styles.count}>
+                {visitasFiltradas.length}{' '}
+                {visitasFiltradas.length === 1
+                  ? 'visita encontrada'
+                  : 'visitas encontradas'}
+              </Text>
+            )}
           </View>
         }
         renderItem={({ item }) => (
@@ -212,38 +189,57 @@ export default function Inicio() {
             accessibilityLabel={`Ver detalhes de ${item.lugar}`}
             style={({ pressed }) => [
               styles.visitCard,
-              pressed && styles.pressed,
+              pressed && styles.dimmed,
             ]}
           >
-            <Text style={styles.category}>
-              {item.categoria.toUpperCase()}
-            </Text>
-
+            <Text style={styles.category}>{item.categoria.toUpperCase()}</Text>
             <Text style={styles.placeName}>{item.lugar}</Text>
-
             <Text style={styles.city}>
               {item.cidade} · {item.uf}
             </Text>
-
-            <Text style={styles.visitDate}>
-              Visitado em {item.data}
-            </Text>
-
-            <Text style={styles.detailsLink}>
-              Ver detalhes →
-            </Text>
+            <Text style={styles.date}>Visitado em {item.data}</Text>
+            <Text style={styles.details}>Ver detalhes →</Text>
           </Pressable>
         )}
         ListEmptyComponent={
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>
-              Nenhuma visita encontrada
-            </Text>
+          carregando ? (
+            <View style={styles.statusCard}>
+              <ActivityIndicator size="large" color="#183F35" />
+              <Text style={styles.statusText}>
+                Carregando suas visitas…
+              </Text>
+            </View>
+          ) : erro ? (
+            <View style={styles.statusCard}>
+              <Text style={styles.statusTitle}>
+                Não foi possível carregar suas visitas
+              </Text>
+              <Text style={styles.statusText}>{erro}</Text>
 
-            <Text style={styles.emptyDescription}>
-              Cadastre uma visita ou ajuste a busca e os filtros.
-            </Text>
-          </View>
+              <Pressable
+                onPress={recarregarVisitas}
+                style={({ pressed }) => [
+                  styles.retryButton,
+                  pressed && styles.dimmed,
+                ]}
+              >
+                <Text style={styles.buttonText}>Tentar novamente</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.statusCard}>
+              <Text style={styles.statusTitle}>
+                {visitas.length === 0
+                  ? 'Sua jornada começa aqui'
+                  : 'Nenhuma visita encontrada'}
+              </Text>
+              <Text style={styles.statusText}>
+                {visitas.length === 0
+                  ? 'Toque em “+ Nova visita” para registrar sua primeira descoberta.'
+                  : 'Experimente outra busca ou selecione uma categoria diferente.'}
+              </Text>
+            </View>
+          )
         }
       />
     </SafeAreaView>
@@ -263,16 +259,19 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 20,
   },
-  backButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: 12,
-    paddingRight: 16,
-    marginBottom: 12,
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
   },
-  backText: {
+  smallButton: {
+    paddingVertical: 10,
+  },
+  linkText: {
     color: '#183F35',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
   },
   label: {
     color: '#C76B48',
@@ -301,26 +300,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#183F35',
     borderRadius: 18,
-    padding: 20,
+    padding: 18,
   },
   summaryNumber: {
     color: '#F7F1E5',
     fontSize: 32,
     fontWeight: '800',
   },
-  summaryLabel: {
-    color: '#DBCEAF',
-    fontSize: 14,
+  summaryText: {
+    color: '#F7F1E5',
+    fontSize: 13,
     marginTop: 6,
   },
-  newVisitButton: {
+  newButton: {
     backgroundColor: '#C76B48',
     borderRadius: 14,
-    paddingVertical: 16,
+    padding: 18,
     alignItems: 'center',
     marginTop: 20,
   },
-  newVisitText: {
+  buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
@@ -329,64 +328,55 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#183F35',
     borderRadius: 14,
-    paddingVertical: 16,
+    padding: 16,
     alignItems: 'center',
     marginTop: 12,
-  },
-  passportText: {
-    color: '#183F35',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  pressed: {
-    opacity: 0.75,
   },
   searchLabel: {
     color: '#183F35',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     marginTop: 24,
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  searchInput: {
+  input: {
     backgroundColor: '#FFFFFF',
-    color: '#183F35',
     borderWidth: 1,
-    borderColor: '#DED9CE',
+    borderColor: '#E3DDD2',
     borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 15,
+    color: '#183F35',
     fontSize: 16,
   },
-  filters: {
+  categories: {
     gap: 8,
-    paddingTop: 16,
-    paddingBottom: 4,
+    paddingVertical: 16,
   },
-  filterButton: {
+  categoryButton: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#DED9CE',
+    borderColor: '#E3DDD2',
     borderRadius: 24,
     paddingHorizontal: 18,
     paddingVertical: 12,
   },
-  filterButtonSelected: {
+  categorySelected: {
     backgroundColor: '#183F35',
     borderColor: '#183F35',
   },
-  filterText: {
+  categoryText: {
     color: '#53645B',
     fontSize: 14,
     fontWeight: '600',
   },
-  filterTextSelected: {
+  categoryTextSelected: {
     color: '#FFFFFF',
   },
   count: {
     color: '#53645B',
     fontSize: 14,
-    marginTop: 14,
+    marginTop: 4,
   },
   visitCard: {
     backgroundColor: '#FFFFFF',
@@ -411,31 +401,44 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 6,
   },
-  visitDate: {
+  date: {
     color: '#53645B',
-    fontSize: 13,
-    marginTop: 18,
+    fontSize: 14,
+    marginTop: 20,
   },
-  detailsLink: {
+  details: {
     color: '#C76B48',
     fontSize: 14,
     fontWeight: '700',
     marginTop: 18,
   },
-  emptyCard: {
+  statusCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    padding: 22,
+    padding: 24,
+    alignItems: 'center',
   },
-  emptyTitle: {
+  statusTitle: {
     color: '#183F35',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
+    textAlign: 'center',
   },
-  emptyDescription: {
+  statusText: {
     color: '#53645B',
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 8,
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+    marginTop: 14,
+  },
+  retryButton: {
+    backgroundColor: '#183F35',
+    borderRadius: 14,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    marginTop: 20,
+  },
+  dimmed: {
+    opacity: 0.6,
   },
 });

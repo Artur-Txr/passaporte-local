@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -67,6 +67,9 @@ export default function EditarVisita() {
   const [comentario, setComentario] = useState(
     visita?.comentario ?? '',
   );
+  const [salvando, setSalvando] = useState(false);
+
+  const envioEmAndamento = useRef(false);
 
   function voltar() {
     if (router.canGoBack()) {
@@ -76,7 +79,11 @@ export default function EditarVisita() {
     }
   }
 
-  function salvarAlteracoes() {
+  async function salvarAlteracoes() {
+    if (envioEmAndamento.current) {
+      return;
+    }
+
     if (!visita) {
       Alert.alert('Visita não encontrada');
       return;
@@ -114,16 +121,29 @@ export default function EditarVisita() {
       return;
     }
 
-    editarVisita(visita.id, {
-      lugar: lugar.trim(),
-      cidade: cidade.trim(),
-      uf,
-      categoria,
-      data,
-      comentario: comentario.trim(),
-    });
+    envioEmAndamento.current = true;
+    setSalvando(true);
 
-    voltar();
+    try {
+      await editarVisita(visita.id, {
+        lugar: lugar.trim(),
+        cidade: cidade.trim(),
+        uf,
+        categoria,
+        data,
+        comentario: comentario.trim(),
+      });
+
+      voltar();
+    } catch {
+      Alert.alert(
+        'Não foi possível atualizar',
+        'Os campos foram mantidos. Confira sua conexão e tente novamente.',
+      );
+    } finally {
+      envioEmAndamento.current = false;
+      setSalvando(false);
+    }
   }
 
   return (
@@ -138,6 +158,7 @@ export default function EditarVisita() {
         >
           <Pressable
             onPress={voltar}
+            disabled={salvando}
             style={styles.backButton}
           >
             <Text style={styles.backText}>← Voltar</Text>
@@ -175,6 +196,7 @@ export default function EditarVisita() {
                 onChangeText={setLugar}
                 maxLength={120}
                 autoCapitalize="words"
+                editable={!salvando}
               />
 
               <Text style={styles.fieldLabel}>Cidade *</Text>
@@ -185,6 +207,7 @@ export default function EditarVisita() {
                 onChangeText={setCidade}
                 maxLength={100}
                 autoCapitalize="words"
+                editable={!salvando}
               />
 
               <Text style={styles.fieldLabel}>UF *</Text>
@@ -200,6 +223,7 @@ export default function EditarVisita() {
                 maxLength={2}
                 autoCapitalize="characters"
                 autoCorrect={false}
+                editable={!salvando}
               />
 
               <Text style={styles.fieldLabel}>
@@ -214,9 +238,11 @@ export default function EditarVisita() {
                     <Pressable
                       key={item}
                       onPress={() => setCategoria(item)}
+                      disabled={salvando}
                       accessibilityRole="button"
                       accessibilityState={{
                         selected: selecionada,
+                        disabled: salvando,
                       }}
                       style={[
                         styles.categoryButton,
@@ -250,6 +276,7 @@ export default function EditarVisita() {
                 maxLength={10}
                 autoCorrect={false}
                 keyboardType="numbers-and-punctuation"
+                editable={!salvando}
               />
 
               <Text style={styles.fieldLabel}>
@@ -263,6 +290,7 @@ export default function EditarVisita() {
                 multiline
                 maxLength={500}
                 textAlignVertical="top"
+                editable={!salvando}
               />
 
               <Text style={styles.counter}>
@@ -275,14 +303,18 @@ export default function EditarVisita() {
 
               <Pressable
                 onPress={salvarAlteracoes}
+                disabled={salvando}
                 accessibilityRole="button"
+                accessibilityState={{ disabled: salvando }}
                 style={({ pressed }) => [
                   styles.button,
-                  pressed && styles.pressed,
+                  (pressed || salvando) && styles.pressed,
                 ]}
               >
                 <Text style={styles.buttonText}>
-                  Salvar alterações
+                  {salvando
+                    ? 'Salvando...'
+                    : 'Salvar alterações'}
                 </Text>
               </Pressable>
             </>

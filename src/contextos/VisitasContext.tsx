@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createContext,
   useContext,
@@ -7,27 +6,28 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { Alert } from 'react-native';
+import type { Visita } from '../dados/visitas';
 import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  Text,
-  View,
-} from 'react-native';
-import {
-  visitas as visitasIniciais,
-  type Visita,
-} from '../dados/visitas';
-
-const CHAVE_VISITAS = '@passaporte-local:visitas:v1';
-
-type DadosVisita = Omit<Visita, 'id'>;
+  atualizarVisita,
+  cadastrarVisita,
+  listarVisitas,
+  removerVisita,
+  type DadosVisita,
+} from '../servicos/visitasService';
+import { useAutenticacao } from './AutenticacaoContext';
 
 type VisitasContextData = {
   visitas: Visita[];
-  adicionarVisita: (dados: DadosVisita) => void;
-  excluirVisita: (id: string) => void;
-  editarVisita: (id: string, dados: DadosVisita) => void;
+  carregando: boolean;
+  erro: string | null;
+  recarregarVisitas: () => void;
+  adicionarVisita: (dados: DadosVisita) => Promise<void>;
+  excluirVisita: (id: string) => Promise<void>;
+  editarVisita: (
+    id: string,
+    dados: DadosVisita,
+  ) => Promise<void>;
 };
 
 const VisitasContext = createContext<
@@ -38,106 +38,130 @@ type VisitasProviderProps = {
   children: ReactNode;
 };
 
-function registroValido(valor: unknown): valor is Visita {
-  if (typeof valor !== 'object' || valor === null) {
-    return false;
-  }
-
-  const visita = valor as Record<string, unknown>;
-
-  return (
-    typeof visita.id === 'string' &&
-    typeof visita.lugar === 'string' &&
-    typeof visita.cidade === 'string' &&
-    typeof visita.uf === 'string' &&
-    typeof visita.categoria === 'string' &&
-    typeof visita.data === 'string' &&
-    typeof visita.comentario === 'string'
-  );
-}
+type DadosVisitasProviderProps = {
+  children: ReactNode;
+  usuarioId: string | null;
+};
 
 export function VisitasProvider({
   children,
 }: VisitasProviderProps) {
+  const { sessao } = useAutenticacao();
+
+  const usuarioId = sessao?.user.id ?? null;
+
+  return (
+    <DadosVisitasProvider
+      key={usuarioId ?? 'sem-sessao'}
+      usuarioId={usuarioId}
+    >
+      {children}
+    </DadosVisitasProvider>
+  );
+}
+
+function DadosVisitasProvider({
+  children,
+  usuarioId,
+}: DadosVisitasProviderProps) {
   const [visitas, setVisitas] = useState<Visita[]>([]);
-  const [carregado, setCarregado] = useState(false);
-  const [erroCarregamento, setErroCarregamento] =
-    useState(false);
+  const [carregando, setCarregando] = useState(
+    usuarioId !== null,
+  );
+  const [erro, setErro] = useState<string | null>(null);
   const [tentativa, setTentativa] = useState(0);
 
-  const sequencia = useRef(0);
-  const filaSalvamento = useRef<Promise<void>>(
-    Promise.resolve(),
-  );
+  const ativo = useRef(true);
 
   useEffect(() => {
-    let ativo = true;
+    ativo.current = true;
 
-    async function carregarVisitas() {
+    return () => {
+      ativo.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let consultaAtiva = true;
+
+    async function carregar() {
+      if (!usuarioId) {
+        setVisitas([]);
+        setCarregando(false);
+        setErro(null);
+        return;
+      }
+
+      setCarregando(true);
+      setErro(null);
+
       try {
-        const texto = await AsyncStorage.getItem(CHAVE_VISITAS);
+        const lista = await listarVisitas(usuarioId);
 
-        let lista: Visita[];
-
-        if (texto === null) {
-          lista = visitasIniciais.map((visita) => ({
-            ...visita,
-          }));
-        } else {
-          const dados: unknown = JSON.parse(texto);
-
-          if (
-            !Array.isArray(dados) ||
-            !dados.every(registroValido)
-          ) {
-            throw new Error('Dados armazenados inválidos.');
-          }
-
-          lista = dados;
-        }
-
-        if (ativo) {
+        if (consultaAtiva) {
           setVisitas(lista);
-          setCarregado(true);
         }
       } catch {
-        if (ativo) {
-          setErroCarregamento(true);
+        if (consultaAtiva) {
+          const mensagem =
+            'Não foi possível carregar suas visitas.';
+
+          setErro(mensagem);
+
+          Alert.alert(
+            'Falha ao carregar',
+            `${mensagem} Confira sua conexão.`,
+          );
+        }
+      } finally {
+        if (consultaAtiva) {
+          setCarregando(false);
         }
       }
     }
 
-    carregarVisitas();
+    void carregar();
 
     return () => {
-      ativo = false;
+      consultaAtiva = false;
     };
-  }, [tentativa]);
+  }, [usuarioId, tentativa]);
 
-  useEffect(() => {
-    if (!carregado) {
-      return;
+  function obterUsuarioId() {
+    if (!usuarioId || !ativo.current) {
+      throw new Error('Entre na sua conta para continuar.');
     }
 
-    const texto = JSON.stringify(visitas);
+    if (carregando || erro) {
+      throw new Error(
+        'Aguarde o carregamento das visitas ou tente novamente.',
+      );
+    }
 
-    filaSalvamento.current = filaSalvamento.current
-      .then(() => AsyncStorage.setItem(CHAVE_VISITAS, texto))
-      .catch(() => {
-        Alert.alert(
-          'Não foi possível guardar as visitas',
-          'A alteração está na memória, mas pode ser perdida ao fechar o aplicativo. Tente novamente.',
-        );
-      });
-  }, [visitas, carregado]);
+    return usuarioId;
+  }
 
-  function adicionarVisita(dados: DadosVisita) {
-    sequencia.current += 1;
+  function conferirSessaoAtiva() {
+    if (!ativo.current) {
+      throw new Error(
+        'A sessão mudou durante a operação.',
+      );
+    }
+  }
 
-    const novaVisita: Visita = {
-      ...dados,
-      id: `visita-${Date.now()}-${sequencia.current}`,
-    };
+  function recarregarVisitas() {
+    setTentativa((valor) => valor + 1);
+  }
+
+  async function adicionarVisita(dados: DadosVisita) {
+    const idUsuario = obterUsuarioId();
+
+    const novaVisita = await cadastrarVisita(
+      idUsuario,
+      dados,
+    );
+
+    conferirSessaoAtiva();
 
     setVisitas((listaAtual) => [
       novaVisita,
@@ -145,83 +169,36 @@ export function VisitasProvider({
     ]);
   }
 
-  function excluirVisita(id: string) {
+  async function excluirVisita(id: string) {
+    const idUsuario = obterUsuarioId();
+
+    await removerVisita(idUsuario, id);
+
+    conferirSessaoAtiva();
+
     setVisitas((listaAtual) =>
       listaAtual.filter((visita) => visita.id !== id),
     );
   }
 
-  function editarVisita(id: string, dados: DadosVisita) {
+  async function editarVisita(
+    id: string,
+    dados: DadosVisita,
+  ) {
+    const idUsuario = obterUsuarioId();
+
+    const visitaAtualizada = await atualizarVisita(
+      idUsuario,
+      id,
+      dados,
+    );
+
+    conferirSessaoAtiva();
+
     setVisitas((listaAtual) =>
       listaAtual.map((visita) =>
-        visita.id === id
-          ? { ...dados, id: visita.id }
-          : visita,
+        visita.id === id ? visitaAtualizada : visita,
       ),
-    );
-  }
-
-  function tentarNovamente() {
-    setErroCarregamento(false);
-    setTentativa((valor) => valor + 1);
-  }
-
-  if (!carregado) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: '#F7F1E5',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 28,
-        }}
-      >
-        {erroCarregamento ? (
-          <>
-            <Text
-              style={{
-                color: '#183F35',
-                fontSize: 18,
-                textAlign: 'center',
-              }}
-            >
-              Não foi possível carregar suas visitas.
-            </Text>
-
-            <Pressable
-              onPress={tentarNovamente}
-              accessibilityRole="button"
-              style={{
-                backgroundColor: '#183F35',
-                padding: 16,
-                borderRadius: 14,
-                marginTop: 20,
-              }}
-            >
-              <Text style={{ color: '#FFFFFF' }}>
-                Tentar novamente
-              </Text>
-            </Pressable>
-          </>
-        ) : (
-          <>
-            <ActivityIndicator
-              size="large"
-              color="#183F35"
-            />
-
-            <Text
-              style={{
-                color: '#53645B',
-                marginTop: 16,
-              }}
-            >
-              Carregando seu passaporte...
-            </Text>
-          </>
-        )}
-      </View>
     );
   }
 
@@ -229,6 +206,9 @@ export function VisitasProvider({
     <VisitasContext.Provider
       value={{
         visitas,
+        carregando,
+        erro,
+        recarregarVisitas,
         adicionarVisita,
         excluirVisita,
         editarVisita,

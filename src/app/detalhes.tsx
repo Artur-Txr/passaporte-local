@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { useRef, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -21,6 +22,9 @@ export default function Detalhes() {
   const visitaId = Array.isArray(id) ? id[0] : id;
   const visita = visitas.find((item) => item.id === visitaId);
 
+  const [excluindo, setExcluindo] = useState(false);
+  const exclusaoEmAndamento = useRef(false);
+
   function voltar() {
     if (router.canGoBack()) {
       router.back();
@@ -30,7 +34,7 @@ export default function Detalhes() {
   }
 
   function abrirEdicao() {
-    if (!visita) {
+    if (!visita || exclusaoEmAndamento.current) {
       return;
     }
 
@@ -40,8 +44,30 @@ export default function Detalhes() {
     });
   }
 
+  async function executarExclusao(idParaExcluir: string) {
+    if (exclusaoEmAndamento.current) {
+      return;
+    }
+
+    exclusaoEmAndamento.current = true;
+    setExcluindo(true);
+
+    try {
+      await excluirVisita(idParaExcluir);
+      voltar();
+    } catch {
+      Alert.alert(
+        'Não foi possível excluir',
+        'Confira sua conexão e tente novamente.',
+      );
+    } finally {
+      exclusaoEmAndamento.current = false;
+      setExcluindo(false);
+    }
+  }
+
   function confirmarExclusao() {
-    if (!visita) {
+    if (!visita || exclusaoEmAndamento.current) {
       return;
     }
 
@@ -59,8 +85,7 @@ export default function Detalhes() {
           text: 'Excluir',
           style: 'destructive',
           onPress: () => {
-            excluirVisita(idParaExcluir);
-            voltar();
+            void executarExclusao(idParaExcluir);
           },
         },
       ],
@@ -73,12 +98,23 @@ export default function Detalhes() {
       <ScrollView contentContainerStyle={styles.content}>
         <Pressable
           onPress={voltar}
+          disabled={excluindo}
           style={styles.backButton}
         >
           <Text style={styles.backText}>← Voltar</Text>
         </Pressable>
 
-        {visita ? (
+        {excluindo ? (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>
+              Excluindo visita...
+            </Text>
+
+            <Text style={styles.cardText}>
+              Aguarde a conclusão.
+            </Text>
+          </View>
+        ) : visita ? (
           <>
             <Text style={styles.label}>MINHA DESCOBERTA</Text>
 

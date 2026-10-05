@@ -68,7 +68,7 @@ export default function NovaVisita() {
     }
   }
 
-  function salvarVisita() {
+  async function salvarVisita() {
     if (envioEmAndamento.current) {
       return;
     }
@@ -89,7 +89,7 @@ export default function NovaVisita() {
       return;
     }
 
-    if (!categoria) {
+    if (!categorias.includes(categoria)) {
       Alert.alert(
         'Escolha uma categoria',
         'Selecione o tipo de lugar visitado.',
@@ -108,16 +108,26 @@ export default function NovaVisita() {
     envioEmAndamento.current = true;
     setSalvando(true);
 
-    adicionarVisita({
-      lugar: lugar.trim(),
-      cidade: cidade.trim(),
-      uf,
-      categoria,
-      data,
-      comentario: comentario.trim(),
-    });
+    try {
+      await adicionarVisita({
+        lugar: lugar.trim(),
+        cidade: cidade.trim(),
+        uf,
+        categoria,
+        data,
+        comentario: comentario.trim(),
+      });
 
-    voltar();
+      voltar();
+    } catch {
+      Alert.alert(
+        'Não foi possível salvar',
+        'Os campos foram mantidos. Confira sua conexão e tente novamente.',
+      );
+    } finally {
+      envioEmAndamento.current = false;
+      setSalvando(false);
+    }
   }
 
   return (
@@ -132,6 +142,7 @@ export default function NovaVisita() {
         >
           <Pressable
             onPress={voltar}
+            disabled={salvando}
             style={styles.backButton}
           >
             <Text style={styles.backText}>← Voltar</Text>
@@ -154,6 +165,7 @@ export default function NovaVisita() {
             onChangeText={setLugar}
             maxLength={120}
             autoCapitalize="words"
+            editable={!salvando}
           />
 
           <Text style={styles.fieldLabel}>Cidade *</Text>
@@ -166,6 +178,7 @@ export default function NovaVisita() {
             onChangeText={setCidade}
             maxLength={100}
             autoCapitalize="words"
+            editable={!salvando}
           />
 
           <Text style={styles.fieldLabel}>UF *</Text>
@@ -181,6 +194,7 @@ export default function NovaVisita() {
             maxLength={2}
             autoCapitalize="characters"
             autoCorrect={false}
+            editable={!salvando}
           />
 
           <Text style={styles.fieldLabel}>Categoria *</Text>
@@ -193,8 +207,12 @@ export default function NovaVisita() {
                 <Pressable
                   key={item}
                   onPress={() => setCategoria(item)}
+                  disabled={salvando}
                   accessibilityRole="button"
-                  accessibilityState={{ selected: selecionada }}
+                  accessibilityState={{
+                    selected: selecionada,
+                    disabled: salvando,
+                  }}
                   style={[
                     styles.categoryButton,
                     selecionada && styles.categorySelected,
@@ -224,6 +242,7 @@ export default function NovaVisita() {
             maxLength={10}
             autoCorrect={false}
             keyboardType="numbers-and-punctuation"
+            editable={!salvando}
           />
 
           <Text style={styles.hint}>
@@ -241,6 +260,7 @@ export default function NovaVisita() {
             multiline
             maxLength={500}
             textAlignVertical="top"
+            editable={!salvando}
           />
 
           <Text style={styles.counter}>
@@ -256,7 +276,7 @@ export default function NovaVisita() {
             accessibilityState={{ disabled: salvando }}
             style={({ pressed }) => [
               styles.button,
-              (pressed || salvando) && styles.buttonPressed,
+              (pressed || salvando) && styles.pressed,
             ]}
           >
             <Text style={styles.buttonText}>
@@ -375,12 +395,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
-  buttonPressed: {
-    opacity: 0.75,
-  },
   buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  pressed: {
+    opacity: 0.75,
   },
 });
