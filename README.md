@@ -8,7 +8,7 @@ Aplicativo mobile para registrar passeios e organizar memórias de lugares visit
 **Professor:** Edemilton Alcides
 
 ## Situação
-Fase 1: planejamento. O aplicativo ainda não foi implementado. Apresentação prevista para 20/10/2026.
+Fase 1: planejamento. Base inicial em React Native + Expo criada para testar o ambiente, com tela de apresentação. Login, banco de dados e CRUD ainda não foram implementados. Apresentação prevista para 20/10/2026.
 
 ## Problema e solução
 Fotos e anotações de passeios podem ficar dispersas. A proposta reúne lugar, cidade, data e impressões em um diário privado com busca e filtros. Essa necessidade será validada com potenciais usuários.
@@ -47,7 +47,8 @@ Registro manual de lugares no Brasil. Primeira versão com internet e foco inici
 - 24 ou 26/nov: Fase 2, conforme definição do professor.
 
 ## Execução
-As instruções de instalação e configuração serão adicionadas na Fase 2, após a criação do aplicativo.
+Instale Node.js LTS e Expo Go. Na pasta do projeto, execute `npm install` e depois `npm start`. Abra a URL exibida no Expo Go. Para verificar os tipos, execute `npm run typecheck`. O emulador precisa ter uma versão do Expo Go compatível com o SDK 57.
 
 ## Verificações previstas
 CRUD completo, persistência após reabertura, campos inválidos, falha de conexão, permissão de câmera negada e isolamento entre duas contas.
+
