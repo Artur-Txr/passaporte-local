@@ -7,6 +7,7 @@ export type Visita = {
   data: string;
   comentario: string;
   avaliacao?: number | null;
+  foto_path?: string | null;
 };
 
 export const visitas: Visita[] = [

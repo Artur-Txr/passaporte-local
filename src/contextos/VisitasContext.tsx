@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { Alert } from 'react-native';
 import type { Visita } from '../dados/visitas';
+import { excluirFoto } from '../servicos/fotosService';
 import {
   atualizarVisita,
   cadastrarVisita,
@@ -47,7 +48,6 @@ export function VisitasProvider({
   children,
 }: VisitasProviderProps) {
   const { sessao } = useAutenticacao();
-
   const usuarioId = sessao?.user.id ?? null;
 
   return (
@@ -143,9 +143,7 @@ function DadosVisitasProvider({
 
   function conferirSessaoAtiva() {
     if (!ativo.current) {
-      throw new Error(
-        'A sessão mudou durante a operação.',
-      );
+      throw new Error('A sessão mudou durante a operação.');
     }
   }
 
@@ -171,14 +169,34 @@ function DadosVisitasProvider({
 
   async function excluirVisita(id: string) {
     const idUsuario = obterUsuarioId();
+    const visita = visitas.find((item) => item.id === id);
+
+    if (!visita) {
+      throw new Error('A visita não foi encontrada.');
+    }
+
+    const caminhoFoto = visita.foto_path ?? null;
 
     await removerVisita(idUsuario, id);
 
     conferirSessaoAtiva();
 
     setVisitas((listaAtual) =>
-      listaAtual.filter((visita) => visita.id !== id),
+      listaAtual.filter((item) => item.id !== id),
     );
+
+    if (caminhoFoto) {
+      try {
+        await excluirFoto(idUsuario, caminhoFoto);
+      } catch {
+        if (ativo.current) {
+          Alert.alert(
+            'Visita excluída',
+            'A visita foi removida, mas não foi possível apagar o arquivo da foto do armazenamento.',
+          );
+        }
+      }
+    }
   }
 
   async function editarVisita(

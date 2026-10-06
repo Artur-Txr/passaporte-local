@@ -13,7 +13,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AvaliacaoEstrelas from '../componentes/AvaliacaoEstrelas';
+import SeletorFoto from '../componentes/SeletorFoto';
+import { useAutenticacao } from '../contextos/AutenticacaoContext';
 import { useVisitas } from '../contextos/VisitasContext';
+import { enviarFoto } from '../servicos/fotosService';
+import type { FotoSelecionada } from '../servicos/selecaoFotoService';
 
 const categorias = ['Parque', 'Museu', 'Cafeteria', 'Outro'];
 
@@ -50,6 +54,7 @@ function dataValida(texto: string) {
 
 export default function NovaVisita() {
   const { adicionarVisita } = useVisitas();
+  const { sessao } = useAutenticacao();
 
   const [lugar, setLugar] = useState('');
   const [cidade, setCidade] = useState('');
@@ -58,9 +63,25 @@ export default function NovaVisita() {
   const [data, setData] = useState('');
   const [comentario, setComentario] = useState('');
   const [avaliacao, setAvaliacao] = useState<number | null>(null);
+  const [foto, setFoto] = useState<FotoSelecionada | null>(null);
+  const [selecionandoFoto, setSelecionandoFoto] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
 
   const envioEmAndamento = useRef(false);
+  const selecaoEmAndamento = useRef(false);
+
+  const fotoEnviada = useRef<{
+    foto: FotoSelecionada;
+    caminho: string;
+  } | null>(null);
+
+  const bloqueado = salvando || selecionandoFoto;
+
+  function acompanharSelecao(selecionando: boolean) {
+    selecaoEmAndamento.current = selecionando;
+    setSelecionandoFoto(selecionando);
+  }
 
   function voltar() {
     if (router.canGoBack()) {
@@ -71,7 +92,20 @@ export default function NovaVisita() {
   }
 
   async function salvarVisita() {
-    if (envioEmAndamento.current) {
+    if (
+      envioEmAndamento.current ||
+      selecaoEmAndamento.current
+    ) {
+      return;
+    }
+
+    const usuarioId = sessao?.user.id;
+
+    if (!usuarioId) {
+      Alert.alert(
+        'Entre na sua conta',
+        'Faça login para registrar uma visita.',
+      );
       return;
     }
 
@@ -111,6 +145,31 @@ export default function NovaVisita() {
     setSalvando(true);
 
     try {
+      let caminhoFoto: string | null = null;
+
+      if (foto) {
+        if (fotoEnviada.current?.foto === foto) {
+          caminhoFoto = fotoEnviada.current.caminho;
+        } else {
+          setEnviandoFoto(true);
+
+          try {
+            caminhoFoto = await enviarFoto(
+              usuarioId,
+              foto.conteudo,
+              foto.tipo,
+            );
+
+            fotoEnviada.current = {
+              foto,
+              caminho: caminhoFoto,
+            };
+          } finally {
+            setEnviandoFoto(false);
+          }
+        }
+      }
+
       await adicionarVisita({
         lugar: lugar.trim(),
         cidade: cidade.trim(),
@@ -119,16 +178,18 @@ export default function NovaVisita() {
         data,
         comentario: comentario.trim(),
         avaliacao,
+        foto_path: caminhoFoto,
       });
 
       voltar();
     } catch {
       Alert.alert(
         'Não foi possível salvar',
-        'Os campos foram mantidos. Confira sua conexão e tente novamente.',
+        'Os campos e a foto selecionada foram mantidos. Confira sua conexão e tente novamente.',
       );
     } finally {
       envioEmAndamento.current = false;
+      setEnviandoFoto(false);
       setSalvando(false);
     }
   }
@@ -145,7 +206,7 @@ export default function NovaVisita() {
         >
           <Pressable
             onPress={voltar}
-            disabled={salvando}
+            disabled={bloqueado}
             style={styles.backButton}
           >
             <Text style={styles.backText}>← Voltar</Text>
@@ -168,7 +229,7 @@ export default function NovaVisita() {
             onChangeText={setLugar}
             maxLength={120}
             autoCapitalize="words"
-            editable={!salvando}
+            editable={!bloqueado}
           />
 
           <Text style={styles.fieldLabel}>Cidade *</Text>
@@ -181,7 +242,7 @@ export default function NovaVisita() {
             onChangeText={setCidade}
             maxLength={100}
             autoCapitalize="words"
-            editable={!salvando}
+            editable={!bloqueado}
           />
 
           <Text style={styles.fieldLabel}>UF *</Text>
@@ -197,7 +258,7 @@ export default function NovaVisita() {
             maxLength={2}
             autoCapitalize="characters"
             autoCorrect={false}
-            editable={!salvando}
+            editable={!bloqueado}
           />
 
           <Text style={styles.fieldLabel}>Categoria *</Text>
@@ -210,11 +271,11 @@ export default function NovaVisita() {
                 <Pressable
                   key={item}
                   onPress={() => setCategoria(item)}
-                  disabled={salvando}
+                  disabled={bloqueado}
                   accessibilityRole="button"
                   accessibilityState={{
                     selected: selecionada,
-                    disabled: salvando,
+                    disabled: bloqueado,
                   }}
                   style={[
                     styles.categoryButton,
@@ -245,7 +306,7 @@ export default function NovaVisita() {
             maxLength={10}
             autoCorrect={false}
             keyboardType="numbers-and-punctuation"
-            editable={!salvando}
+            editable={!bloqueado}
           />
 
           <Text style={styles.hint}>
@@ -257,7 +318,16 @@ export default function NovaVisita() {
           <AvaliacaoEstrelas
             valor={avaliacao}
             onChange={setAvaliacao}
+            desabilitado={bloqueado}
+          />
+
+          <Text style={styles.fieldLabel}>Foto da visita (opcional)</Text>
+
+          <SeletorFoto
+            foto={foto}
+            onChange={setFoto}
             desabilitado={salvando}
+            onSelecionandoChange={acompanharSelecao}
           />
 
           <Text style={styles.fieldLabel}>Sua lembrança</Text>
@@ -271,7 +341,7 @@ export default function NovaVisita() {
             multiline
             maxLength={500}
             textAlignVertical="top"
-            editable={!salvando}
+            editable={!bloqueado}
           />
 
           <Text style={styles.counter}>
@@ -282,16 +352,20 @@ export default function NovaVisita() {
 
           <Pressable
             onPress={salvarVisita}
-            disabled={salvando}
+            disabled={bloqueado}
             accessibilityRole="button"
-            accessibilityState={{ disabled: salvando }}
+            accessibilityState={{ disabled: bloqueado }}
             style={({ pressed }) => [
               styles.button,
-              (pressed || salvando) && styles.pressed,
+              (pressed || bloqueado) && styles.pressed,
             ]}
           >
             <Text style={styles.buttonText}>
-              {salvando ? 'Salvando...' : 'Salvar visita'}
+              {enviandoFoto
+                ? 'Enviando foto...'
+                : salvando
+                  ? 'Salvando...'
+                  : 'Salvar visita'}
             </Text>
           </Pressable>
         </ScrollView>

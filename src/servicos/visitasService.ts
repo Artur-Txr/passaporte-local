@@ -13,10 +13,11 @@ type VisitaBanco = {
   data_visita: string;
   comentario: string;
   avaliacao: number | null;
+  foto_path: string | null;
 };
 
 const CAMPOS =
-  'id, usuario_id, lugar, cidade, uf, categoria, data_visita, comentario, avaliacao';
+  'id, usuario_id, lugar, cidade, uf, categoria, data_visita, comentario, avaliacao, foto_path';
 
 function dataParaBanco(data: string) {
   const [dia, mes, ano] = data.split('/');
@@ -42,6 +43,28 @@ function conferirAvaliacao(avaliacao?: number | null) {
   }
 }
 
+function conferirFoto(
+  usuarioId: string,
+  caminho?: string | null,
+) {
+  if (caminho === undefined || caminho === null) {
+    return;
+  }
+
+  const partes = caminho.split('/');
+
+  if (
+    !usuarioId ||
+    partes.length !== 2 ||
+    partes[0] !== usuarioId ||
+    !partes[1] ||
+    partes[1] === '.' ||
+    partes[1] === '..'
+  ) {
+    throw new Error('O caminho da foto não pertence a esta conta.');
+  }
+}
+
 function converterVisita(registro: VisitaBanco): Visita {
   return {
     id: registro.id,
@@ -52,6 +75,7 @@ function converterVisita(registro: VisitaBanco): Visita {
     data: dataParaTela(registro.data_visita),
     comentario: registro.comentario,
     avaliacao: registro.avaliacao,
+    foto_path: registro.foto_path,
   };
 }
 
@@ -77,6 +101,7 @@ export async function cadastrarVisita(
   dados: DadosVisita,
 ): Promise<Visita> {
   conferirAvaliacao(dados.avaliacao);
+  conferirFoto(usuarioId, dados.foto_path);
 
   const { data, error } = await supabase
     .from('visitas')
@@ -89,6 +114,7 @@ export async function cadastrarVisita(
       data_visita: dataParaBanco(dados.data),
       comentario: dados.comentario.trim(),
       avaliacao: dados.avaliacao ?? null,
+      foto_path: dados.foto_path ?? null,
     })
     .select(CAMPOS)
     .single();
@@ -106,6 +132,7 @@ export async function atualizarVisita(
   dados: DadosVisita,
 ): Promise<Visita> {
   conferirAvaliacao(dados.avaliacao);
+  conferirFoto(usuarioId, dados.foto_path);
 
   const { data, error } = await supabase
     .from('visitas')
@@ -118,6 +145,9 @@ export async function atualizarVisita(
       comentario: dados.comentario.trim(),
       ...(dados.avaliacao !== undefined
         ? { avaliacao: dados.avaliacao }
+        : {}),
+      ...(dados.foto_path !== undefined
+        ? { foto_path: dados.foto_path }
         : {}),
     })
     .eq('id', visitaId)

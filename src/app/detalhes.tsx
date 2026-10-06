@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
   Alert,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AvaliacaoEstrelas from '../componentes/AvaliacaoEstrelas';
 import CarimboVisita from '../componentes/CarimboVisita';
+import FotoVisita from '../componentes/FotoVisita';
 import { useVisitas } from '../contextos/VisitasContext';
 
 export default function Detalhes() {
@@ -73,6 +75,13 @@ export default function Detalhes() {
     }
 
     const idParaExcluir = visita.id;
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Deseja remover a visita a ${visita.lugar}?`)) {
+        void executarExclusao(idParaExcluir);
+      }
+      return;
+    }
 
     Alert.alert(
       'Excluir visita?',
@@ -143,6 +152,17 @@ export default function Detalhes() {
               <Text style={styles.stampDescription}>
                 Cada descoberta deixa uma marca no seu passaporte.
               </Text>
+            </View>
+
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>
+                Foto da visita
+              </Text>
+
+              <FotoVisita
+                key={`${visita.id}:${visita.foto_path ?? ''}`}
+                caminho={visita.foto_path ?? null}
+              />
             </View>
 
             <View style={styles.card}>

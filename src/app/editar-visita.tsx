@@ -13,7 +13,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AvaliacaoEstrelas from '../componentes/AvaliacaoEstrelas';
+import FotoVisita from '../componentes/FotoVisita';
+import SeletorFoto from '../componentes/SeletorFoto';
+import { useAutenticacao } from '../contextos/AutenticacaoContext';
 import { useVisitas } from '../contextos/VisitasContext';
+import { enviarFoto, excluirFoto } from '../servicos/fotosService';
+import type { FotoSelecionada } from '../servicos/selecaoFotoService';
 
 const categorias = ['Parque', 'Museu', 'Cafeteria', 'Outro'];
 
@@ -36,20 +41,20 @@ function dataValida(texto: string) {
   }
 
   const data = new Date(ano, mes - 1, dia);
-
-  const existe =
-    data.getFullYear() === ano &&
-    data.getMonth() === mes - 1 &&
-    data.getDate() === dia;
-
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
 
-  return existe && data <= hoje;
+  return (
+    data.getFullYear() === ano &&
+    data.getMonth() === mes - 1 &&
+    data.getDate() === dia &&
+    data <= hoje
+  );
 }
 
 export default function EditarVisita() {
   const { visitas, editarVisita } = useVisitas();
+  const { sessao } = useAutenticacao();
 
   const { id } = useLocalSearchParams<{
     id?: string | string[];
@@ -71,9 +76,32 @@ export default function EditarVisita() {
   const [avaliacao, setAvaliacao] = useState<number | null>(
     visita?.avaliacao ?? null,
   );
+
+  const [foto, setFoto] = useState<FotoSelecionada | null>(null);
+  const [removerFotoAtual, setRemoverFotoAtual] = useState(false);
+  const [selecionandoFoto, setSelecionandoFoto] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
 
   const envioEmAndamento = useRef(false);
+  const selecaoEmAndamento = useRef(false);
+  const fotoEnviada = useRef<{
+    foto: FotoSelecionada;
+    caminho: string;
+  } | null>(null);
+
+  const bloqueado = salvando || selecionandoFoto;
+  const caminhoAtual = visita?.foto_path ?? null;
+
+  function acompanharSelecao(selecionando: boolean) {
+    selecaoEmAndamento.current = selecionando;
+    setSelecionandoFoto(selecionando);
+  }
+
+  function alterarFoto(escolhida: FotoSelecionada | null) {
+    setFoto(escolhida);
+    setRemoverFotoAtual(escolhida === null);
+  }
 
   function voltar() {
     if (router.canGoBack()) {
@@ -84,12 +112,20 @@ export default function EditarVisita() {
   }
 
   async function salvarAlteracoes() {
-    if (envioEmAndamento.current) {
+    if (
+      envioEmAndamento.current ||
+      selecaoEmAndamento.current
+    ) {
       return;
     }
 
-    if (!visita) {
-      Alert.alert('Visita não encontrada');
+    const usuarioId = sessao?.user.id;
+
+    if (!visita || !usuarioId) {
+      Alert.alert(
+        'Não foi possível continuar',
+        'Entre na sua conta e selecione uma visita.',
+      );
       return;
     }
 
@@ -128,7 +164,34 @@ export default function EditarVisita() {
     envioEmAndamento.current = true;
     setSalvando(true);
 
+    const caminhoAnterior = caminhoAtual;
+
     try {
+      let novoCaminho = removerFotoAtual ? null : caminhoAnterior;
+
+      if (foto) {
+        if (fotoEnviada.current?.foto === foto) {
+          novoCaminho = fotoEnviada.current.caminho;
+        } else {
+          setEnviandoFoto(true);
+
+          try {
+            novoCaminho = await enviarFoto(
+              usuarioId,
+              foto.conteudo,
+              foto.tipo,
+            );
+
+            fotoEnviada.current = {
+              foto,
+              caminho: novoCaminho,
+            };
+          } finally {
+            setEnviandoFoto(false);
+          }
+        }
+      }
+
       await editarVisita(visita.id, {
         lugar: lugar.trim(),
         cidade: cidade.trim(),
@@ -137,16 +200,32 @@ export default function EditarVisita() {
         data,
         comentario: comentario.trim(),
         avaliacao,
+        foto_path: novoCaminho,
       });
+
+      if (
+        caminhoAnterior &&
+        caminhoAnterior !== novoCaminho
+      ) {
+        try {
+          await excluirFoto(usuarioId, caminhoAnterior);
+        } catch {
+          Alert.alert(
+            'Visita atualizada',
+            'A alteração foi salva, mas não foi possível apagar o arquivo da foto antiga do armazenamento.',
+          );
+        }
+      }
 
       voltar();
     } catch {
       Alert.alert(
         'Não foi possível atualizar',
-        'Os campos foram mantidos. Confira sua conexão e tente novamente.',
+        'Os campos e a foto selecionada foram mantidos. Confira sua conexão e tente novamente.',
       );
     } finally {
       envioEmAndamento.current = false;
+      setEnviandoFoto(false);
       setSalvando(false);
     }
   }
@@ -163,7 +242,7 @@ export default function EditarVisita() {
         >
           <Pressable
             onPress={voltar}
-            disabled={salvando}
+            disabled={bloqueado}
             style={styles.backButton}
           >
             <Text style={styles.backText}>← Voltar</Text>
@@ -174,7 +253,6 @@ export default function EditarVisita() {
               <Text style={styles.title}>
                 Visita não encontrada
               </Text>
-
               <Text style={styles.description}>
                 Volte à lista e selecione uma visita.
               </Text>
@@ -184,57 +262,45 @@ export default function EditarVisita() {
               <Text style={styles.label}>
                 ATUALIZE SUA DESCOBERTA
               </Text>
-
               <Text style={styles.title}>Editar visita</Text>
-
               <Text style={styles.description}>
                 Ajuste os dados e atualize sua lembrança.
               </Text>
 
-              <Text style={styles.fieldLabel}>
-                Nome do lugar *
-              </Text>
-
+              <Text style={styles.fieldLabel}>Nome do lugar *</Text>
               <TextInput
                 style={styles.input}
                 value={lugar}
                 onChangeText={setLugar}
                 maxLength={120}
                 autoCapitalize="words"
-                editable={!salvando}
+                editable={!bloqueado}
               />
 
               <Text style={styles.fieldLabel}>Cidade *</Text>
-
               <TextInput
                 style={styles.input}
                 value={cidade}
                 onChangeText={setCidade}
                 maxLength={100}
                 autoCapitalize="words"
-                editable={!salvando}
+                editable={!bloqueado}
               />
 
               <Text style={styles.fieldLabel}>UF *</Text>
-
               <TextInput
                 style={styles.input}
                 value={uf}
                 onChangeText={(texto) =>
-                  setUf(
-                    texto.replace(/[^a-z]/gi, '').toUpperCase(),
-                  )
+                  setUf(texto.replace(/[^a-z]/gi, '').toUpperCase())
                 }
                 maxLength={2}
                 autoCapitalize="characters"
                 autoCorrect={false}
-                editable={!salvando}
+                editable={!bloqueado}
               />
 
-              <Text style={styles.fieldLabel}>
-                Categoria *
-              </Text>
-
+              <Text style={styles.fieldLabel}>Categoria *</Text>
               <View style={styles.categories}>
                 {categorias.map((item) => {
                   const selecionada = categoria === item;
@@ -243,11 +309,11 @@ export default function EditarVisita() {
                     <Pressable
                       key={item}
                       onPress={() => setCategoria(item)}
-                      disabled={salvando}
+                      disabled={bloqueado}
                       accessibilityRole="button"
                       accessibilityState={{
                         selected: selecionada,
-                        disabled: salvando,
+                        disabled: bloqueado,
                       }}
                       style={[
                         styles.categoryButton,
@@ -257,8 +323,7 @@ export default function EditarVisita() {
                       <Text
                         style={[
                           styles.categoryText,
-                          selecionada &&
-                            styles.categoryTextSelected,
+                          selecionada && styles.categoryTextSelected,
                         ]}
                       >
                         {item}
@@ -268,10 +333,7 @@ export default function EditarVisita() {
                 })}
               </View>
 
-              <Text style={styles.fieldLabel}>
-                Data da visita *
-              </Text>
-
+              <Text style={styles.fieldLabel}>Data da visita *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="DD/MM/AAAA"
@@ -281,23 +343,71 @@ export default function EditarVisita() {
                 maxLength={10}
                 autoCorrect={false}
                 keyboardType="numbers-and-punctuation"
-                editable={!salvando}
+                editable={!bloqueado}
               />
 
               <Text style={styles.fieldLabel}>
                 Sua avaliação (opcional)
               </Text>
-
               <AvaliacaoEstrelas
                 valor={avaliacao}
                 onChange={setAvaliacao}
-                desabilitado={salvando}
+                desabilitado={bloqueado}
               />
 
               <Text style={styles.fieldLabel}>
-                Sua lembrança
+                Foto da visita (opcional)
               </Text>
 
+              {caminhoAtual && !foto && !removerFotoAtual ? (
+                <View style={styles.currentPhoto}>
+                  <FotoVisita
+                    key={caminhoAtual}
+                    caminho={caminhoAtual}
+                  />
+
+                  <Pressable
+                    disabled={bloqueado}
+                    onPress={() => setRemoverFotoAtual(true)}
+                    accessibilityRole="button"
+                    style={({ pressed }) => [
+                      styles.removeButton,
+                      (pressed || bloqueado) && styles.pressed,
+                    ]}
+                  >
+                    <Text style={styles.removeText}>
+                      Remover foto atual
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : null}
+
+              {removerFotoAtual && caminhoAtual && !foto && (
+                <View style={styles.notice}>
+                  <Text style={styles.hint}>
+                    A foto atual será removida ao salvar.
+                  </Text>
+                  <Pressable
+                    disabled={bloqueado}
+                    onPress={() => setRemoverFotoAtual(false)}
+                    accessibilityRole="button"
+                    style={styles.undoButton}
+                  >
+                    <Text style={styles.backText}>
+                      Manter foto atual
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+
+              <SeletorFoto
+                foto={foto}
+                onChange={alterarFoto}
+                desabilitado={salvando}
+                onSelecionandoChange={acompanharSelecao}
+              />
+
+              <Text style={styles.fieldLabel}>Sua lembrança</Text>
               <TextInput
                 style={[styles.input, styles.commentInput]}
                 value={comentario}
@@ -305,31 +415,30 @@ export default function EditarVisita() {
                 multiline
                 maxLength={500}
                 textAlignVertical="top"
-                editable={!salvando}
+                editable={!bloqueado}
               />
 
               <Text style={styles.counter}>
                 {comentario.length}/500 caracteres
               </Text>
-
-              <Text style={styles.hint}>
-                * Campos obrigatórios
-              </Text>
+              <Text style={styles.hint}>* Campos obrigatórios</Text>
 
               <Pressable
                 onPress={salvarAlteracoes}
-                disabled={salvando}
+                disabled={bloqueado}
                 accessibilityRole="button"
-                accessibilityState={{ disabled: salvando }}
+                accessibilityState={{ disabled: bloqueado }}
                 style={({ pressed }) => [
                   styles.button,
-                  (pressed || salvando) && styles.pressed,
+                  (pressed || bloqueado) && styles.pressed,
                 ]}
               >
                 <Text style={styles.buttonText}>
-                  {salvando
-                    ? 'Salvando...'
-                    : 'Salvar alterações'}
+                  {enviandoFoto
+                    ? 'Enviando foto...'
+                    : salvando
+                      ? 'Salvando...'
+                      : 'Salvar alterações'}
                 </Text>
               </Pressable>
             </>
@@ -423,6 +532,29 @@ const styles = StyleSheet.create({
   categoryTextSelected: {
     color: '#FFFFFF',
   },
+  currentPhoto: {
+    marginBottom: 16,
+  },
+  removeButton: {
+    borderWidth: 1,
+    borderColor: '#A33B32',
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  removeText: {
+    color: '#A33B32',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  notice: {
+    marginBottom: 16,
+  },
+  undoButton: {
+    paddingVertical: 12,
+    alignSelf: 'flex-start',
+  },
   commentInput: {
     minHeight: 130,
   },
@@ -435,7 +567,8 @@ const styles = StyleSheet.create({
   hint: {
     color: '#53645B',
     fontSize: 13,
-    marginTop: 20,
+    lineHeight: 20,
+    marginTop: 12,
   },
   button: {
     backgroundColor: '#183F35',
@@ -450,6 +583,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   pressed: {
-    opacity: 0.75,
+    opacity: 0.65,
   },
 });
