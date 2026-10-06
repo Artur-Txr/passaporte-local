@@ -12,10 +12,11 @@ type VisitaBanco = {
   categoria: string;
   data_visita: string;
   comentario: string;
+  avaliacao: number | null;
 };
 
 const CAMPOS =
-  'id, usuario_id, lugar, cidade, uf, categoria, data_visita, comentario';
+  'id, usuario_id, lugar, cidade, uf, categoria, data_visita, comentario, avaliacao';
 
 function dataParaBanco(data: string) {
   const [dia, mes, ano] = data.split('/');
@@ -27,6 +28,20 @@ function dataParaTela(data: string) {
   return `${dia}/${mes}/${ano}`;
 }
 
+function conferirAvaliacao(avaliacao?: number | null) {
+  if (avaliacao === undefined || avaliacao === null) {
+    return;
+  }
+
+  if (
+    !Number.isInteger(avaliacao) ||
+    avaliacao < 1 ||
+    avaliacao > 5
+  ) {
+    throw new Error('A avaliação deve ser um número inteiro de 1 a 5.');
+  }
+}
+
 function converterVisita(registro: VisitaBanco): Visita {
   return {
     id: registro.id,
@@ -36,6 +51,7 @@ function converterVisita(registro: VisitaBanco): Visita {
     categoria: registro.categoria,
     data: dataParaTela(registro.data_visita),
     comentario: registro.comentario,
+    avaliacao: registro.avaliacao,
   };
 }
 
@@ -60,6 +76,8 @@ export async function cadastrarVisita(
   usuarioId: string,
   dados: DadosVisita,
 ): Promise<Visita> {
+  conferirAvaliacao(dados.avaliacao);
+
   const { data, error } = await supabase
     .from('visitas')
     .insert({
@@ -70,6 +88,7 @@ export async function cadastrarVisita(
       categoria: dados.categoria,
       data_visita: dataParaBanco(dados.data),
       comentario: dados.comentario.trim(),
+      avaliacao: dados.avaliacao ?? null,
     })
     .select(CAMPOS)
     .single();
@@ -86,6 +105,8 @@ export async function atualizarVisita(
   visitaId: string,
   dados: DadosVisita,
 ): Promise<Visita> {
+  conferirAvaliacao(dados.avaliacao);
+
   const { data, error } = await supabase
     .from('visitas')
     .update({
@@ -95,6 +116,9 @@ export async function atualizarVisita(
       categoria: dados.categoria,
       data_visita: dataParaBanco(dados.data),
       comentario: dados.comentario.trim(),
+      ...(dados.avaliacao !== undefined
+        ? { avaliacao: dados.avaliacao }
+        : {}),
     })
     .eq('id', visitaId)
     .eq('usuario_id', usuarioId)

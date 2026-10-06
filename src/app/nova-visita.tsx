@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AvaliacaoEstrelas from '../componentes/AvaliacaoEstrelas';
 import { useVisitas } from '../contextos/VisitasContext';
 
 const categorias = ['Parque', 'Museu', 'Cafeteria', 'Outro'];
@@ -56,6 +57,7 @@ export default function NovaVisita() {
   const [categoria, setCategoria] = useState('');
   const [data, setData] = useState('');
   const [comentario, setComentario] = useState('');
+  const [avaliacao, setAvaliacao] = useState<number | null>(null);
   const [salvando, setSalvando] = useState(false);
 
   const envioEmAndamento = useRef(false);
@@ -116,6 +118,7 @@ export default function NovaVisita() {
         categoria,
         data,
         comentario: comentario.trim(),
+        avaliacao,
       });
 
       voltar();
@@ -248,6 +251,14 @@ export default function NovaVisita() {
           <Text style={styles.hint}>
             Digite também as barras. Ex.: 04/10/2026.
           </Text>
+
+          <Text style={styles.fieldLabel}>Sua avaliação (opcional)</Text>
+
+          <AvaliacaoEstrelas
+            valor={avaliacao}
+            onChange={setAvaliacao}
+            desabilitado={salvando}
+          />
 
           <Text style={styles.fieldLabel}>Sua lembrança</Text>
 

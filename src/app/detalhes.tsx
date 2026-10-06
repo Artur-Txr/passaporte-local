@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AvaliacaoEstrelas from '../componentes/AvaliacaoEstrelas';
 import CarimboVisita from '../componentes/CarimboVisita';
 import { useVisitas } from '../contextos/VisitasContext';
 
@@ -156,6 +157,18 @@ export default function Detalhes() {
 
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>
+                Minha avaliação
+              </Text>
+
+              <View style={styles.ratingContainer}>
+                <AvaliacaoEstrelas
+                  valor={visita.avaliacao ?? null}
+                />
+              </View>
+            </View>
+
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>
                 Minha lembrança
               </Text>
 
@@ -285,6 +298,9 @@ const styles = StyleSheet.create({
     color: '#183F35',
     fontSize: 18,
     fontWeight: '700',
+  },
+  ratingContainer: {
+    marginTop: 12,
   },
   cardText: {
     color: '#53645B',

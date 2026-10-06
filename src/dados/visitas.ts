@@ -6,6 +6,7 @@ export type Visita = {
   uf: string;
   data: string;
   comentario: string;
+  avaliacao?: number | null;
 };
 
 export const visitas: Visita[] = [

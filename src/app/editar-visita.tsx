@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AvaliacaoEstrelas from '../componentes/AvaliacaoEstrelas';
 import { useVisitas } from '../contextos/VisitasContext';
 
 const categorias = ['Parque', 'Museu', 'Cafeteria', 'Outro'];
@@ -66,6 +67,9 @@ export default function EditarVisita() {
   const [data, setData] = useState(visita?.data ?? '');
   const [comentario, setComentario] = useState(
     visita?.comentario ?? '',
+  );
+  const [avaliacao, setAvaliacao] = useState<number | null>(
+    visita?.avaliacao ?? null,
   );
   const [salvando, setSalvando] = useState(false);
 
@@ -132,6 +136,7 @@ export default function EditarVisita() {
         categoria,
         data,
         comentario: comentario.trim(),
+        avaliacao,
       });
 
       voltar();
@@ -277,6 +282,16 @@ export default function EditarVisita() {
                 autoCorrect={false}
                 keyboardType="numbers-and-punctuation"
                 editable={!salvando}
+              />
+
+              <Text style={styles.fieldLabel}>
+                Sua avaliação (opcional)
+              </Text>
+
+              <AvaliacaoEstrelas
+                valor={avaliacao}
+                onChange={setAvaliacao}
+                desabilitado={salvando}
               />
 
               <Text style={styles.fieldLabel}>
