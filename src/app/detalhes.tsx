@@ -1,359 +1,203 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import { useRef, useState } from 'react';
-import {
-  Alert,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import AvaliacaoEstrelas from '../componentes/AvaliacaoEstrelas';
-import CarimboVisita from '../componentes/CarimboVisita';
-import FotoVisita from '../componentes/FotoVisita';
-import { useVisitas } from '../contextos/VisitasContext';
-
+import Icone from "../componentes/Icone";
+import { router, useLocalSearchParams } from "expo-router";
+import { useRef, useState } from "react";
+import { Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useVisitas } from "../contextos/VisitasContext";
+import FotoVisita from "../componentes/FotoVisita";
+import AvaliacaoEstrelas from "../componentes/AvaliacaoEstrelas";
+import CarimboVisita from "../componentes/CarimboVisita";
+import { Cabecalho, Decoracao, cores, visual } from "../componentes/Design";
 export default function Detalhes() {
+  const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const { visitas, excluirVisita } = useVisitas();
-
-  const { id } = useLocalSearchParams<{
-    id?: string | string[];
-  }>();
-
-  const visitaId = Array.isArray(id) ? id[0] : id;
-  const visita = visitas.find((item) => item.id === visitaId);
-
+  const visita = visitas.find((v) => v.id === (Array.isArray(id) ? id[0] : id));
+  const [confirmar, setConfirmar] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
-  const exclusaoEmAndamento = useRef(false);
-
-  function voltar() {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/inicio');
-    }
-  }
-
-  function abrirEdicao() {
-    if (!visita || exclusaoEmAndamento.current) {
-      return;
-    }
-
-    router.push({
-      pathname: '/editar-visita',
-      params: { id: visita.id },
-    });
-  }
-
-  async function executarExclusao(idParaExcluir: string) {
-    if (exclusaoEmAndamento.current) {
-      return;
-    }
-
-    exclusaoEmAndamento.current = true;
+  const emAndamento = useRef(false);
+  async function excluir() {
+    if (!visita || emAndamento.current) return;
+    emAndamento.current = true;
     setExcluindo(true);
-
     try {
-      await excluirVisita(idParaExcluir);
-      voltar();
+      await excluirVisita(visita.id);
+      setConfirmar(false);
+      router.replace("/visitas");
     } catch {
       Alert.alert(
-        'Não foi possível excluir',
-        'Confira sua conexão e tente novamente.',
+        "Não foi possível excluir",
+        "Confira a conexão e tente novamente.",
       );
     } finally {
-      exclusaoEmAndamento.current = false;
+      emAndamento.current = false;
       setExcluindo(false);
     }
   }
-
-  function confirmarExclusao() {
-    if (!visita || exclusaoEmAndamento.current) {
-      return;
-    }
-
-    const idParaExcluir = visita.id;
-
-    if (Platform.OS === 'web') {
-      if (window.confirm(`Deseja remover a visita a ${visita.lugar}?`)) {
-        void executarExclusao(idParaExcluir);
-      }
-      return;
-    }
-
-    Alert.alert(
-      'Excluir visita?',
-      `Deseja remover a visita a ${visita.lugar}?`,
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => {
-            void executarExclusao(idParaExcluir);
-          },
-        },
-      ],
-      { cancelable: true },
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Pressable
-          onPress={voltar}
-          disabled={excluindo}
-          style={styles.backButton}
-        >
-          <Text style={styles.backText}>← Voltar</Text>
-        </Pressable>
-
-        {excluindo ? (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>
-              Excluindo visita...
-            </Text>
-
-            <Text style={styles.cardText}>
-              Aguarde a conclusão.
-            </Text>
-          </View>
-        ) : visita ? (
+    <SafeAreaView style={visual.screen}>
+      <Decoracao />
+      <ScrollView contentContainerStyle={visual.content}>
+        <Cabecalho titulo="Detalhes da visita" voltar />
+        {visita ? (
           <>
-            <Text style={styles.label}>MINHA DESCOBERTA</Text>
-
-            <Text style={styles.title}>{visita.lugar}</Text>
-
-            <Text style={styles.location}>
-              {visita.cidade} · {visita.uf}
+            <FotoVisita caminho={visita.foto_path ?? null} />
+            <Text style={[visual.title, { fontSize: 27, marginTop: 14 }]}>
+              {visita.lugar}
             </Text>
-
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {visita.categoria}
-              </Text>
-            </View>
-
-            <View style={styles.stampCard}>
-              <Text style={styles.sectionTitle}>
-                Carimbo da visita
-              </Text>
-
-              <View style={styles.stampContainer}>
-                <CarimboVisita visita={visita} />
+            <Text style={visual.subtitle}>
+              {visita.cidade}, {visita.uf}
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 14,
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <View
+                  style={{
+                    alignSelf: "flex-start",
+                    backgroundColor: "#E1E5D4",
+                    borderRadius: 7,
+                    padding: 8,
+                  }}
+                >
+                  <Text style={{ color: cores.verde, fontSize: 12 }}>
+                    ♧ {visita.categoria}
+                  </Text>
+                </View>
+                <Text style={[visual.meta, { marginTop: 14 }]}>
+                  ▢ {visita.data}
+                </Text>
+                <Text style={[visual.meta, { marginTop: 22 }]}>
+                  Minha avaliação
+                </Text>
+                <AvaliacaoEstrelas valor={visita.avaliacao ?? null} />
               </View>
-
-              <Text style={styles.stampDescription}>
-                Cada descoberta deixa uma marca no seu passaporte.
-              </Text>
-            </View>
-
-            <View style={styles.card}>
-              <Text style={styles.sectionTitle}>
-                Foto da visita
-              </Text>
-
-              <FotoVisita
-                key={`${visita.id}:${visita.foto_path ?? ''}`}
-                caminho={visita.foto_path ?? null}
-              />
-            </View>
-
-            <View style={styles.card}>
-              <Text style={styles.sectionTitle}>
-                Data da visita
-              </Text>
-
-              <Text style={styles.cardText}>
-                {visita.data}
-              </Text>
-            </View>
-
-            <View style={styles.card}>
-              <Text style={styles.sectionTitle}>
-                Minha avaliação
-              </Text>
-
-              <View style={styles.ratingContainer}>
-                <AvaliacaoEstrelas
-                  valor={visita.avaliacao ?? null}
-                />
+              <View
+                style={{
+                  width: 130,
+                  height: 138,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View style={{ transform: [{ scale: 0.66 }] }}>
+                  <CarimboVisita visita={visita} />
+                </View>
               </View>
             </View>
-
-            <View style={styles.card}>
-              <Text style={styles.sectionTitle}>
-                Minha lembrança
-              </Text>
-
-              <Text style={styles.cardText}>
+            <View
+              style={{
+                borderTopWidth: 1,
+                borderColor: cores.borda,
+                paddingTop: 16,
+                marginTop: 18,
+              }}
+            >
+              <Text style={visual.section}>♧ Minha lembrança</Text>
+              <Text style={[visual.subtitle, { marginTop: 8 }]}>
                 {visita.comentario.trim() ||
-                  'Nenhuma lembrança escrita para esta visita.'}
+                  "Nenhuma lembrança escrita para esta visita."}
               </Text>
             </View>
-
             <Pressable
-              onPress={abrirEdicao}
               accessibilityRole="button"
-              style={({ pressed }) => [
-                styles.editButton,
-                pressed && styles.pressed,
-              ]}
+              disabled={excluindo}
+              onPress={() =>
+                router.push({
+                  pathname: "/editar-visita",
+                  params: { id: visita.id },
+                })
+              }
+              style={visual.button}
             >
-              <Text style={styles.editText}>
-                Editar visita
-              </Text>
+              <Text style={visual.buttonText}>Editar visita</Text>
             </Pressable>
-
             <Pressable
-              onPress={confirmarExclusao}
               accessibilityRole="button"
-              style={({ pressed }) => [
-                styles.deleteButton,
-                pressed && styles.pressed,
-              ]}
+              disabled={excluindo}
+              onPress={() => setConfirmar(true)}
+              style={{ alignItems: "center", padding: 16 }}
             >
-              <Text style={styles.deleteText}>
+              <Text
+                style={{
+                  color: cores.laranja,
+                  fontWeight: "600",
+                  fontSize: 13,
+                }}
+              >
                 Excluir visita
               </Text>
             </Pressable>
           </>
         ) : (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>
-              Visita não encontrada
-            </Text>
-
-            <Text style={styles.cardText}>
-              Volte à lista e selecione uma visita.
-            </Text>
-          </View>
+          <Text style={visual.subtitle}>
+            Visita não encontrada. Volte à coleção.
+          </Text>
         )}
       </ScrollView>
+      <Modal
+        visible={confirmar}
+        transparent
+        animationType="fade"
+        onRequestClose={() => !excluindo && setConfirmar(false)}
+      >
+        <View style={visual.overlay}>
+          <View style={visual.dialog}>
+            <View
+              style={{
+                alignSelf: "center",
+                padding: 12,
+                backgroundColor: "#F5E4D7",
+                borderRadius: 30,
+                marginBottom: 12,
+              }}
+            >
+              <Icone nome="excluir" tamanho={25} cor={cores.laranja} />
+            </View>
+            <Text
+              style={[visual.section, { textAlign: "center", fontSize: 20 }]}
+            >
+              Excluir visita?
+            </Text>
+            <Text style={[visual.subtitle, { textAlign: "center" }]}>
+              A visita e a foto serão removidas do seu passaporte.
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              disabled={excluindo}
+              onPress={() => setConfirmar(false)}
+              style={[
+                visual.button,
+                {
+                  backgroundColor: "transparent",
+                  borderWidth: 1,
+                  borderColor: cores.verde,
+                },
+              ]}
+            >
+              <Text style={{ color: cores.verde, fontWeight: "600" }}>
+                Cancelar
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              disabled={excluindo}
+              onPress={excluir}
+              style={[
+                visual.button,
+                { backgroundColor: cores.laranja, marginTop: 8 },
+              ]}
+            >
+              <Text style={visual.buttonText}>
+                {excluindo ? "Excluindo..." : "Excluir visita"}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#F7F1E5',
-  },
-  content: {
-    padding: 28,
-    paddingBottom: 40,
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: 12,
-    paddingRight: 16,
-    marginBottom: 24,
-  },
-  backText: {
-    color: '#183F35',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  label: {
-    color: '#C76B48',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 2,
-  },
-  title: {
-    color: '#183F35',
-    fontSize: 34,
-    fontWeight: '800',
-    marginTop: 16,
-  },
-  location: {
-    color: '#53645B',
-    fontSize: 17,
-    marginTop: 10,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#E8DDCC',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  badgeText: {
-    color: '#183F35',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  stampCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 22,
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  stampContainer: {
-    marginTop: 28,
-    marginBottom: 24,
-  },
-  stampDescription: {
-    color: '#53645B',
-    fontSize: 14,
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 22,
-    marginTop: 16,
-  },
-  sectionTitle: {
-    color: '#183F35',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  ratingContainer: {
-    marginTop: 12,
-  },
-  cardText: {
-    color: '#53645B',
-    fontSize: 16,
-    lineHeight: 26,
-    marginTop: 12,
-  },
-  editButton: {
-    backgroundColor: '#183F35',
-    borderRadius: 14,
-    padding: 18,
-    alignItems: 'center',
-    marginTop: 28,
-  },
-  editText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  deleteButton: {
-    borderWidth: 1,
-    borderColor: '#A33B32',
-    borderRadius: 14,
-    padding: 18,
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  deleteText: {
-    color: '#A33B32',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  pressed: {
-    opacity: 0.75,
-  },
-});

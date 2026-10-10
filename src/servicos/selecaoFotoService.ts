@@ -60,9 +60,19 @@ function identificarTipo(conteudo: ArrayBuffer): TipoImagem {
   throw new Error('Escolha uma imagem JPEG, PNG ou WebP.');
 }
 
-export async function selecionarFoto():
+export async function selecionarFoto(origem: 'galeria' | 'camera' = 'galeria'):
   Promise<FotoSelecionada | null> {
-  const resultado = await ImagePicker.launchImageLibraryAsync({
+  if (origem === 'camera' && Platform.OS !== 'web') {
+    const permissao = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissao.granted) {
+      throw new Error(permissao.canAskAgain
+        ? 'Permita o acesso à câmera para tirar uma foto. Você também pode escolher uma imagem da galeria.'
+        : 'O acesso à câmera está desativado. Você pode habilitá-lo nas configurações do Expo Go ou escolher uma imagem da galeria.');
+    }
+  }
+  const abrir = origem === 'camera'
+    ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
+  const resultado = await abrir({
     mediaTypes: ['images'],
     allowsMultipleSelection: false,
     allowsEditing: false,

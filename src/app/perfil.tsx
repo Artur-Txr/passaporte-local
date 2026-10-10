@@ -1,222 +1,257 @@
-import { Redirect, router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { Redirect } from "expo-router";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
+  Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAutenticacao } from '../contextos/AutenticacaoContext';
-
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAutenticacao } from "../contextos/AutenticacaoContext";
+import { useVisitas } from "../contextos/VisitasContext";
+import {
+  Cabecalho,
+  Decoracao,
+  NavegacaoInferior,
+  cores,
+  visual,
+} from "../componentes/Design";
 export default function Perfil() {
   const { sessao, carregando, sair } = useAutenticacao();
+  const { visitas, carregando: carregandoVisitas, erro } = useVisitas();
   const [saindo, setSaindo] = useState(false);
-
-  const saidaEmAndamento = useRef(false);
-
-  async function encerrarSessao() {
-    if (saidaEmAndamento.current) {
-      return;
-    }
-
-    saidaEmAndamento.current = true;
+  const [confirmar, setConfirmar] = useState(false);
+  const [falha, setFalha] = useState("");
+  const emAndamento = useRef(false);
+  if (carregando)
+    return (
+      <SafeAreaView style={visual.screen}>
+        <ActivityIndicator />
+      </SafeAreaView>
+    );
+  if (!sessao) return <Redirect href="/login" />;
+  const nome =
+    typeof sessao.user.user_metadata.nome === "string"
+      ? sessao.user.user_metadata.nome
+      : "Viajante";
+  const iniciais = nome
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase();
+  const cidades = Array.from(
+    new Map(
+      visitas.map((v) => [
+        `${v.cidade.trim().toLowerCase()}|${v.uf}`,
+        `${v.cidade} · ${v.uf}`,
+      ]),
+    ).values(),
+  );
+  async function encerrar() {
+    if (emAndamento.current) return;
+    emAndamento.current = true;
     setSaindo(true);
-
     try {
       await sair();
     } catch {
-      Alert.alert(
-        'Não foi possível sair',
-        'Confira sua conexão e tente novamente.',
-      );
+      setFalha("Não foi possível sair. Confira sua conexão.");
     } finally {
-      saidaEmAndamento.current = false;
+      emAndamento.current = false;
       setSaindo(false);
+      setConfirmar(false);
     }
   }
-
-  function confirmarSaida() {
-    Alert.alert(
-      'Sair da conta?',
-      'Você precisará entrar novamente para acessar sua conta.',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Sair',
-          onPress: encerrarSessao,
-        },
-      ],
-      { cancelable: true },
-    );
-  }
-
-  function voltar() {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/inicio');
-    }
-  }
-
-  if (carregando) {
-    return (
-      <SafeAreaView style={styles.loading}>
-        <ActivityIndicator size="large" color="#183F35" />
-      </SafeAreaView>
-    );
-  }
-
-  if (!sessao) {
-    return <Redirect href="/login" />;
-  }
-
-  const nomeCadastrado = sessao.user.user_metadata.nome;
-
-  const nome =
-    typeof nomeCadastrado === 'string' &&
-    nomeCadastrado.trim()
-      ? nomeCadastrado.trim()
-      : 'Viajante';
-
   return (
-    <SafeAreaView style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Pressable
-          onPress={voltar}
-          disabled={saindo}
-          style={styles.backButton}
+    <SafeAreaView style={visual.screen}>
+      <Decoracao />
+      <ScrollView contentContainerStyle={visual.content}>
+        <Cabecalho />
+        <Text style={visual.title}>Meu perfil</Text>
+        <Text style={visual.subtitle}>Meu passaporte pessoal</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 16,
+            marginVertical: 20,
+          }}
         >
-          <Text style={styles.backText}>← Voltar</Text>
-        </Pressable>
-
-        <Text style={styles.label}>SUA CONTA</Text>
-        <Text style={styles.title}>Meu perfil</Text>
-
-        <View style={styles.card}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {nome.charAt(0).toUpperCase()}
+          <View
+            style={{
+              width: 66,
+              height: 66,
+              borderRadius: 33,
+              backgroundColor: cores.laranja,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={{ color: "#FFF", fontSize: 27, fontWeight: "700" }}>
+              {iniciais}
             </Text>
           </View>
-
-          <Text style={styles.name}>{nome}</Text>
-
-          <Text style={styles.email}>
-            {sessao.user.email ?? 'E-mail não informado'}
+          <Text style={[visual.section, { fontSize: 19, flex: 1 }]}>
+            {nome}
           </Text>
         </View>
-
-        <Pressable
-          onPress={confirmarSaida}
-          disabled={saindo}
-          accessibilityRole="button"
-          accessibilityState={{ disabled: saindo }}
-          style={({ pressed }) => [
-            styles.exitButton,
-            (pressed || saindo) && styles.pressed,
-          ]}
+        <View style={{ flexDirection: "row", gap: 10, marginBottom: 20 }}>
+          {[
+            ["⌖", carregandoVisitas || erro ? "—" : visitas.length, "visitas"],
+            ["▥", carregandoVisitas || erro ? "—" : cidades.length, "cidades"],
+          ].map(([icone, n, rotulo]) => (
+            <View
+              key={rotulo}
+              style={{
+                flex: 1,
+                padding: 14,
+                backgroundColor: "#EEEDE2",
+                borderRadius: 10,
+                flexDirection: "row",
+                gap: 14,
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 28, color: cores.verde }}>{icone}</Text>
+              <View>
+                <Text style={[visual.section, { fontSize: 22 }]}>{n}</Text>
+                <Text style={visual.meta}>{rotulo}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+        <Text style={visual.section}>Minha conta</Text>
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: cores.borda,
+            borderRadius: 10,
+            marginTop: 10,
+            paddingHorizontal: 13,
+          }}
         >
-          <Text style={styles.exitText}>
-            {saindo ? 'Saindo...' : 'Sair da conta'}
+          {[
+            ["♙ Nome", nome],
+            ["✉ E-mail", sessao.user.email ?? "Não informado"],
+          ].map(([campo, valor]) => (
+            <View
+              key={campo}
+              style={{
+                flexDirection: "row",
+                gap: 12,
+                paddingVertical: 14,
+                borderBottomWidth: campo.includes("Nome") ? 1 : 0,
+                borderColor: cores.borda,
+              }}
+            >
+              <Text style={visual.meta}>{campo}</Text>
+              <Text style={[visual.meta, { flex: 1, textAlign: "right" }]}>
+                {valor}
+              </Text>
+            </View>
+          ))}
+        </View>
+        <Text style={[visual.section, { marginTop: 20 }]}>
+          Cidades no passaporte
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 10,
+            marginTop: 12,
+          }}
+        >
+          {cidades.map((cidade, i) => (
+            <View
+              key={cidade}
+              style={{
+                width: "47%",
+                padding: 14,
+                borderWidth: 1,
+                borderStyle: "dashed",
+                borderColor: i % 2 ? cores.laranja : "#728269",
+                backgroundColor: "#EEE9D9",
+                borderRadius: 8,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 32,
+                  color: i % 2 ? cores.laranja : "#728269",
+                }}
+              >
+                ⌂ ≋
+              </Text>
+              <Text style={{ fontSize: 12, color: cores.tinta, marginTop: 8 }}>
+                {cidade}
+              </Text>
+            </View>
+          ))}
+        </View>
+        {!cidades.length && (
+          <Text style={visual.subtitle}>
+            Suas cidades aparecerão após a primeira visita.
+          </Text>
+        )}
+        {!!falha && (
+          <Text style={{ color: cores.laranja, marginTop: 12 }}>{falha}</Text>
+        )}
+        <Pressable
+          accessibilityRole="button"
+          disabled={saindo}
+          onPress={() => setConfirmar(true)}
+          style={{
+            borderWidth: 1,
+            borderColor: cores.laranja,
+            borderRadius: 13,
+            padding: 13,
+            alignItems: "center",
+            marginTop: 22,
+          }}
+        >
+          <Text style={{ color: cores.laranja, fontWeight: "600" }}>
+            {saindo ? "Saindo..." : "Sair da conta"}
           </Text>
         </Pressable>
       </ScrollView>
+      <NavegacaoInferior ativa="perfil" />
+      <Modal
+        visible={confirmar}
+        transparent
+        animationType="fade"
+        onRequestClose={() => !saindo && setConfirmar(false)}
+      >
+        <View style={visual.overlay}>
+          <View style={visual.dialog}>
+            <Text style={[visual.section, { textAlign: "center" }]}>
+              Sair da conta?
+            </Text>
+            <Text style={[visual.subtitle, { textAlign: "center" }]}>
+              Você precisará entrar novamente para acessar seu passaporte.
+            </Text>
+            <Pressable
+              disabled={saindo}
+              onPress={() => setConfirmar(false)}
+              style={visual.button}
+            >
+              <Text style={visual.buttonText}>Cancelar</Text>
+            </Pressable>
+            <Pressable
+              disabled={saindo}
+              onPress={encerrar}
+              style={[visual.button, { backgroundColor: cores.laranja }]}
+            >
+              <Text style={visual.buttonText}>
+                {saindo ? "Saindo..." : "Sair"}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#F7F1E5',
-  },
-  loading: {
-    flex: 1,
-    backgroundColor: '#F7F1E5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    padding: 28,
-    paddingBottom: 40,
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: 12,
-    paddingRight: 16,
-    marginBottom: 24,
-  },
-  backText: {
-    color: '#183F35',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  label: {
-    color: '#C76B48',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 2,
-  },
-  title: {
-    color: '#183F35',
-    fontSize: 32,
-    fontWeight: '800',
-    marginTop: 16,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 28,
-    alignItems: 'center',
-    marginTop: 28,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#183F35',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    color: '#F7F1E5',
-    fontSize: 34,
-    fontWeight: '800',
-  },
-  name: {
-    color: '#183F35',
-    fontSize: 24,
-    fontWeight: '700',
-    marginTop: 20,
-    textAlign: 'center',
-  },
-  email: {
-    color: '#53645B',
-    fontSize: 15,
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  exitButton: {
-    borderWidth: 1,
-    borderColor: '#A33B32',
-    borderRadius: 14,
-    padding: 18,
-    alignItems: 'center',
-    marginTop: 28,
-  },
-  exitText: {
-    color: '#A33B32',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  pressed: {
-    opacity: 0.75,
-  },
-});

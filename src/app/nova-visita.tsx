@@ -1,5 +1,6 @@
-import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { Cabecalho, Decoracao, Filtro } from "../componentes/Design";
+import { router } from "expo-router";
+import { useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -10,61 +11,31 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import AvaliacaoEstrelas from '../componentes/AvaliacaoEstrelas';
-import SeletorFoto from '../componentes/SeletorFoto';
-import { useAutenticacao } from '../contextos/AutenticacaoContext';
-import { useVisitas } from '../contextos/VisitasContext';
-import { enviarFoto } from '../servicos/fotosService';
-import type { FotoSelecionada } from '../servicos/selecaoFotoService';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import AvaliacaoEstrelas from "../componentes/AvaliacaoEstrelas";
+import SeletorFoto from "../componentes/SeletorFoto";
+import { useAutenticacao } from "../contextos/AutenticacaoContext";
+import { useVisitas } from "../contextos/VisitasContext";
+import { enviarFoto } from "../servicos/fotosService";
+import type { FotoSelecionada } from "../servicos/selecaoFotoService";
 
-const categorias = ['Parque', 'Museu', 'Cafeteria', 'Outro'];
-
-const estados = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF',
-  'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA',
-  'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS',
-  'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
-];
-
-function dataValida(texto: string) {
-  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(texto)) {
-    return false;
-  }
-
-  const [dia, mes, ano] = texto.split('/').map(Number);
-
-  if (ano < 1900) {
-    return false;
-  }
-
-  const data = new Date(ano, mes - 1, dia);
-
-  const existe =
-    data.getFullYear() === ano &&
-    data.getMonth() === mes - 1 &&
-    data.getDate() === dia;
-
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-
-  return existe && data <= hoje;
-}
+import { categorias, estados, dataValida } from "../lib/validacaoVisita";
 
 export default function NovaVisita() {
   const { adicionarVisita } = useVisitas();
   const { sessao } = useAutenticacao();
 
-  const [lugar, setLugar] = useState('');
-  const [cidade, setCidade] = useState('');
-  const [uf, setUf] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const [data, setData] = useState('');
-  const [comentario, setComentario] = useState('');
+  const [lugar, setLugar] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [uf, setUf] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [data, setData] = useState("");
+  const [comentario, setComentario] = useState("");
   const [avaliacao, setAvaliacao] = useState<number | null>(null);
   const [foto, setFoto] = useState<FotoSelecionada | null>(null);
   const [selecionandoFoto, setSelecionandoFoto] = useState(false);
+  const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [enviandoFoto, setEnviandoFoto] = useState(false);
 
@@ -87,56 +58,53 @@ export default function NovaVisita() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/inicio');
+      router.replace("/inicio");
     }
   }
 
+  function informarErro(titulo: string, mensagem: string) {
+    setErro(`${titulo}. ${mensagem}`);
+    if (Platform.OS !== "web") Alert.alert(titulo, mensagem);
+  }
+
   async function salvarVisita() {
-    if (
-      envioEmAndamento.current ||
-      selecaoEmAndamento.current
-    ) {
+    setErro("");
+    if (envioEmAndamento.current || selecaoEmAndamento.current) {
       return;
     }
 
     const usuarioId = sessao?.user.id;
 
     if (!usuarioId) {
-      Alert.alert(
-        'Entre na sua conta',
-        'Faça login para registrar uma visita.',
+      informarErro(
+        "Entre na sua conta",
+        "Faça login para registrar uma visita.",
       );
       return;
     }
 
     if (!lugar.trim() || !cidade.trim()) {
-      Alert.alert(
-        'Preencha os campos',
-        'Informe o nome do lugar e a cidade.',
-      );
+      informarErro("Preencha os campos", "Informe o nome do lugar e a cidade.");
       return;
     }
 
     if (!estados.includes(uf)) {
-      Alert.alert(
-        'Confira a UF',
-        'Informe uma sigla válida, como BA ou SP.',
-      );
+      informarErro("Confira a UF", "Informe uma sigla válida, como BA ou SP.");
       return;
     }
 
     if (!categorias.includes(categoria)) {
-      Alert.alert(
-        'Escolha uma categoria',
-        'Selecione o tipo de lugar visitado.',
+      informarErro(
+        "Escolha uma categoria",
+        "Selecione o tipo de lugar visitado.",
       );
       return;
     }
 
     if (!dataValida(data)) {
-      Alert.alert(
-        'Confira a data',
-        'Use DD/MM/AAAA, com uma data válida entre 1900 e hoje.',
+      informarErro(
+        "Confira a data",
+        "Use DD/MM/AAAA, com uma data válida entre 1900 e hoje.",
       );
       return;
     }
@@ -154,11 +122,7 @@ export default function NovaVisita() {
           setEnviandoFoto(true);
 
           try {
-            caminhoFoto = await enviarFoto(
-              usuarioId,
-              foto.conteudo,
-              foto.tipo,
-            );
+            caminhoFoto = await enviarFoto(usuarioId, foto.conteudo, foto.tipo);
 
             fotoEnviada.current = {
               foto,
@@ -183,9 +147,9 @@ export default function NovaVisita() {
 
       voltar();
     } catch {
-      Alert.alert(
-        'Não foi possível salvar',
-        'Os campos e a foto selecionada foram mantidos. Confira sua conexão e tente novamente.',
+      informarErro(
+        "Não foi possível salvar",
+        "Os campos e a foto selecionada foram mantidos. Confira sua conexão e tente novamente.",
       );
     } finally {
       envioEmAndamento.current = false;
@@ -196,30 +160,29 @@ export default function NovaVisita() {
 
   return (
     <SafeAreaView style={styles.screen}>
+      <Decoracao paisagem={false} />
       <KeyboardAvoidingView
         style={styles.keyboard}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          <Pressable
-            onPress={voltar}
-            disabled={bloqueado}
-            style={styles.backButton}
-          >
-            <Text style={styles.backText}>← Voltar</Text>
-          </Pressable>
+          <Cabecalho voltar />
 
-          <Text style={styles.label}>UMA NOVA DESCOBERTA</Text>
-          <Text style={styles.title}>Registrar visita</Text>
+          <Text style={styles.title}>Nova visita</Text>
 
-          <Text style={styles.description}>
-            Conte onde você esteve e guarde sua lembrança.
-          </Text>
+          <Text style={styles.description}>Guarde mais uma descoberta.</Text>
 
-          <Text style={styles.fieldLabel}>Nome do lugar *</Text>
+          <SeletorFoto
+            foto={foto}
+            onChange={setFoto}
+            desabilitado={salvando}
+            onSelecionandoChange={acompanharSelecao}
+          />
+
+          <Text style={styles.fieldLabel}>Lugar *</Text>
 
           <TextInput
             style={styles.input}
@@ -232,68 +195,43 @@ export default function NovaVisita() {
             editable={!bloqueado}
           />
 
-          <Text style={styles.fieldLabel}>Cidade *</Text>
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.fieldLabel}>Cidade *</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Ex.: Salvador"
-            placeholderTextColor="#7C827A"
-            value={cidade}
-            onChangeText={setCidade}
-            maxLength={100}
-            autoCapitalize="words"
-            editable={!bloqueado}
-          />
-
-          <Text style={styles.fieldLabel}>UF *</Text>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Ex.: BA"
-            placeholderTextColor="#7C827A"
-            value={uf}
-            onChangeText={(texto) =>
-              setUf(texto.replace(/[^a-z]/gi, '').toUpperCase())
-            }
-            maxLength={2}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            editable={!bloqueado}
-          />
+              <TextInput
+                style={styles.input}
+                placeholder="Ex.: Salvador"
+                placeholderTextColor="#7C827A"
+                value={cidade}
+                onChangeText={setCidade}
+                maxLength={100}
+                autoCapitalize="words"
+                editable={!bloqueado}
+              />
+            </View>
+            <View style={{ width: 85 }}>
+              <Text style={styles.fieldLabel}>UF *</Text>
+              <Filtro
+                valor={uf}
+                onChange={setUf}
+                opcoes={[
+                  { id: "", nome: "UF" },
+                  ...estados.map((id) => ({ id, nome: id })),
+                ]}
+              />
+            </View>
+          </View>
 
           <Text style={styles.fieldLabel}>Categoria *</Text>
-
-          <View style={styles.categories}>
-            {categorias.map((item) => {
-              const selecionada = categoria === item;
-
-              return (
-                <Pressable
-                  key={item}
-                  onPress={() => setCategoria(item)}
-                  disabled={bloqueado}
-                  accessibilityRole="button"
-                  accessibilityState={{
-                    selected: selecionada,
-                    disabled: bloqueado,
-                  }}
-                  style={[
-                    styles.categoryButton,
-                    selecionada && styles.categorySelected,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.categoryText,
-                      selecionada && styles.categoryTextSelected,
-                    ]}
-                  >
-                    {item}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          <Filtro
+            valor={categoria}
+            onChange={setCategoria}
+            opcoes={[
+              { id: "", nome: "Selecione uma categoria" },
+              ...categorias.map((id) => ({ id, nome: id })),
+            ]}
+          />
 
           <Text style={styles.fieldLabel}>Data da visita *</Text>
 
@@ -321,16 +259,7 @@ export default function NovaVisita() {
             desabilitado={bloqueado}
           />
 
-          <Text style={styles.fieldLabel}>Foto da visita (opcional)</Text>
-
-          <SeletorFoto
-            foto={foto}
-            onChange={setFoto}
-            desabilitado={salvando}
-            onSelecionandoChange={acompanharSelecao}
-          />
-
-          <Text style={styles.fieldLabel}>Sua lembrança</Text>
+          <Text style={styles.fieldLabel}>Comentário (opcional)</Text>
 
           <TextInput
             style={[styles.input, styles.commentInput]}
@@ -344,11 +273,15 @@ export default function NovaVisita() {
             editable={!bloqueado}
           />
 
-          <Text style={styles.counter}>
-            {comentario.length}/500 caracteres
-          </Text>
+          <Text style={styles.counter}>{comentario.length}/500 caracteres</Text>
 
           <Text style={styles.hint}>* Campos obrigatórios</Text>
+
+          {erro ? (
+            <Text accessibilityRole="alert" accessibilityLiveRegion="assertive" style={styles.error}>
+              {erro}
+            </Text>
+          ) : null}
 
           <Pressable
             onPress={salvarVisita}
@@ -362,10 +295,10 @@ export default function NovaVisita() {
           >
             <Text style={styles.buttonText}>
               {enviandoFoto
-                ? 'Enviando foto...'
+                ? "Enviando foto..."
                 : salvando
-                  ? 'Salvando...'
-                  : 'Salvar visita'}
+                  ? "Salvando..."
+                  : "Salvar visita"}
             </Text>
           </Pressable>
         </ScrollView>
@@ -375,115 +308,116 @@ export default function NovaVisita() {
 }
 
 const styles = StyleSheet.create({
+  error: { color: "#942F24", backgroundColor: "#FBEAE3", padding: 12, borderRadius: 9, marginTop: 12, fontSize: 14, lineHeight: 20 },
   screen: {
     flex: 1,
-    backgroundColor: '#F7F1E5',
+    backgroundColor: "#F8F5EC",
   },
   keyboard: {
     flex: 1,
   },
   content: {
-    padding: 28,
-    paddingBottom: 40,
+    padding: 20,
+    paddingBottom: 24,
   },
   backButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: 12,
+    alignSelf: "flex-start",
+    paddingVertical: 7,
     paddingRight: 16,
-    marginBottom: 24,
+    marginBottom: 4,
   },
   backText: {
-    color: '#183F35',
-    fontSize: 16,
-    fontWeight: '600',
+    color: "#183F35",
+    fontSize: 14,
+    fontWeight: "600",
   },
   label: {
-    color: '#C76B48',
+    color: "#C76B48",
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 2,
   },
   title: {
-    color: '#183F35',
+    color: "#183F35",
     fontSize: 32,
-    fontWeight: '800',
-    marginTop: 16,
+    fontWeight: "800",
+    marginTop: 8,
   },
   description: {
-    color: '#53645B',
-    fontSize: 16,
-    lineHeight: 24,
+    color: "#53645B",
+    fontSize: 14,
+    lineHeight: 20,
     marginTop: 12,
-    marginBottom: 8,
+    marginBottom: 5,
   },
   fieldLabel: {
-    color: '#183F35',
-    fontSize: 15,
-    fontWeight: '600',
-    marginTop: 24,
-    marginBottom: 8,
+    color: "#183F35",
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 10,
+    marginBottom: 5,
   },
   input: {
-    backgroundColor: '#FFFFFF',
-    color: '#183F35',
+    backgroundColor: "#F6F3EB",
+    color: "#183F35",
     borderWidth: 1,
-    borderColor: '#DED9CE',
-    borderRadius: 14,
-    paddingHorizontal: 16,
+    borderColor: "#DED9CE",
+    borderRadius: 9,
+    paddingHorizontal: 12,
     paddingVertical: 14,
-    fontSize: 16,
+    fontSize: 14,
   },
   categories: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   categoryButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#F6F3EB",
     borderWidth: 1,
-    borderColor: '#DED9CE',
+    borderColor: "#DED9CE",
     borderRadius: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
   },
   categorySelected: {
-    backgroundColor: '#183F35',
-    borderColor: '#183F35',
+    backgroundColor: "#183F35",
+    borderColor: "#183F35",
   },
   categoryText: {
-    color: '#53645B',
+    color: "#53645B",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   categoryTextSelected: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   commentInput: {
-    minHeight: 130,
+    minHeight: 80,
   },
   counter: {
-    color: '#53645B',
+    color: "#53645B",
     fontSize: 12,
-    textAlign: 'right',
+    textAlign: "right",
     marginTop: 8,
   },
   hint: {
-    color: '#53645B',
+    color: "#53645B",
     fontSize: 13,
     lineHeight: 20,
     marginTop: 12,
   },
   button: {
-    backgroundColor: '#183F35',
-    borderRadius: 14,
-    padding: 18,
-    alignItems: 'center',
-    marginTop: 20,
+    backgroundColor: "#183F35",
+    borderRadius: 9,
+    padding: 13,
+    alignItems: "center",
+    marginTop: 12,
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
   },
   pressed: {
     opacity: 0.75,

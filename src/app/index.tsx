@@ -1,176 +1,68 @@
-import { router } from 'expo-router';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAutenticacao } from '../contextos/AutenticacaoContext';
-
+import { Redirect, router } from "expo-router";
+import { Image, Pressable, ScrollView, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAutenticacao } from "../contextos/AutenticacaoContext";
+import { Logo, cores, visual } from "../componentes/Design";
 export default function Welcome() {
-  const { sessao, carregando, erro } = useAutenticacao();
-
-  function comecar() {
-    if (sessao) {
-      router.push('/inicio');
-    } else {
-      router.push('/login');
-    }
-  }
-
+  const { sessao, carregando, erro, recuperandoSenha } = useAutenticacao();
+  if (!carregando && sessao && recuperandoSenha)
+    return <Redirect href="/recuperar-senha" />;
+  if (!carregando && sessao && !erro) return <Redirect href="/inicio" />;
   return (
-    <SafeAreaView style={styles.screen}>
-      <Text style={styles.label}>
-        SEU DIÁRIO DE DESCOBERTAS
-      </Text>
-
-      <View style={styles.content}>
-        <View style={styles.stamp}>
-          <Text style={styles.monogram}>PL</Text>
-        </View>
-
-        <Text style={styles.title}>
-          Passaporte{'\n'}Local
-        </Text>
-
-        <Text style={styles.description}>
-          Explore sua cidade.{'\n'}
-          Guarde suas melhores histórias.
-        </Text>
-
-        <Pressable
-          onPress={comecar}
-          disabled={carregando}
-          accessibilityRole="button"
-          accessibilityState={{ disabled: carregando }}
-          style={({ pressed }) => [
-            styles.button,
-            (pressed || carregando) && styles.pressed,
+    <SafeAreaView style={visual.screen}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: 20,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Logo />
+        <Image
+          source={require("../../assets/prototipo/abertura.png")}
+          style={{ width: "100%", height: 345, marginTop: 8 }}
+          resizeMode="contain"
+        />
+        <Text
+          style={[
+            visual.title,
+            { textAlign: "center", fontSize: 29, marginTop: 12 },
           ]}
         >
-          {carregando ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.buttonText}>
-              Começar minha jornada
-            </Text>
-          )}
+          Suas descobertas,{"\n"}sempre com você
+        </Text>
+        <Text
+          style={[
+            visual.subtitle,
+            { textAlign: "center", maxWidth: 290, marginTop: 8 },
+          ]}
+        >
+          Guarde os lugares que fazem parte da sua história.
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          disabled={carregando}
+          onPress={() => router.push("/cadastro")}
+          style={[visual.button, { width: "100%", marginTop: 20 }]}
+        >
+          <Text style={visual.buttonText}>
+            {carregando ? "Carregando..." : "Começar"}
+          </Text>
         </Pressable>
-
-        {erro ? (
-          <Text style={styles.errorText}>
-            {erro} Você pode tentar entrar novamente.
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push("/login")}
+          style={{ padding: 14 }}
+        >
+          <Text
+            style={{ color: cores.laranja, fontWeight: "600", fontSize: 13 }}
+          >
+            Já tenho conta
           </Text>
-        ) : null}
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>
-            Cada passeio merece uma lembrança.
-          </Text>
-
-          <Text style={styles.cardBody}>
-            Registre suas visitas, organize suas descobertas
-            e monte sua coleção de carimbos.
-          </Text>
-        </View>
-      </View>
-
-      <Text style={styles.footer}>
-        ARTUR TEIXEIRA · UNIRIOS
-      </Text>
+        </Pressable>
+        {!!erro && <Text style={visual.subtitle}>{erro}</Text>}
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#183F35',
-    paddingHorizontal: 28,
-  },
-  label: {
-    color: '#DBCEAF',
-    fontSize: 10,
-    letterSpacing: 2,
-    marginTop: 28,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  stamp: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    borderWidth: 2,
-    borderColor: '#DBCEAF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 28,
-  },
-  monogram: {
-    color: '#DBCEAF',
-    fontSize: 26,
-    fontWeight: '700',
-  },
-  title: {
-    color: '#F7F1E5',
-    fontSize: 52,
-    fontWeight: '800',
-    letterSpacing: -2,
-    lineHeight: 57,
-  },
-  description: {
-    color: '#DBCEAF',
-    fontSize: 22,
-    lineHeight: 30,
-    marginTop: 20,
-  },
-  button: {
-    backgroundColor: '#C76B48',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 14,
-    marginTop: 24,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  pressed: {
-    opacity: 0.75,
-  },
-  errorText: {
-    color: '#F7D4C6',
-    fontSize: 14,
-    lineHeight: 22,
-    marginTop: 12,
-  },
-  card: {
-    backgroundColor: '#F7F1E5',
-    borderRadius: 20,
-    padding: 22,
-    marginTop: 28,
-  },
-  cardTitle: {
-    color: '#183F35',
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  cardBody: {
-    color: '#53645B',
-    fontSize: 14,
-    lineHeight: 22,
-  },
-  footer: {
-    color: '#DBCEAF',
-    fontSize: 10,
-    letterSpacing: 1.5,
-    paddingBottom: 24,
-  },
-});

@@ -1,185 +1,147 @@
-import { useRef, useState } from 'react';
+import Icone from "./Icone";
+import { useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
   View,
-} from 'react-native';
+} from "react-native";
 import {
   selecionarFoto,
   type FotoSelecionada,
-} from '../servicos/selecaoFotoService';
-
-type SeletorFotoProps = {
+} from "../servicos/selecaoFotoService";
+import { cores, visual } from "./Design";
+type Props = {
   foto: FotoSelecionada | null;
   onChange: (foto: FotoSelecionada | null) => void;
   desabilitado?: boolean;
-  onSelecionandoChange?: (selecionando: boolean) => void;
+  onSelecionandoChange?: (valor: boolean) => void;
 };
-
 export default function SeletorFoto({
   foto,
   onChange,
   desabilitado = false,
   onSelecionandoChange,
-}: SeletorFotoProps) {
+}: Props) {
   const [selecionando, setSelecionando] = useState(false);
-  const selecaoEmAndamento = useRef(false);
-
+  const [aberto, setAberto] = useState(false);
+  const emAndamento = useRef(false);
   const bloqueado = desabilitado || selecionando;
-
-  async function escolherFoto() {
-    if (desabilitado || selecaoEmAndamento.current) {
-      return;
-    }
-
-    selecaoEmAndamento.current = true;
+  async function escolher(origem: "galeria" | "camera") {
+    if (bloqueado || emAndamento.current) return;
+    setAberto(false);
+    emAndamento.current = true;
     setSelecionando(true);
     onSelecionandoChange?.(true);
-
     try {
-      const escolhida = await selecionarFoto();
-
-      if (escolhida) {
-        onChange(escolhida);
-      }
+      const escolhida = await selecionarFoto(origem);
+      if (escolhida) onChange(escolhida);
     } catch (erro) {
       Alert.alert(
-        'Não foi possível selecionar a foto',
+        "Não foi possível selecionar a foto",
         erro instanceof Error
           ? erro.message
-          : 'Tente novamente e escolha uma imagem JPEG, PNG ou WebP de até 5 MB.',
+          : "Escolha uma imagem JPEG, PNG ou WebP de até 5 MB.",
       );
     } finally {
-      selecaoEmAndamento.current = false;
+      emAndamento.current = false;
       setSelecionando(false);
       onSelecionandoChange?.(false);
     }
   }
-
   return (
-    <View style={styles.container}>
-      {foto ? (
-        <Image
-          source={{ uri: foto.uri }}
-          style={styles.preview}
-          resizeMode="cover"
-          accessibilityLabel="Prévia da foto escolhida para a visita"
-        />
-      ) : (
-        <View style={styles.empty}>
-          <Text style={styles.emptyText}>
-            Nenhuma foto selecionada
-          </Text>
-        </View>
-      )}
-
+    <View style={{ marginTop: 12 }}>
       <Pressable
-        onPress={escolherFoto}
-        disabled={bloqueado}
         accessibilityRole="button"
-        accessibilityState={{ disabled: bloqueado }}
-        style={({ pressed }) => [
-          styles.chooseButton,
-          (pressed || bloqueado) && styles.dimmed,
-        ]}
+        accessibilityLabel={foto ? "Alterar foto" : "Adicionar foto"}
+        disabled={bloqueado}
+        onPress={() => setAberto(true)}
+        style={{
+          borderWidth: 1,
+          borderStyle: "dashed",
+          borderColor: cores.borda,
+          borderRadius: 10,
+          minHeight: 95,
+          backgroundColor: "#F0EDE2",
+          overflow: "hidden",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
-        {selecionando ? (
-          <View style={styles.loading}>
-            <ActivityIndicator size="small" color="#FFFFFF" />
-            <Text style={styles.chooseText}>Selecionando...</Text>
-          </View>
+        {foto ? (
+          <Image
+            source={{ uri: foto.uri }}
+            style={{ width: "100%", height: 145 }}
+            resizeMode="cover"
+          />
         ) : (
-          <Text style={styles.chooseText}>
-            {foto ? 'Trocar foto' : 'Escolher foto da galeria'}
-          </Text>
+          <>
+            <Icone nome="camera" tamanho={30} />
+            <Text
+              style={{ color: cores.verde, fontWeight: "600", fontSize: 13 }}
+            >
+              {selecionando ? "Selecionando..." : "Adicionar foto"}
+            </Text>
+            <Text style={{ color: cores.suave, fontSize: 11, marginTop: 3 }}>
+              Opcional · até 5 MB
+            </Text>
+          </>
         )}
       </Pressable>
-
       {foto && (
-        <Pressable
-          onPress={() => onChange(null)}
-          disabled={bloqueado}
-          accessibilityRole="button"
-          accessibilityState={{ disabled: bloqueado }}
-          style={({ pressed }) => [
-            styles.removeButton,
-            (pressed || bloqueado) && styles.dimmed,
-          ]}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingVertical: 10,
+          }}
         >
-          <Text style={styles.removeText}>Remover foto</Text>
-        </Pressable>
+          <Pressable disabled={bloqueado} onPress={() => setAberto(true)}>
+            <Text style={visual.link}>Alterar foto</Text>
+          </Pressable>
+          <Pressable disabled={bloqueado} onPress={() => onChange(null)}>
+            <Text style={visual.link}>Remover foto</Text>
+          </Pressable>
+        </View>
       )}
-
-      <Text style={styles.hint}>
-        Foto opcional. JPEG, PNG ou WebP de até 5 MB.
-      </Text>
+      <Modal
+        visible={aberto}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAberto(false)}
+      >
+        <View style={visual.overlay}>
+          <View style={visual.dialog}>
+            <Text style={[visual.section, { textAlign: "center" }]}>
+              Adicionar uma lembrança
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => escolher("galeria")}
+              style={visual.button}
+            >
+              <Text style={visual.buttonText}>Escolher foto da galeria</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => escolher("camera")}
+              style={visual.button}
+            >
+              <Text style={visual.buttonText}>Tirar foto com a câmera</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setAberto(false)}
+              style={{ padding: 16, alignItems: "center" }}
+            >
+              <Text style={visual.link}>Cancelar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 12,
-  },
-  preview: {
-    width: '100%',
-    height: 220,
-    borderRadius: 16,
-    backgroundColor: '#E8DDCC',
-  },
-  empty: {
-    minHeight: 110,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#DED9CE',
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    color: '#53645B',
-    fontSize: 15,
-    textAlign: 'center',
-  },
-  chooseButton: {
-    backgroundColor: '#183F35',
-    borderRadius: 14,
-    padding: 16,
-    alignItems: 'center',
-  },
-  chooseText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  loading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  removeButton: {
-    borderWidth: 1,
-    borderColor: '#A33B32',
-    borderRadius: 14,
-    padding: 16,
-    alignItems: 'center',
-  },
-  removeText: {
-    color: '#A33B32',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  hint: {
-    color: '#53645B',
-    fontSize: 13,
-    lineHeight: 20,
-  },
-  dimmed: {
-    opacity: 0.6,
-  },
-});

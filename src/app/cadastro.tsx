@@ -1,5 +1,6 @@
-import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { Cabecalho, Decoracao } from "../componentes/Design";
+import { router } from "expo-router";
+import { useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -9,15 +10,17 @@ import {
   StyleSheet,
   Text,
   TextInput,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '../lib/supabase';
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { supabase } from "../lib/supabase";
 
 export default function Cadastro() {
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmacao, setConfirmacao] = useState('');
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [senha, setSenha] = useState("");
+  const [confirmacao, setConfirmacao] = useState("");
   const [cadastrando, setCadastrando] = useState(false);
 
   const envioEmAndamento = useRef(false);
@@ -26,7 +29,7 @@ export default function Cadastro() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/login');
+      router.replace("/login");
     }
   }
 
@@ -38,39 +41,28 @@ export default function Cadastro() {
     const nomeFormatado = nome.trim();
     const emailFormatado = email.trim();
 
-    if (
-      !nomeFormatado ||
-      !emailFormatado ||
-      !senha ||
-      !confirmacao
-    ) {
+    if (!nomeFormatado || !emailFormatado || !senha || !confirmacao) {
       Alert.alert(
-        'Preencha os campos',
-        'Informe seu nome, e-mail e os dois campos de senha.',
+        "Preencha os campos",
+        "Informe seu nome, e-mail e os dois campos de senha.",
       );
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFormatado)) {
-      Alert.alert(
-        'Confira o e-mail',
-        'Informe um endereço de e-mail válido.',
-      );
+      Alert.alert("Confira o e-mail", "Informe um endereço de e-mail válido.");
       return;
     }
 
     if (senha.length < 8) {
-      Alert.alert(
-        'Escolha uma senha maior',
-        'Use pelo menos 8 caracteres.',
-      );
+      Alert.alert("Escolha uma senha maior", "Use pelo menos 8 caracteres.");
       return;
     }
 
     if (senha !== confirmacao) {
       Alert.alert(
-        'As senhas são diferentes',
-        'Digite a mesma senha nos dois campos.',
+        "As senhas são diferentes",
+        "Digite a mesma senha nos dois campos.",
       );
       return;
     }
@@ -90,26 +82,23 @@ export default function Cadastro() {
       });
 
       if (error) {
-        Alert.alert(
-          'Não foi possível cadastrar',
-          error.message,
-        );
+        Alert.alert("Não foi possível cadastrar", error.message);
         return;
       }
 
-      setSenha('');
-      setConfirmacao('');
+      setSenha("");
+      setConfirmacao("");
 
       if (data.session) {
-        router.replace('/inicio');
+        router.replace("/inicio");
       } else {
         Alert.alert(
-          'Confira seu e-mail',
-          'Se o cadastro precisar de confirmação, você receberá um e-mail. Confirme sua conta antes de entrar.',
+          "Confira seu e-mail",
+          "Se o cadastro precisar de confirmação, você receberá um e-mail. Confirme sua conta antes de entrar.",
           [
             {
-              text: 'Ir para login',
-              onPress: () => router.replace('/login'),
+              text: "Ir para login",
+              onPress: () => router.replace("/login"),
             },
           ],
           { cancelable: false },
@@ -117,8 +106,8 @@ export default function Cadastro() {
       }
     } catch {
       Alert.alert(
-        'Falha de conexão',
-        'Confira sua internet e tente novamente.',
+        "Falha de conexão",
+        "Confira sua internet e tente novamente.",
       );
     } finally {
       envioEmAndamento.current = false;
@@ -128,28 +117,20 @@ export default function Cadastro() {
 
   return (
     <SafeAreaView style={styles.screen}>
+      <Decoracao paisagem={true} />
       <KeyboardAvoidingView
         style={styles.keyboard}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          <Pressable
-            onPress={voltar}
-            disabled={cadastrando}
-            style={styles.backButton}
-          >
-            <Text style={styles.backText}>← Voltar</Text>
-          </Pressable>
+          <Cabecalho voltar />
 
-          <Text style={styles.label}>PASSAPORTE LOCAL</Text>
-          <Text style={styles.title}>Comece sua jornada.</Text>
+          <Text style={styles.title}>Crie seu{"\n"}passaporte</Text>
 
-          <Text style={styles.description}>
-            Crie sua conta para organizar suas descobertas.
-          </Text>
+          <Text style={styles.description}>Suas memórias começam aqui.</Text>
 
           <Text style={styles.fieldLabel}>Nome</Text>
 
@@ -182,34 +163,56 @@ export default function Cadastro() {
 
           <Text style={styles.fieldLabel}>Senha</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Pelo menos 8 caracteres"
-            placeholderTextColor="#7C827A"
-            value={senha}
-            onChangeText={setSenha}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="new-password"
-            editable={!cadastrando}
-          />
+          <View style={{ position: "relative" }}>
+            <TextInput
+              style={[styles.input, { paddingRight: 48 }]}
+              placeholder="Pelo menos 8 caracteres"
+              placeholderTextColor="#7C827A"
+              value={senha}
+              onChangeText={setSenha}
+              secureTextEntry={!mostrarSenha}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="new-password"
+              editable={!cadastrando}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                mostrarSenha ? "Ocultar senha" : "Mostrar senha"
+              }
+              onPress={() => setMostrarSenha((v) => !v)}
+              style={{ position: "absolute", right: 8, top: 4, padding: 8 }}
+            >
+              <Text style={{ fontSize: 20, color: "#53645B" }}>◎</Text>
+            </Pressable>
+          </View>
 
-          <Text style={styles.fieldLabel}>
-            Confirmar senha
-          </Text>
+          <Text style={styles.fieldLabel}>Confirmar senha</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Digite a senha novamente"
-            placeholderTextColor="#7C827A"
-            value={confirmacao}
-            onChangeText={setConfirmacao}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={!cadastrando}
-          />
+          <View style={{ position: "relative" }}>
+            <TextInput
+              style={[styles.input, { paddingRight: 48 }]}
+              placeholder="Digite a senha novamente"
+              placeholderTextColor="#7C827A"
+              value={confirmacao}
+              onChangeText={setConfirmacao}
+              secureTextEntry={!mostrarSenha}
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!cadastrando}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                mostrarSenha ? "Ocultar senha" : "Mostrar senha"
+              }
+              onPress={() => setMostrarSenha((v) => !v)}
+              style={{ position: "absolute", right: 8, top: 4, padding: 8 }}
+            >
+              <Text style={{ fontSize: 20, color: "#53645B" }}>◎</Text>
+            </Pressable>
+          </View>
 
           <Pressable
             onPress={cadastrar}
@@ -222,7 +225,16 @@ export default function Cadastro() {
             ]}
           >
             <Text style={styles.buttonText}>
-              {cadastrando ? 'Criando conta...' : 'Criar conta'}
+              {cadastrando ? "Criando conta..." : "Criar conta"}
+            </Text>
+          </Pressable>
+          <Pressable
+            disabled={cadastrando}
+            onPress={() => router.replace("/login")}
+            style={{ alignItems: "center", padding: 16 }}
+          >
+            <Text style={{ color: "#BC592F", fontSize: 13 }}>
+              Já tenho conta: Entrar
             </Text>
           </Pressable>
         </ScrollView>
@@ -234,72 +246,72 @@ export default function Cadastro() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#F7F1E5',
+    backgroundColor: "#F8F5EC",
   },
   keyboard: {
     flex: 1,
   },
   content: {
-    padding: 28,
-    paddingBottom: 40,
+    padding: 20,
+    paddingBottom: 165,
   },
   backButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: 12,
+    alignSelf: "flex-start",
+    paddingVertical: 7,
     paddingRight: 16,
-    marginBottom: 28,
+    marginBottom: 4,
   },
   backText: {
-    color: '#183F35',
-    fontSize: 16,
-    fontWeight: '600',
+    color: "#183F35",
+    fontSize: 14,
+    fontWeight: "600",
   },
   label: {
-    color: '#C76B48',
+    color: "#C76B48",
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 2,
   },
   title: {
-    color: '#183F35',
-    fontSize: 34,
-    fontWeight: '800',
-    marginTop: 20,
+    color: "#183F35",
+    fontSize: 29,
+    fontWeight: "800",
+    marginTop: 12,
   },
   description: {
-    color: '#53645B',
-    fontSize: 16,
-    lineHeight: 24,
-    marginTop: 16,
+    color: "#53645B",
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 8,
   },
   fieldLabel: {
-    color: '#183F35',
-    fontSize: 15,
-    fontWeight: '600',
-    marginTop: 24,
-    marginBottom: 8,
+    color: "#183F35",
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 10,
+    marginBottom: 5,
   },
   input: {
-    backgroundColor: '#FFFFFF',
-    color: '#183F35',
+    backgroundColor: "#F6F3EB",
+    color: "#183F35",
     borderWidth: 1,
-    borderColor: '#DED9CE',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    fontSize: 16,
+    borderColor: "#DED9CE",
+    borderRadius: 9,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    fontSize: 14,
   },
   button: {
-    backgroundColor: '#183F35',
-    borderRadius: 14,
-    padding: 18,
-    alignItems: 'center',
-    marginTop: 32,
+    backgroundColor: "#183F35",
+    borderRadius: 9,
+    padding: 13,
+    alignItems: "center",
+    marginTop: 12,
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
   },
   pressed: {
     opacity: 0.75,

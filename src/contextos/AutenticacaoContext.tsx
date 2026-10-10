@@ -13,6 +13,8 @@ type AutenticacaoContextData = {
   sessao: Session | null;
   carregando: boolean;
   erro: string | null;
+  recuperandoSenha: boolean;
+  concluirRecuperacao: () => void;
   sair: () => Promise<void>;
 };
 
@@ -30,6 +32,7 @@ export function AutenticacaoProvider({
   const [sessao, setSessao] = useState<Session | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [recuperandoSenha, setRecuperandoSenha] = useState(false);
 
   useEffect(() => {
     let ativo = true;
@@ -38,10 +41,12 @@ export function AutenticacaoProvider({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      (_evento, novaSessao) => {
+      (evento, novaSessao) => {
         recebeuEvento = true;
 
         if (ativo) {
+          if (evento === 'PASSWORD_RECOVERY') setRecuperandoSenha(true);
+          if (evento === 'SIGNED_OUT') setRecuperandoSenha(false);
           setSessao(novaSessao);
           setErro(null);
           setCarregando(false);
@@ -115,6 +120,8 @@ export function AutenticacaoProvider({
         sessao,
         carregando,
         erro,
+        recuperandoSenha,
+        concluirRecuperacao: () => setRecuperandoSenha(false),
         sair,
       }}
     >
