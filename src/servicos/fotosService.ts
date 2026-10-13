@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
+import { conferirTamanhoFoto } from '../lib/limitesFoto';
 
 const BUCKET = 'fotos-visitas';
-const LIMITE_BYTES = 5 * 1024 * 1024;
 
 export type TipoImagem =
   | 'image/jpeg'
@@ -38,13 +38,7 @@ export async function enviarFoto(
     throw new Error('Entre na sua conta para enviar uma foto.');
   }
 
-  if (conteudo.byteLength === 0) {
-    throw new Error('A imagem está vazia.');
-  }
-
-  if (conteudo.byteLength > LIMITE_BYTES) {
-    throw new Error('Escolha uma imagem de até 5 MB.');
-  }
+  conferirTamanhoFoto(conteudo.byteLength);
 
   const extensao = extensoes[tipo];
 

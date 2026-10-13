@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -12,14 +13,17 @@ import { obterUrlFoto } from '../servicos/fotosService';
 
 type FotoVisitaProps = {
   caminho: string | null;
+  compacto?: boolean;
 };
 
 export default function FotoVisita({
   caminho,
+  compacto = false,
 }: FotoVisitaProps) {
   const { sessao } = useAutenticacao();
   const usuarioId = sessao?.user.id ?? null;
 
+  const [ampliada, setAmpliada] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState(false);
@@ -77,12 +81,19 @@ export default function FotoVisita({
 
   return (
     <View style={styles.container}>
+      <Modal visible={ampliada && !!url} transparent animationType="fade" onRequestClose={() => setAmpliada(false)}>
+        <View style={{ flex: 1, backgroundColor: "#000E", justifyContent: "center", padding: 16 }}>
+          {url && <Image source={{ uri: url }} style={{ width: "100%", height: "80%" }} resizeMode="contain" accessibilityLabel="Foto completa da visita" />}
+          <Pressable accessibilityRole="button" onPress={() => setAmpliada(false)} style={{ alignSelf: "center", padding: 16 }}><Text style={{ color: "#FFF", fontWeight: "700" }}>Fechar foto</Text></Pressable>
+        </View>
+      </Modal>
       {url && !erro && (
+        <Pressable accessibilityRole="button" accessibilityLabel="Ampliar foto da visita" onPress={() => setAmpliada(true)}>
         <Image
           key={url}
           source={{ uri: url }}
-          style={styles.image}
-          resizeMode="contain"
+          style={[styles.image, compacto && { height: 140, aspectRatio: undefined }]}
+          resizeMode="cover"
           accessibilityLabel="Foto da visita"
           onLoad={() => setCarregando(false)}
           onError={() => {
@@ -90,6 +101,7 @@ export default function FotoVisita({
             setCarregando(false);
           }}
         />
+        </Pressable>
       )}
 
       {carregando && !erro && (
@@ -129,7 +141,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 260,
+    aspectRatio: 1.35,
     borderRadius: 16,
     backgroundColor: '#F7F1E5',
   },

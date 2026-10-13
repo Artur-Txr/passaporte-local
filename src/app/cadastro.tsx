@@ -1,3 +1,5 @@
+import Icone from "../componentes/Icone";
+import CampoTexto from "../componentes/CampoTexto";
 import { Cabecalho, Decoracao } from "../componentes/Design";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
@@ -120,13 +122,14 @@ export default function Cadastro() {
       <Decoracao paisagem={true} />
       <KeyboardAvoidingView
         style={styles.keyboard}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
-          <Cabecalho voltar />
+          <Cabecalho alinharInicio />
 
           <Text style={styles.title}>Crie seu{"\n"}passaporte</Text>
 
@@ -134,7 +137,7 @@ export default function Cadastro() {
 
           <Text style={styles.fieldLabel}>Nome</Text>
 
-          <TextInput
+          <CampoTexto icone="perfil"
             style={styles.input}
             placeholder="Como você se chama?"
             placeholderTextColor="#7C827A"
@@ -148,7 +151,7 @@ export default function Cadastro() {
 
           <Text style={styles.fieldLabel}>E-mail</Text>
 
-          <TextInput
+          <CampoTexto icone="email"
             style={styles.input}
             placeholder="seuemail@exemplo.com"
             placeholderTextColor="#7C827A"
@@ -164,7 +167,7 @@ export default function Cadastro() {
           <Text style={styles.fieldLabel}>Senha</Text>
 
           <View style={{ position: "relative" }}>
-            <TextInput
+            <CampoTexto icone="senha"
               style={[styles.input, { paddingRight: 48 }]}
               placeholder="Pelo menos 8 caracteres"
               placeholderTextColor="#7C827A"
@@ -184,14 +187,14 @@ export default function Cadastro() {
               onPress={() => setMostrarSenha((v) => !v)}
               style={{ position: "absolute", right: 8, top: 4, padding: 8 }}
             >
-              <Text style={{ fontSize: 20, color: "#53645B" }}>◎</Text>
+              <Icone nome={mostrarSenha ? "olhoFechado" : "olho"} tamanho={20} cor="#53645B" />
             </Pressable>
           </View>
 
           <Text style={styles.fieldLabel}>Confirmar senha</Text>
 
           <View style={{ position: "relative" }}>
-            <TextInput
+            <CampoTexto icone="senha"
               style={[styles.input, { paddingRight: 48 }]}
               placeholder="Digite a senha novamente"
               placeholderTextColor="#7C827A"
@@ -210,7 +213,7 @@ export default function Cadastro() {
               onPress={() => setMostrarSenha((v) => !v)}
               style={{ position: "absolute", right: 8, top: 4, padding: 8 }}
             >
-              <Text style={{ fontSize: 20, color: "#53645B" }}>◎</Text>
+              <Icone nome={mostrarSenha ? "olhoFechado" : "olho"} tamanho={20} cor="#53645B" />
             </Pressable>
           </View>
 
@@ -251,7 +254,7 @@ const styles = StyleSheet.create({
   keyboard: {
     flex: 1,
   },
-  content: {
+  content: { width: "100%", maxWidth: 600, alignSelf: "center",
     padding: 20,
     paddingBottom: 165,
   },
@@ -303,7 +306,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#183F35",
-    borderRadius: 9,
+    borderRadius: 18,
     padding: 13,
     alignItems: "center",
     marginTop: 12,

@@ -78,11 +78,12 @@ const styles = StyleSheet.create({
   appFrame: {
     flex: 1,
     width: "100%",
+    maxWidth: 600,
     ...(Platform.OS === "web"
       ? {
-          maxWidth: 430,
-          maxHeight: 900,
-          marginVertical: 12,
+          maxWidth: 600,
+
+
           borderRadius: 22,
           overflow: "hidden" as const,
           borderWidth: 1,

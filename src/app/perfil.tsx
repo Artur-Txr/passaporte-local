@@ -1,3 +1,7 @@
+import { Dialogo } from "../componentes/Design";
+import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
+import Icone from '../componentes/Icone';
+import CartaoCidade from '../componentes/CartaoCidade';
 import { Redirect } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -19,6 +23,7 @@ import {
   visual,
 } from "../componentes/Design";
 export default function Perfil() {
+  const { compacto } = useLayoutResponsivo();
   const { sessao, carregando, sair } = useAutenticacao();
   const { visitas, carregando: carregandoVisitas, erro } = useVisitas();
   const [saindo, setSaindo] = useState(false);
@@ -69,7 +74,7 @@ export default function Perfil() {
     <SafeAreaView style={visual.screen}>
       <Decoracao />
       <ScrollView contentContainerStyle={visual.content}>
-        <Cabecalho />
+        <Cabecalho alinharInicio />
         <Text style={visual.title}>Meu perfil</Text>
         <Text style={visual.subtitle}>Meu passaporte pessoal</Text>
         <View
@@ -98,10 +103,10 @@ export default function Perfil() {
             {nome}
           </Text>
         </View>
-        <View style={{ flexDirection: "row", gap: 10, marginBottom: 20 }}>
+        <View style={{ flexDirection: compacto ? "column" : "row", gap: 10, marginBottom: 20 }}>
           {[
-            ["⌖", carregandoVisitas || erro ? "—" : visitas.length, "visitas"],
-            ["▥", carregandoVisitas || erro ? "—" : cidades.length, "cidades"],
+            ["lugar", carregandoVisitas || erro ? "—" : visitas.length, "visitas"],
+            ["cidade", carregandoVisitas || erro ? "—" : cidades.length, "cidades"],
           ].map(([icone, n, rotulo]) => (
             <View
               key={rotulo}
@@ -115,7 +120,7 @@ export default function Perfil() {
                 alignItems: "center",
               }}
             >
-              <Text style={{ fontSize: 28, color: cores.verde }}>{icone}</Text>
+              <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: rotulo === "cidades" ? "#F1DDC9" : "#DFE8D8", alignItems: "center", justifyContent: "center" }}><Icone nome={rotulo === "cidades" ? "cidade" : "lugar"} tamanho={25} cor={rotulo === "cidades" ? cores.laranja : cores.verde} /></View>
               <View>
                 <Text style={[visual.section, { fontSize: 22 }]}>{n}</Text>
                 <Text style={visual.meta}>{rotulo}</Text>
@@ -134,21 +139,21 @@ export default function Perfil() {
           }}
         >
           {[
-            ["♙ Nome", nome],
-            ["✉ E-mail", sessao.user.email ?? "Não informado"],
+            ["Nome", nome],
+            ["E-mail", sessao.user.email ?? "Não informado"],
           ].map(([campo, valor]) => (
             <View
               key={campo}
               style={{
-                flexDirection: "row",
+                flexDirection: compacto ? "column" : "row",
                 gap: 12,
                 paddingVertical: 14,
                 borderBottomWidth: campo.includes("Nome") ? 1 : 0,
                 borderColor: cores.borda,
               }}
             >
-              <Text style={visual.meta}>{campo}</Text>
-              <Text style={[visual.meta, { flex: 1, textAlign: "right" }]}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}><Icone nome={campo === "Nome" ? "perfil" : "email"} tamanho={18} cor={cores.suave} /><Text style={visual.meta}>{campo}</Text></View>
+              <Text style={[visual.meta, { flex: 1, minWidth: 0, textAlign: compacto ? "left" : "right" }]}>
                 {valor}
               </Text>
             </View>
@@ -165,32 +170,7 @@ export default function Perfil() {
             marginTop: 12,
           }}
         >
-          {cidades.map((cidade, i) => (
-            <View
-              key={cidade}
-              style={{
-                width: "47%",
-                padding: 14,
-                borderWidth: 1,
-                borderStyle: "dashed",
-                borderColor: i % 2 ? cores.laranja : "#728269",
-                backgroundColor: "#EEE9D9",
-                borderRadius: 8,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 32,
-                  color: i % 2 ? cores.laranja : "#728269",
-                }}
-              >
-                ⌂ ≋
-              </Text>
-              <Text style={{ fontSize: 12, color: cores.tinta, marginTop: 8 }}>
-                {cidade}
-              </Text>
-            </View>
-          ))}
+          {cidades.map((cidade, i) => <CartaoCidade key={cidade} nome={cidade} indice={i} />)}
         </View>
         {!cidades.length && (
           <Text style={visual.subtitle}>
@@ -226,7 +206,7 @@ export default function Perfil() {
         onRequestClose={() => !saindo && setConfirmar(false)}
       >
         <View style={visual.overlay}>
-          <View style={visual.dialog}>
+          <Dialogo>
             <Text style={[visual.section, { textAlign: "center" }]}>
               Sair da conta?
             </Text>
@@ -249,7 +229,7 @@ export default function Perfil() {
                 {saindo ? "Saindo..." : "Sair"}
               </Text>
             </Pressable>
-          </View>
+          </Dialogo>
         </View>
       </Modal>
     </SafeAreaView>

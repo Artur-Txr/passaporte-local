@@ -1,3 +1,4 @@
+import { Dialogo } from "./Design";
 import Icone from "./Icone";
 import { useRef, useState } from "react";
 import {
@@ -18,12 +19,14 @@ type Props = {
   foto: FotoSelecionada | null;
   onChange: (foto: FotoSelecionada | null) => void;
   desabilitado?: boolean;
+  fotoAtual?: boolean;
   onSelecionandoChange?: (valor: boolean) => void;
 };
 export default function SeletorFoto({
   foto,
   onChange,
   desabilitado = false,
+  fotoAtual = false,
   onSelecionandoChange,
 }: Props) {
   const [selecionando, setSelecionando] = useState(false);
@@ -44,7 +47,7 @@ export default function SeletorFoto({
         "Não foi possível selecionar a foto",
         erro instanceof Error
           ? erro.message
-          : "Escolha uma imagem JPEG, PNG ou WebP de até 5 MB.",
+          : "Escolha uma imagem JPEG, PNG ou WebP de até 20 MB.",
       );
     } finally {
       emAndamento.current = false;
@@ -56,7 +59,7 @@ export default function SeletorFoto({
     <View style={{ marginTop: 12 }}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={foto ? "Alterar foto" : "Adicionar foto"}
+        accessibilityLabel={foto || fotoAtual ? "Alterar foto" : "Adicionar foto"}
         disabled={bloqueado}
         onPress={() => setAberto(true)}
         style={{
@@ -64,7 +67,9 @@ export default function SeletorFoto({
           borderStyle: "dashed",
           borderColor: cores.borda,
           borderRadius: 10,
-          minHeight: 95,
+          minHeight: fotoAtual && !foto ? 48 : 95,
+          flexDirection: fotoAtual && !foto ? "row" : "column",
+          gap: fotoAtual && !foto ? 8 : 0,
           backgroundColor: "#F0EDE2",
           overflow: "hidden",
           alignItems: "center",
@@ -79,15 +84,18 @@ export default function SeletorFoto({
           />
         ) : (
           <>
+            {!fotoAtual && <View pointerEvents="none" style={{ position: "absolute", right: -8, bottom: -10, width: 110, height: 85, transform: [{ rotate: "12deg" }], opacity: 0.55, borderWidth: 6, borderColor: "#FCFAF3" }}>
+              <Image source={require("../../assets/prototipo/paisagem.png")} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+            </View>}
             <Icone nome="camera" tamanho={30} />
             <Text
               style={{ color: cores.verde, fontWeight: "600", fontSize: 13 }}
             >
-              {selecionando ? "Selecionando..." : "Adicionar foto"}
+              {selecionando ? "Selecionando..." : fotoAtual ? "Alterar foto" : "Adicionar foto"}
             </Text>
-            <Text style={{ color: cores.suave, fontSize: 11, marginTop: 3 }}>
-              Opcional · até 5 MB
-            </Text>
+            {!fotoAtual && <Text style={{ color: cores.suave, fontSize: 11, marginTop: 3 }}>
+              Opcional · até 20 MB
+            </Text>}
           </>
         )}
       </Pressable>
@@ -114,7 +122,7 @@ export default function SeletorFoto({
         onRequestClose={() => setAberto(false)}
       >
         <View style={visual.overlay}>
-          <View style={visual.dialog}>
+          <Dialogo>
             <Text style={[visual.section, { textAlign: "center" }]}>
               Adicionar uma lembrança
             </Text>
@@ -139,7 +147,7 @@ export default function SeletorFoto({
             >
               <Text style={visual.link}>Cancelar</Text>
             </Pressable>
-          </View>
+          </Dialogo>
         </View>
       </Modal>
     </View>

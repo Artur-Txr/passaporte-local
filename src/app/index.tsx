@@ -1,8 +1,8 @@
 import { Redirect, router } from "expo-router";
-import { Image, Pressable, ScrollView, Text } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAutenticacao } from "../contextos/AutenticacaoContext";
-import { Logo, cores, visual } from "../componentes/Design";
+import { cores, visual } from "../componentes/Design";
 export default function Welcome() {
   const { sessao, carregando, erro, recuperandoSenha } = useAutenticacao();
   if (!carregando && sessao && recuperandoSenha)
@@ -13,21 +13,21 @@ export default function Welcome() {
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
-          padding: 20,
+          paddingTop: 8,
+          paddingBottom: 24,
           alignItems: "center",
-          justifyContent: "center",
         }}
       >
-        <Logo />
+        <View style={{ width: "100%", maxWidth: 440, alignItems: "center" }}>
         <Image
-          source={require("../../assets/prototipo/abertura.png")}
-          style={{ width: "100%", height: 345, marginTop: 8 }}
+          source={require("../../assets/prototipo/abertura-completa.png")}
+          style={{ width: "100%", aspectRatio: 358 / 469 }}
           resizeMode="contain"
         />
         <Text
           style={[
             visual.title,
-            { textAlign: "center", fontSize: 29, marginTop: 12 },
+            { textAlign: "center", fontSize: 29, marginTop: 8, paddingHorizontal: 12 },
           ]}
         >
           Suas descobertas,{"\n"}sempre com você
@@ -44,7 +44,7 @@ export default function Welcome() {
           accessibilityRole="button"
           disabled={carregando}
           onPress={() => router.push("/cadastro")}
-          style={[visual.button, { width: "100%", marginTop: 20 }]}
+          style={[visual.button, { alignSelf: "stretch", marginHorizontal: 16, marginTop: 20, borderRadius: 18 }]}
         >
           <Text style={visual.buttonText}>
             {carregando ? "Carregando..." : "Começar"}
@@ -62,6 +62,7 @@ export default function Welcome() {
           </Text>
         </Pressable>
         {!!erro && <Text style={visual.subtitle}>{erro}</Text>}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

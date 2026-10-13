@@ -86,3 +86,13 @@ Roteiro de demonstração e testes manuais: [ROTEIRO_TESTES.md](ROTEIRO_TESTES.m
 A interface segue as telas do PDF Passaporte Local: apresentação com colagem, logo e paisagem nos formulários de conta, início com resumo e últimos carimbos, listagem separada com filtros, formulário com foto no topo, detalhes e confirmação de exclusão, perfil com cidades e navegação inferior. Os elementos decorativos foram extraídos das referências fornecidas; as visitas, contagens e fotos são dados reais da conta. Uma visita sem foto usa um marcador visual.
 
 No navegador, a interface fica em uma moldura de até 430 px para facilitar a avaliação como aplicativo mobile. O Android ocupa a tela disponível. A recuperação de senha mantém o fluxo de link por e-mail. A captura por câmera depende do dispositivo/emulador.
+
+## Exemplos para apresentação
+
+Na versão de desenvolvimento, a tela Visitas oferece Adicionar exemplos do Brasil. Importa Lençóis Maranhenses, Praia do Sancho e Cataratas do Iguaçu com fotos reais, títulos DEMONSTRAÇÃO, data fictícia e sem avaliação pessoal. As fotos usam o armazenamento privado da conta. Créditos e licenças: [assets/demonstracao/CREDITOS.md](assets/demonstracao/CREDITOS.md). O botão ignora exemplos já cadastrados com o mesmo título.
+
+
+Fotos: limite atual de 20 MB por imagem (JPEG, PNG ou WebP), validado na seleção e no upload. Em 13/10/2026, o bucket privado fotos-visitas foi configurado para file_size_limit=20971520. Em outra instalação, ajuste esse limite nas configurações do bucket; a migração histórica 006 registra o limite original de 5 MB.
+
+
+Carimbos: o aplicativo mantém o estilo do protótipo, com VISITADO em arco, paisagem central, bordas duplas e a data da visita abreviada. Os selos postais por estado não foram aplicados.

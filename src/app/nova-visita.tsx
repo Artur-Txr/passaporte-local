@@ -1,3 +1,6 @@
+import { formatarEntradaData } from "../lib/formatacaoData";
+import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
+import CampoTexto from "../componentes/CampoTexto";
 import { Cabecalho, Decoracao, Filtro } from "../componentes/Design";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
@@ -23,6 +26,7 @@ import type { FotoSelecionada } from "../servicos/selecaoFotoService";
 import { categorias, estados, dataValida } from "../lib/validacaoVisita";
 
 export default function NovaVisita() {
+  const { compacto } = useLayoutResponsivo();
   const { adicionarVisita } = useVisitas();
   const { sessao } = useAutenticacao();
 
@@ -163,11 +167,12 @@ export default function NovaVisita() {
       <Decoracao paisagem={false} />
       <KeyboardAvoidingView
         style={styles.keyboard}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           <Cabecalho voltar />
 
@@ -184,7 +189,7 @@ export default function NovaVisita() {
 
           <Text style={styles.fieldLabel}>Lugar *</Text>
 
-          <TextInput
+          <CampoTexto icone="lugar"
             style={styles.input}
             placeholder="Ex.: Pelourinho"
             placeholderTextColor="#7C827A"
@@ -195,11 +200,11 @@ export default function NovaVisita() {
             editable={!bloqueado}
           />
 
-          <View style={{ flexDirection: "row", gap: 12 }}>
+          <View style={{ flexDirection: compacto ? "column" : "row", gap: 12 }}>
             <View style={{ flex: 1 }}>
               <Text style={styles.fieldLabel}>Cidade *</Text>
 
-              <TextInput
+              <CampoTexto icone="cidade"
                 style={styles.input}
                 placeholder="Ex.: Salvador"
                 placeholderTextColor="#7C827A"
@@ -210,7 +215,7 @@ export default function NovaVisita() {
                 editable={!bloqueado}
               />
             </View>
-            <View style={{ width: 85 }}>
+            <View style={{ width: compacto ? "100%" : 85 }}>
               <Text style={styles.fieldLabel}>UF *</Text>
               <Filtro
                 valor={uf}
@@ -235,20 +240,20 @@ export default function NovaVisita() {
 
           <Text style={styles.fieldLabel}>Data da visita *</Text>
 
-          <TextInput
+          <CampoTexto icone="calendario"
             style={styles.input}
             placeholder="DD/MM/AAAA"
             placeholderTextColor="#7C827A"
             value={data}
-            onChangeText={setData}
+            onChangeText={(texto) => setData(formatarEntradaData(texto))}
             maxLength={10}
             autoCorrect={false}
-            keyboardType="numbers-and-punctuation"
+            keyboardType="number-pad"
             editable={!bloqueado}
           />
 
           <Text style={styles.hint}>
-            Digite também as barras. Ex.: 04/10/2026.
+            Digite dia, mês e ano. As barras são preenchidas automaticamente.
           </Text>
 
           <Text style={styles.fieldLabel}>Sua avaliação (opcional)</Text>
@@ -261,7 +266,7 @@ export default function NovaVisita() {
 
           <Text style={styles.fieldLabel}>Comentário (opcional)</Text>
 
-          <TextInput
+          <CampoTexto icone="editar"
             style={[styles.input, styles.commentInput]}
             placeholder="O que marcou esse passeio?"
             placeholderTextColor="#7C827A"
@@ -316,7 +321,7 @@ const styles = StyleSheet.create({
   keyboard: {
     flex: 1,
   },
-  content: {
+  content: { width: "100%", maxWidth: 600, alignSelf: "center",
     padding: 20,
     paddingBottom: 24,
   },

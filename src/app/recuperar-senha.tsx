@@ -147,11 +147,12 @@ export default function RecuperarSenha() {
       <Decoracao paisagem={true} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           <Pressable
             onPress={sairDaTela}
@@ -307,7 +308,7 @@ export default function RecuperarSenha() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F8F5EC" },
-  content: { flexGrow: 1, padding: 20, paddingBottom: 40 },
+  content: { width: "100%", maxWidth: 600, alignSelf: "center", flexGrow: 1, padding: 20, paddingBottom: 40 },
   back: { alignSelf: "flex-start", paddingVertical: 11, marginBottom: 20 },
   link: { color: "#183F35", fontSize: 14, fontWeight: "600" },
   label: {

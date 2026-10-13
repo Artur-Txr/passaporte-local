@@ -103,8 +103,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8F5EC",
   },
-  content: {
-    paddingHorizontal: 28,
+  content: { width: "100%", maxWidth: 600, alignSelf: "center",
+    paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 40,
   },
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   stampCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
-    padding: 24,
+    padding: 16,
     marginBottom: 20,
     alignItems: "center",
   },

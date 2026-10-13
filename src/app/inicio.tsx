@@ -1,3 +1,4 @@
+import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import Icone from "../componentes/Icone";
 import { router } from "expo-router";
 import {
@@ -20,6 +21,7 @@ import {
   visual,
 } from "../componentes/Design";
 export default function Inicio() {
+  const { compacto } = useLayoutResponsivo();
   const { sessao } = useAutenticacao();
   const { visitas, carregando, erro, recarregarVisitas } = useVisitas();
   const nome =
@@ -76,11 +78,11 @@ export default function Inicio() {
           style={{
             backgroundColor: cores.verde,
             borderRadius: 12,
-            padding: 20,
+            padding: compacto ? 12 : 20,
             marginTop: 16,
             flexDirection: "row",
             alignItems: "center",
-            gap: 20,
+            gap: compacto ? 8 : 20,
             overflow: "hidden",
           }}
         >
@@ -108,7 +110,7 @@ export default function Inicio() {
             >
               PASSAPORTE LOCAL
             </Text>
-            <View style={{ flexDirection: "row", gap: 28 }}>
+            <View style={{ flexDirection: "row", gap: compacto ? 12 : 28 }}>
               <View>
                 <Text
                   style={{ color: "#FFF", fontSize: 28, fontWeight: "700" }}
@@ -121,7 +123,7 @@ export default function Inicio() {
                 style={{
                   borderLeftWidth: 1,
                   borderColor: "#688373",
-                  paddingLeft: 28,
+                  paddingLeft: compacto ? 12 : 28,
                 }}
               >
                 <Text
@@ -133,7 +135,7 @@ export default function Inicio() {
               </View>
             </View>
           </View>
-          <Icone nome="mundo" tamanho={40} cor="#A7B29A" />
+          {!compacto && <Image source={require("../../assets/prototipo/carimbo-brasil.png")} style={{ width: 62, height: 68 }} resizeMode="contain" />}
         </Pressable>
         <View
           style={{

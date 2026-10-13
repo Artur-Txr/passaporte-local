@@ -1,3 +1,6 @@
+import { formatarEntradaData } from "../lib/formatacaoData";
+import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
+import CampoTexto from "../componentes/CampoTexto";
 import { Cabecalho, Decoracao, Filtro } from "../componentes/Design";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
@@ -24,6 +27,7 @@ import type { FotoSelecionada } from "../servicos/selecaoFotoService";
 import { categorias, estados, dataValida } from "../lib/validacaoVisita";
 
 export default function EditarVisita() {
+  const { compacto } = useLayoutResponsivo();
   const { visitas, editarVisita } = useVisitas();
   const { sessao } = useAutenticacao();
 
@@ -193,13 +197,14 @@ export default function EditarVisita() {
       <Decoracao paisagem={false} />
       <KeyboardAvoidingView
         style={styles.keyboard}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
-          <Cabecalho voltar />
+          <Cabecalho voltar titulo="Editar visita" />
 
           {!visita ? (
             <>
@@ -210,7 +215,7 @@ export default function EditarVisita() {
             </>
           ) : (
             <>
-              <Text style={styles.title}>Editar visita</Text>
+
               <Text style={styles.description}>
                 Ajuste os dados e atualize sua lembrança.
               </Text>
@@ -219,7 +224,7 @@ export default function EditarVisita() {
 
               {caminhoAtual && !foto && !removerFotoAtual ? (
                 <View style={styles.currentPhoto}>
-                  <FotoVisita key={caminhoAtual} caminho={caminhoAtual} />
+                  <FotoVisita key={caminhoAtual} caminho={caminhoAtual} compacto />
 
                   <Pressable
                     disabled={bloqueado}
@@ -252,6 +257,7 @@ export default function EditarVisita() {
               )}
 
               <SeletorFoto
+                fotoAtual={!!caminhoAtual && !removerFotoAtual}
                 foto={foto}
                 onChange={alterarFoto}
                 desabilitado={salvando}
@@ -259,7 +265,7 @@ export default function EditarVisita() {
               />
 
               <Text style={styles.fieldLabel}>Lugar *</Text>
-              <TextInput
+              <CampoTexto icone="lugar"
                 style={styles.input}
                 value={lugar}
                 onChangeText={setLugar}
@@ -268,10 +274,10 @@ export default function EditarVisita() {
                 editable={!bloqueado}
               />
 
-              <View style={{ flexDirection: "row", gap: 12 }}>
+              <View style={{ flexDirection: compacto ? "column" : "row", gap: 12 }}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.fieldLabel}>Cidade *</Text>
-                  <TextInput
+                  <CampoTexto icone="cidade"
                     style={styles.input}
                     value={cidade}
                     onChangeText={setCidade}
@@ -280,7 +286,7 @@ export default function EditarVisita() {
                     editable={!bloqueado}
                   />
                 </View>
-                <View style={{ width: 85 }}>
+                <View style={{ width: compacto ? "100%" : 85 }}>
                   <Text style={styles.fieldLabel}>UF *</Text>
                   <Filtro
                     valor={uf}
@@ -304,15 +310,15 @@ export default function EditarVisita() {
               />
 
               <Text style={styles.fieldLabel}>Data da visita *</Text>
-              <TextInput
+              <CampoTexto icone="calendario"
                 style={styles.input}
                 placeholder="DD/MM/AAAA"
                 placeholderTextColor="#7C827A"
                 value={data}
-                onChangeText={setData}
+                onChangeText={(texto) => setData(formatarEntradaData(texto))}
                 maxLength={10}
                 autoCorrect={false}
-                keyboardType="numbers-and-punctuation"
+                keyboardType="number-pad"
                 editable={!bloqueado}
               />
 
@@ -324,7 +330,7 @@ export default function EditarVisita() {
               />
 
               <Text style={styles.fieldLabel}>Comentário (opcional)</Text>
-              <TextInput
+              <CampoTexto icone="editar"
                 style={[styles.input, styles.commentInput]}
                 value={comentario}
                 onChangeText={setComentario}
@@ -389,7 +395,7 @@ const styles = StyleSheet.create({
   keyboard: {
     flex: 1,
   },
-  content: {
+  content: { width: "100%", maxWidth: 600, alignSelf: "center",
     padding: 20,
     paddingBottom: 24,
   },

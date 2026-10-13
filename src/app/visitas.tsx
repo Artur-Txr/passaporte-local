@@ -1,4 +1,7 @@
+import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
+import Icone from '../componentes/Icone';
 import { useState } from "react";
+import ImportarExemplos from '../componentes/ImportarExemplos';
 import { router } from "expo-router";
 import {
   ActivityIndicator,
@@ -26,6 +29,7 @@ const normalizar = (s: string) =>
     .toLowerCase()
     .trim();
 export default function Visitas() {
+  const { compacto } = useLayoutResponsivo();
   const { visitas, carregando, erro, recarregarVisitas } = useVisitas();
   const [busca, setBusca] = useState("");
   const [cidade, setCidade] = useState("");
@@ -54,28 +58,30 @@ export default function Visitas() {
         keyExtractor={(v) => v.id}
         contentContainerStyle={visual.content}
         keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <>
             <Cabecalho />
             <Text style={visual.title}>Minhas visitas</Text>
+            <View style={{ marginTop: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: cores.borda, borderRadius: 9, paddingLeft: 10, backgroundColor: '#F4F1E8' }}>
+            <Icone nome="busca" tamanho={20} cor={cores.suave} />
             <TextInput
               accessibilityLabel="Buscar lugar"
-              placeholder="⌕  Buscar lugar"
+              placeholder="Buscar lugar"
               value={busca}
               onChangeText={setBusca}
               style={{
-                marginTop: 16,
-                borderWidth: 1,
-                borderColor: cores.borda,
-                borderRadius: 9,
+                flex: 1,
+                minWidth: 0,
                 padding: 12,
                 color: cores.tinta,
                 backgroundColor: "#F4F1E8",
               }}
             />
+            </View>
             <View
               style={{
-                flexDirection: "row",
+                flexDirection: compacto ? "column" : "row",
                 gap: 8,
                 marginTop: 8,
                 marginBottom: 7,
@@ -129,6 +135,7 @@ export default function Visitas() {
           )
         }
         ListFooterComponent={
+          <>
           <Pressable
             accessibilityRole="button"
             disabled={carregando || !!erro}
@@ -137,6 +144,8 @@ export default function Visitas() {
           >
             <Text style={visual.buttonText}>＋ Nova visita</Text>
           </Pressable>
+          {__DEV__ && <ImportarExemplos />}
+          </>
         }
       />
       <NavegacaoInferior ativa="visitas" />

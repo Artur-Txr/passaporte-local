@@ -1,9 +1,9 @@
 import { File } from 'expo-file-system';
+import { conferirTamanhoFoto } from '../lib/limitesFoto';
 import * as ImagePicker from 'expo-image-picker';
 import { Platform } from 'react-native';
 import type { TipoImagem } from './fotosService';
 
-const LIMITE_BYTES = 5 * 1024 * 1024;
 
 export type FotoSelecionada = {
   uri: string;
@@ -12,9 +12,7 @@ export type FotoSelecionada = {
 };
 
 function conferirTamanho(tamanho: number) {
-  if (tamanho > LIMITE_BYTES) {
-    throw new Error('Escolha uma imagem de até 5 MB.');
-  }
+  conferirTamanhoFoto(tamanho);
 }
 
 function identificarTipo(conteudo: ArrayBuffer): TipoImagem {

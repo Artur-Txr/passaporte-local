@@ -1,3 +1,6 @@
+import type { ReactNode } from "react";
+import useLayoutResponsivo from "./useLayoutResponsivo";
+import { formatarDataVisita } from "../lib/formatacaoData";
 import Icone from "./Icone";
 import { useEffect, useState } from "react";
 import {
@@ -23,11 +26,13 @@ export const cores = {
   suave: "#5B635C",
 };
 export function Logo({ pequeno = false }: { pequeno?: boolean }) {
+  const { compacto } = useLayoutResponsivo();
+  const reduzido = pequeno || compacto;
   return (
     <Image
-      source={require("../../assets/prototipo/logo.png")}
+      source={require("../../assets/prototipo/logo-fiel.png")}
       accessibilityLabel="Passaporte Local"
-      style={{ width: pequeno ? 112 : 160, height: pequeno ? 43 : 61 }}
+      style={{ width: reduzido ? 126 : 180, height: reduzido ? 47 : 66, flexShrink: 0 }}
       resizeMode="contain"
     />
   );
@@ -65,12 +70,14 @@ export function Decoracao({ paisagem = false }: { paisagem?: boolean }) {
 export function Cabecalho({
   titulo,
   voltar = false,
+  alinharInicio = false,
 }: {
   titulo?: string;
   voltar?: boolean;
+  alinharInicio?: boolean;
 }) {
   return (
-    <View style={visual.header}>
+    <View style={[visual.header, alinharInicio && { justifyContent: "flex-start" }]}>
       {voltar && (
         <Pressable
           accessibilityRole="button"
@@ -78,9 +85,9 @@ export function Cabecalho({
           onPress={() =>
             router.canGoBack() ? router.back() : router.replace("/inicio")
           }
-          style={{ padding: 8 }}
+          style={{ padding: 8, ...(!titulo ? { position: "absolute", left: 0, zIndex: 1 } as const : {}) }}
         >
-          <Text style={{ fontSize: 30, color: cores.verde }}>‹</Text>
+          <Icone nome="voltar" tamanho={28} />
         </Pressable>
       )}
       {titulo && (
@@ -146,7 +153,7 @@ export function NavegacaoInferior({
     </View>
   );
 }
-export function MiniFoto({ visita }: { visita: Visita }) {
+export function MiniFoto({ visita, compacto = false }: { visita: Visita; compacto?: boolean }) {
   const { sessao } = useAutenticacao();
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
@@ -165,13 +172,14 @@ export function MiniFoto({ visita }: { visita: Visita }) {
   return url ? (
     <Image
       source={{ uri: url }}
-      style={visual.thumb}
+      style={[visual.thumb, compacto && { width: 80, height: 68 }]}
       onError={() => setUrl(null)}
     />
   ) : (
     <View
       style={[
         visual.thumb,
+        compacto && { width: 80, height: 68 },
         {
           backgroundColor: "#E6E7D9",
           alignItems: "center",
@@ -191,6 +199,7 @@ export function BilheteVisita({
   visita: Visita;
   compacto?: boolean;
 }) {
+  const { compacto: telaCompacta } = useLayoutResponsivo();
   return (
     <Pressable
       accessibilityRole="button"
@@ -198,23 +207,22 @@ export function BilheteVisita({
       onPress={() =>
         router.push({ pathname: "/detalhes", params: { id: visita.id } })
       }
-      style={[visual.ticket, compacto && { minHeight: 82 }]}
+      style={[visual.ticket, compacto && { minHeight: 76, padding: 6 }]}
     >
-      <MiniFoto visita={visita} />
-      <View style={{ flex: 1, gap: 5 }}>
+      <Image source={require("../../assets/prototipo/papel.png")} style={[StyleSheet.absoluteFill, { width: "100%", height: "100%", opacity: 0.25 }]} resizeMode="cover" />
+      <MiniFoto visita={visita} compacto={compacto || telaCompacta} />
+      <View style={{ flex: 1, minWidth: 0, gap: 5 }}>
         <Text
-          numberOfLines={1}
+          numberOfLines={2}
           style={{ fontSize: 15, fontWeight: "700", color: cores.tinta }}
         >
           {visita.lugar}
         </Text>
-        <Text style={visual.meta}>
-          ⌖ {visita.cidade}, {visita.uf}
-        </Text>
-        <Text style={visual.meta}>▢ {visita.data}</Text>
-        {!compacto && <Text style={visual.meta}>♧ {visita.categoria}</Text>}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Icone nome="lugar" tamanho={14} cor={cores.suave} /><Text style={[visual.meta, { flex: 1 }]}>{visita.cidade}, {visita.uf}</Text></View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Icone nome="calendario" tamanho={14} cor={cores.suave} /><Text style={[visual.meta, { flexShrink: 1 }]}>{formatarDataVisita(visita.data)}</Text></View>
+        {!compacto && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Icone nome={visita.categoria === 'Parque' ? 'natureza' : visita.categoria === 'Museu' ? 'museu' : visita.categoria === 'Cafeteria' ? 'cafe' : 'lugar'} tamanho={14} cor={cores.suave} /><Text style={visual.meta}>{visita.categoria}</Text></View>}
       </View>
-      <Text style={{ fontSize: 27, color: cores.suave }}>›</Text>
+      <Icone nome="proximo" tamanho={24} cor={cores.suave} />
     </Pressable>
   );
 }
@@ -241,7 +249,7 @@ export function Filtro({
         >
           {opcoes.find((o) => o.id === valor)?.nome}
         </Text>
-        <Text style={{ color: cores.verde }}>⌄</Text>
+        <Icone nome="expandir" tamanho={18} />
       </Pressable>
       <Modal
         transparent
@@ -250,7 +258,7 @@ export function Filtro({
         onRequestClose={() => setAberto(false)}
       >
         <Pressable onPress={() => setAberto(false)} style={visual.overlay}>
-          <View style={visual.dialog}>
+          <Dialogo>
             <Text style={visual.section}>Selecione uma opção</Text>
             <ScrollView style={{ maxHeight: 320 }}>
               {opcoes.map((o) => (
@@ -275,7 +283,7 @@ export function Filtro({
                 </Pressable>
               ))}
             </ScrollView>
-          </View>
+          </Dialogo>
         </Pressable>
       </Modal>
     </>
@@ -283,7 +291,7 @@ export function Filtro({
 }
 export const visual = StyleSheet.create({
   screen: { flex: 1, backgroundColor: cores.papel },
-  content: { padding: 20, paddingBottom: 24 },
+  content: { width: "100%", maxWidth: 600, alignSelf: "center", padding: 16, paddingBottom: 24 },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -310,6 +318,7 @@ export const visual = StyleSheet.create({
   buttonText: { color: "#FFF", fontSize: 15, fontWeight: "600" },
   link: { color: cores.laranja, fontSize: 12, textDecorationLine: "underline" },
   nav: {
+    width: "100%", maxWidth: 600, alignSelf: "center",
     flexDirection: "row",
     borderTopWidth: 1,
     borderTopColor: cores.borda,
@@ -329,6 +338,7 @@ export const visual = StyleSheet.create({
     borderRadius: 11,
     backgroundColor: "#FCFAF3",
     minHeight: 104,
+    overflow: "hidden",
   },
   thumb: { width: 91, height: 85, borderRadius: 6 },
   meta: { fontSize: 12, color: cores.suave },
@@ -353,8 +363,13 @@ export const visual = StyleSheet.create({
   dialog: {
     width: "100%",
     maxWidth: 360,
+    maxHeight: "85%",
     padding: 22,
     backgroundColor: cores.papel,
     borderRadius: 18,
   },
 });
+
+export function Dialogo({ children }: { children: ReactNode }) {
+  return <ScrollView style={[visual.dialog, { flexGrow: 0, padding: 0 }]} contentContainerStyle={{ padding: 22 }} keyboardShouldPersistTaps="handled">{children}</ScrollView>;
+}

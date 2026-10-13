@@ -1,3 +1,5 @@
+import Icone from "../componentes/Icone";
+import CampoTexto from "../componentes/CampoTexto";
 import { Cabecalho, Decoracao } from "../componentes/Design";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
@@ -87,13 +89,14 @@ export default function Login() {
       <Decoracao paisagem={true} />
       <KeyboardAvoidingView
         style={styles.keyboard}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
-          <Cabecalho voltar />
+          <Cabecalho />
 
           <Text style={styles.title}>Que bom ter{"\n"}você aqui</Text>
 
@@ -101,7 +104,7 @@ export default function Login() {
 
           <Text style={styles.fieldLabel}>E-mail</Text>
 
-          <TextInput
+          <CampoTexto icone="email"
             style={styles.input}
             placeholder="seuemail@exemplo.com"
             placeholderTextColor="#7C827A"
@@ -117,7 +120,7 @@ export default function Login() {
           <Text style={styles.fieldLabel}>Senha</Text>
 
           <View style={{ position: "relative" }}>
-            <TextInput
+            <CampoTexto icone="senha"
               style={[styles.input, { paddingRight: 48 }]}
               placeholder="Digite sua senha"
               placeholderTextColor="#7C827A"
@@ -137,7 +140,7 @@ export default function Login() {
               onPress={() => setMostrarSenha((v) => !v)}
               style={{ position: "absolute", right: 8, top: 4, padding: 8 }}
             >
-              <Text style={{ fontSize: 20, color: "#53645B" }}>◎</Text>
+              <Icone nome={mostrarSenha ? "olhoFechado" : "olho"} tamanho={20} cor="#53645B" />
             </Pressable>
           </View>
 
@@ -214,7 +217,7 @@ const styles = StyleSheet.create({
   keyboard: {
     flex: 1,
   },
-  content: {
+  content: { width: "100%", maxWidth: 600, alignSelf: "center",
     flexGrow: 1,
     padding: 20,
     paddingBottom: 165,
@@ -268,7 +271,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#183F35",
-    borderRadius: 9,
+    borderRadius: 18,
     padding: 13,
     alignItems: "center",
     marginTop: 12,
@@ -287,7 +290,7 @@ const styles = StyleSheet.create({
   signupButton: {
     borderWidth: 1,
     borderColor: "#183F35",
-    borderRadius: 9,
+    borderRadius: 18,
     padding: 13,
     alignItems: "center",
     marginTop: 12,

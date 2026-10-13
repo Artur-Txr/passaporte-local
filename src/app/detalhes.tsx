@@ -1,3 +1,6 @@
+import { Dialogo } from "../componentes/Design";
+import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
+import { formatarDataVisita } from "../lib/formatacaoData";
 import Icone from "../componentes/Icone";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
@@ -9,6 +12,7 @@ import AvaliacaoEstrelas from "../componentes/AvaliacaoEstrelas";
 import CarimboVisita from "../componentes/CarimboVisita";
 import { Cabecalho, Decoracao, cores, visual } from "../componentes/Design";
 export default function Detalhes() {
+  const { compacto } = useLayoutResponsivo();
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const { visitas, excluirVisita } = useVisitas();
   const visita = visitas.find((v) => v.id === (Array.isArray(id) ? id[0] : id));
@@ -49,8 +53,8 @@ export default function Detalhes() {
             </Text>
             <View
               style={{
-                flexDirection: "row",
-                alignItems: "center",
+                flexDirection: compacto ? "column" : "row",
+                alignItems: compacto ? "stretch" : "center",
                 marginTop: 14,
               }}
             >
@@ -63,13 +67,9 @@ export default function Detalhes() {
                     padding: 8,
                   }}
                 >
-                  <Text style={{ color: cores.verde, fontSize: 12 }}>
-                    ♧ {visita.categoria}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><Icone nome={visita.categoria === 'Parque' ? 'natureza' : visita.categoria === 'Museu' ? 'museu' : visita.categoria === 'Cafeteria' ? 'cafe' : 'lugar'} tamanho={16} /><Text style={{ color: cores.verde, fontSize: 12 }}>{visita.categoria}</Text></View>
                 </View>
-                <Text style={[visual.meta, { marginTop: 14 }]}>
-                  ▢ {visita.data}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 14 }}><Icone nome="calendario" tamanho={17} /><Text style={visual.meta}>{formatarDataVisita(visita.data, true)}</Text></View>
                 <Text style={[visual.meta, { marginTop: 22 }]}>
                   Minha avaliação
                 </Text>
@@ -96,7 +96,7 @@ export default function Detalhes() {
                 marginTop: 18,
               }}
             >
-              <Text style={visual.section}>♧ Minha lembrança</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}><Icone nome="editar" tamanho={20} /><Text style={visual.section}>Minha lembrança</Text></View>
               <Text style={[visual.subtitle, { marginTop: 8 }]}>
                 {visita.comentario.trim() ||
                   "Nenhuma lembrança escrita para esta visita."}
@@ -145,7 +145,7 @@ export default function Detalhes() {
         onRequestClose={() => !excluindo && setConfirmar(false)}
       >
         <View style={visual.overlay}>
-          <View style={visual.dialog}>
+          <Dialogo>
             <View
               style={{
                 alignSelf: "center",
@@ -160,7 +160,7 @@ export default function Detalhes() {
             <Text
               style={[visual.section, { textAlign: "center", fontSize: 20 }]}
             >
-              Excluir visita?
+              Excluir esta visita?
             </Text>
             <Text style={[visual.subtitle, { textAlign: "center" }]}>
               A visita e a foto serão removidas do seu passaporte.
@@ -195,7 +195,7 @@ export default function Detalhes() {
                 {excluindo ? "Excluindo..." : "Excluir visita"}
               </Text>
             </Pressable>
-          </View>
+          </Dialogo>
         </View>
       </Modal>
     </SafeAreaView>
