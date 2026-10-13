@@ -2,13 +2,13 @@
 
 Aplicativo React Native para registrar passeios, consultar lembranças e montar um passaporte de visitas. Projeto de Artur Teixeira para Desenvolvimento Mobile, UniRios, professor Edemilton Alcides.
 
-## Estado em 09/10/2026
+## Estado em 13/10/2026
 
 Implementados no código: cadastro, login, persistência de sessão, saída, criação/listagem/detalhes/edição/exclusão de visitas, avaliação de 1 a 5, fotos opcionais, passaporte, perfil, busca por lugar/cidade e filtros combinados por categoria e cidade. Sessão válida abre diretamente a coleção.
 
-Verificados: instalação das dependências com npm ci, verificação TypeScript, resposta do serviço Supabase Auth e abertura do app no Expo Go do BlueStacks. A existência do código não substitui os testes de cada fluxo.
+Verificados em 09/10/2026: instalação das dependências com npm ci, verificação TypeScript, 8 testes locais e exportação Android. No Expo Go do BlueStacks, login manual, criação de visita com foto da galeria, edição da avaliação para 4 estrelas e manutenção da sessão, foto e avaliação após reabrir o aplicativo foram confirmados. O total passou de 3 para 4 visitas. A existência do código não substitui os testes de cada fluxo.
 
-Recuperação de senha implementada via link copiado do e-mail para o aplicativo. Pendente: teste real de envio e troca de senha, teste completo com uma conta, isolamento entre contas, fotos/câmera e evidências de persistência após reabertura. Não considerar essas etapas concluídas antes de validar.
+Recuperação de senha implementada via link copiado do e-mail para o aplicativo. Pendentes: envio e troca real de senha, isolamento entre contas, filtros no Android, cancelamento e confirmação da exclusão, câmera, troca de foto e falha de conexão. Em 13/10/2026, a retomada no emulador encontrou falha ao baixar o aplicativo do servidor Expo; esses testes não foram concluídos nessa sessão.
 
 ## Tecnologias
 
@@ -45,9 +45,9 @@ O planejamento chama a avaliação de nota; a implementação usa o campo avalia
 - [ ] Criar conta e entrar; validar campos vazios e credenciais inválidas.
 - [ ] Criar visita; conferir data inexistente/futura e campos obrigatórios.
 - [ ] Consultar detalhes; combinar busca, cidade e categoria; limpar filtros.
-- [ ] Editar e retornar aos detalhes com os valores atualizados.
+- [x] Editar avaliação e retornar aos detalhes com o valor atualizado (BlueStacks, 09/10/2026).
 - [ ] Excluir somente após confirmação; conferir atualização da coleção.
-- [ ] Fechar/reabrir e demonstrar sessão e visitas persistentes.
+- [x] Fechar/reabrir o aplicativo e demonstrar sessão, foto e avaliação persistentes (09/10/2026). Reinício completo do dispositivo pendente.
 - [ ] Confirmar que uma segunda conta não acessa visitas/fotos da primeira.
 - [ ] Testar foto da galeria, câmera, permissão negada e falha de conexão.
 - [x] Implementar recuperação de senha e testar validações locais.
