@@ -1,23 +1,18 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
-import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
+import TelaCarregamento from "../componentes/TelaCarregamento";
 import {
   AutenticacaoProvider,
   useAutenticacao,
 } from "../contextos/AutenticacaoContext";
 import { VisitasProvider } from "../contextos/VisitasContext";
 
-function Navegacao() {
+function Navegacao({ fontesProntas }: { fontesProntas: boolean }) {
   const { sessao, carregando, erro } = useAutenticacao();
 
-  if (carregando) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#183F35" />
-      </View>
-    );
-  }
+  if (carregando || !fontesProntas) return <TelaCarregamento />;
 
   const conectado = sessao !== null && erro === null;
 
@@ -48,19 +43,13 @@ export default function Layout() {
   const [fontes, erroFontes] = useFonts({
     Simbolos: require("@expo-google-fonts/material-symbols/400Regular/MaterialSymbols_400Regular.ttf"),
   });
-  if (!fontes && !erroFontes)
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator color="#123E34" />
-      </View>
-    );
   return (
     <AutenticacaoProvider>
       <VisitasProvider>
         <View style={styles.workspace}>
           <View style={styles.appFrame}>
             <StatusBar style="dark" />
-            <Navegacao />
+            <Navegacao fontesProntas={fontes || !!erroFontes} />
           </View>
         </View>
       </VisitasProvider>

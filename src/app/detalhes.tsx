@@ -46,7 +46,7 @@ export default function Detalhes() {
   return (
     <SafeAreaView style={visual.screen}>
       <Decoracao />
-      <ScrollView contentContainerStyle={visual.content}>
+      <ScrollView contentContainerStyle={[visual.content, { paddingBottom: 40 }]}>
         <Cabecalho titulo="Detalhes da visita" voltar />
         {visita ? (
           <>
@@ -78,7 +78,7 @@ export default function Detalhes() {
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 14 }}><Icone nome="calendario" tamanho={17} /><Text style={[visual.meta, { flexShrink: 1 }]}>{formatarDataVisita(visita.data, true)}</Text></View>
                 {texto.dataAproximada && <Text style={[visual.meta, { marginTop: 6, color: cores.laranja }]}>Data aproximada</Text>}
-                <Text style={[visual.meta, { marginTop: 22 }]}>
+                <Text style={[visual.meta, { marginTop: 14 }]}>
                   Minha avaliação
                 </Text>
                 <AvaliacaoEstrelas valor={visita.avaliacao ?? null} />
