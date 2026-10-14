@@ -224,10 +224,12 @@ const styles = StyleSheet.create({
   keyboard: {
     flex: 1,
   },
-  content: { width: "100%", maxWidth: 600, alignSelf: "center",
+  content: { width: "100%", maxWidth: 460, alignSelf: "center",
     flexGrow: 1,
     padding: 20,
-    paddingBottom: 165,
+    paddingBottom: 176,
+    paddingTop: 24,
+    justifyContent: "center",
   },
   backButton: {
     alignSelf: "flex-start",

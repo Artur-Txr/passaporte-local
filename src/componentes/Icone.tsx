@@ -21,6 +21,7 @@ const glifos = {
   olhoFechado: "\ue8f5",
   expandir: "\ue5cf",
   proximo: "\ue5cc",
+  atualizar: "\ue5d5",
 };
 export default function Icone({
   nome,

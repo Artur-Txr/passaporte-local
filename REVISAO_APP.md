@@ -52,3 +52,12 @@ Ordem sugerida: inicialização da edição e estados de consulta; proteção co
 Continuam como validações físicas: confirmação de descarte no Android, múltiplas telas/fonte ampliada, falha e retorno de rede, upload real perto de 20 MB e isolamento com duas contas autenticadas. Não foram criadas contas nem alteradas senhas para simular esses testes. SMTP e recuperação por e-mail permanecem adiados pelo usuário.
 
 Exportação Android com bytecode Hermes também passou. A primeira tentativa foi bloqueada na pasta temporária do sandbox; repetida com TEMP/TMP em work/build-temp, concluiu com sucesso. Isso valida o empacotamento JavaScript, não equivale a gerar ou instalar um APK.
+
+
+## Ajustes visuais a partir das capturas do Android
+
+Em 14/10/2026: logo original mantida, com tamanhos e alinhamento consistentes nos cabeçalhos; login/cadastro centralizam o conteúdo na área útil de telas altas, reservando espaço para a paisagem e mantendo rolagem. Cartões de visitas usam fundo limpo. Atualizar virou ação com ícone, indicador de carregamento e área mínima de toque de 44 pontos. Detalhes indicam o toque para ampliar a foto; carimbo maior com nome mais legível; aviso conhecido de data aproximada separado visualmente da lembrança, sem alterar o comentário salvo.
+
+Perfil usa cartão compacto com foto real já vinculada às visitas e quantidade por cidade. Rio do Sal é apresentado como localidade de Paulo Afonso, com agrupamento consistente nos totais/filtros e preservação dos nomes originais no cadastro. Fonte municipal: https://pauloafonso.ba.gov.br/secretario-municipal-de-turismo-visita-sitios-com-pinturas-rupestres-no-rio-do-sal/ . O agrupamento contempla somente as variantes conhecidas Rio do Sal/Rio de Sal em BA; não é um serviço geral de geocodificação.
+
+22 testes passaram e TypeScript passou. A conferência visual final no Android ainda depende de recarregar a nova versão; o navegador integrado encontrou conexão recusada em localhost:8090. Não houve alteração dos registros no Supabase.

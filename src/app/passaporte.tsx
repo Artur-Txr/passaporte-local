@@ -1,3 +1,4 @@
+import { rotuloCidade, localizacaoVisita } from "../lib/cidades";
 import EstadoConsulta from "../componentes/EstadoConsulta";
 import { Cabecalho, Decoracao } from "../componentes/Design";
 import { router } from "expo-router";
@@ -69,9 +70,10 @@ export default function Passaporte() {
             <Text style={styles.placeName}>{item.lugar}</Text>
 
             <Text style={styles.location}>
-              {item.cidade} · {item.uf}
+              {rotuloCidade(item.cidade, item.uf)}
             </Text>
 
+            {!!localizacaoVisita(item.cidade, item.uf).localidade && <Text style={styles.location}>{localizacaoVisita(item.cidade, item.uf).localidade}</Text>}
             <Text style={styles.detailsLink}>Ver esta descoberta →</Text>
           </Pressable>
         )}

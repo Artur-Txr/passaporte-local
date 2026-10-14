@@ -60,6 +60,8 @@ export default function FotoVisita({
         </Pressable>
       )}
 
+      {url && !erro && !compacto && <Text style={[styles.message, { fontSize: 12, marginTop: 6, textAlign: 'center' }]}>Toque na foto para ampliar</Text>}
+
       {carregando && !erro && (
         <View style={styles.status}>
           <ActivityIndicator size="large" color="#183F35" />

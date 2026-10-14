@@ -1,4 +1,4 @@
-import { chaveCidade } from "../lib/cidades";
+import { agruparCidades } from "../lib/cidades";
 import { Dialogo } from "../componentes/Design";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import Icone from '../componentes/Icone';
@@ -49,14 +49,7 @@ export default function Perfil() {
     .map((n: string) => n[0])
     .join("")
     .toUpperCase();
-  const cidades = Array.from(
-    new Map(
-      visitas.map((v) => [
-        chaveCidade(v.cidade, v.uf),
-        `${v.cidade} · ${v.uf}`,
-      ]),
-    ).values(),
-  );
+  const cidades = agruparCidades(visitas);
   async function encerrar() {
     if (emAndamento.current) return;
     emAndamento.current = true;
@@ -124,7 +117,7 @@ export default function Perfil() {
               <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: rotulo === "cidades" ? "#F1DDC9" : "#DFE8D8", alignItems: "center", justifyContent: "center" }}><Icone nome={rotulo === "cidades" ? "cidade" : "lugar"} tamanho={25} cor={rotulo === "cidades" ? cores.laranja : cores.verde} /></View>
               <View>
                 <Text style={[visual.section, { fontSize: 22 }]}>{n}</Text>
-                <Text style={visual.meta}>{rotulo}</Text>
+                <Text style={visual.meta}>{n === 1 ? String(rotulo).replace(/s$/, "") : rotulo}</Text>
               </View>
             </View>
           ))}
@@ -172,7 +165,7 @@ export default function Perfil() {
             marginTop: 12,
           }}
         >
-          {cidades.map((cidade, i) => <CartaoCidade key={cidade} nome={cidade} indice={i} />)}
+          {cidades.map(cidade => <CartaoCidade key={cidade.chave} nome={cidade.nome} visita={cidade.visita} quantidade={cidade.quantidade} localidades={cidade.localidades} unico={cidades.length === 1} />)}
         </View>
         {!cidades.length && (
           <Text style={visual.subtitle}>

@@ -1,3 +1,4 @@
+import BotaoAtualizar from "../componentes/BotaoAtualizar";
 import { chaveCidade } from "../lib/cidades";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import Icone from "../componentes/Icone";
@@ -76,7 +77,7 @@ export default function Inicio() {
         </Text>
         <View style={{ flexDirection: compacto ? "column" : "row", alignItems: compacto ? "flex-start" : "center", gap: 8 }}>
           <Text style={[visual.title, { flex: 1 }]}>Meu passaporte</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel="Atualizar visitas" disabled={carregando} onPress={recarregarVisitas} style={{ paddingVertical: 12, paddingLeft: 8 }}><Text style={visual.link}>{carregando ? "Atualizando…" : "Atualizar"}</Text></Pressable>
+          <BotaoAtualizar carregando={carregando} onPress={recarregarVisitas} />
         </View>
         <Text style={visual.subtitle}>Cada lugar, uma nova história.</Text>
         <Pressable

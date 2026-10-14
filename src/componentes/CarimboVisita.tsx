@@ -45,8 +45,8 @@ const styles = StyleSheet.create({
   anelInterno: { position: 'absolute', inset: 5, borderRadius: 85, borderWidth: 1, borderColor: tinta },
   anelFalhado: { position: 'absolute', inset: 2, borderRadius: 88, borderWidth: 1, borderStyle: 'dashed', borderColor: '#929D80' },
   letra: { position: 'absolute', width: 28, textAlign: 'center', fontSize: 15, fontWeight: '800', color: tinta },
-  miolo: { position: 'absolute', left: 26, right: 26, top: 47, alignItems: 'center' },
-  paisagem: { width: 104, height: 57 },
+  miolo: { position: 'absolute', left: 26, right: 26, top: 43, alignItems: 'center' },
+  paisagem: { width: 104, height: 52 },
   predio: { position: 'absolute', bottom: 3, width: 13, backgroundColor: tinta, paddingTop: 4, gap: 4 },
   janelas: { flexDirection: 'row', justifyContent: 'space-evenly' },
   janela: { width: 2, height: 3, backgroundColor: '#EEECDD' },
@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
   tronco: { width: 3, height: 12, backgroundColor: tinta },
   chao: { position: 'absolute', bottom: 0, width: 104, height: 2, backgroundColor: tinta },
   data: { fontSize: 14, fontWeight: '800', color: tinta, marginTop: 5, letterSpacing: 0.4 },
-  cidade: { fontSize: 9, lineHeight: 12, fontWeight: '700', color: tinta, textAlign: 'center', marginTop: 4, maxWidth: 115 },
+  cidade: { fontSize: 12, lineHeight: 14, fontWeight: '700', color: tinta, textAlign: 'center', marginTop: 4, maxWidth: 128 },
   estrela: { position: 'absolute', top: 79, fontSize: 12, color: tinta },
 });

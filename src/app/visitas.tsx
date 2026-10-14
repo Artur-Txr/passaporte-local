@@ -1,4 +1,5 @@
-import { chaveCidade, normalizarTexto } from "../lib/cidades";
+import BotaoAtualizar from "../componentes/BotaoAtualizar";
+import { chaveCidade, normalizarTexto, rotuloCidade, localizacaoVisita } from "../lib/cidades";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import Icone from '../componentes/Icone';
 import { useState } from "react";
@@ -33,7 +34,7 @@ export default function Visitas() {
     new Map(
       visitas.map((v) => [
         chaveCidade(v.cidade, v.uf),
-        `${v.cidade} · ${v.uf}`,
+        rotuloCidade(v.cidade, v.uf),
       ]),
     ).entries(),
   ).map(([id, nome]) => ({ id, nome }));
@@ -41,7 +42,8 @@ export default function Visitas() {
   const filtradas = visitas.filter(
     (v) =>
       (normalizar(v.lugar).includes(normalizar(busca)) ||
-        normalizar(v.cidade).includes(normalizar(busca))) &&
+        normalizar(v.cidade).includes(normalizar(busca)) ||
+        normalizar(localizacaoVisita(v.cidade, v.uf).cidade).includes(normalizar(busca))) &&
       (!categoria || v.categoria === categoria) &&
       (!cidadeAtiva || chaveCidade(v.cidade, v.uf) === cidadeAtiva),
   );
@@ -62,7 +64,7 @@ export default function Visitas() {
             <Cabecalho />
             <View style={{ flexDirection: compacto ? "column" : "row", alignItems: compacto ? "flex-start" : "center", gap: 8 }}>
               <Text style={[visual.title, { flex: 1 }]}>Minhas visitas</Text>
-              <Pressable accessibilityRole="button" accessibilityLabel="Atualizar visitas" disabled={carregando} onPress={recarregarVisitas} style={{ paddingVertical: 12, paddingLeft: 8 }}><Text style={visual.link}>{carregando ? "Atualizando…" : "Atualizar"}</Text></Pressable>
+              <BotaoAtualizar carregando={carregando} onPress={recarregarVisitas} />
             </View>
             {!!erro && visitas.length > 0 && <Text accessibilityLiveRegion="polite" style={visual.subtitle}>Não foi possível atualizar. Mostrando as visitas anteriores; toque em Atualizar para tentar novamente.</Text>}
             <View style={{ marginTop: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: cores.borda, borderRadius: 9, paddingLeft: 10, backgroundColor: '#F4F1E8' }}>

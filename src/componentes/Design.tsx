@@ -1,3 +1,4 @@
+import { rotuloCidade, localizacaoVisita } from "../lib/cidades";
 import useFotoPrivada from "./useFotoPrivada";
 import type { ReactNode } from "react";
 import useLayoutResponsivo from "./useLayoutResponsivo";
@@ -31,7 +32,7 @@ export function Logo({ pequeno = false }: { pequeno?: boolean }) {
     <Image
       source={require("../../assets/prototipo/logo-fiel.png")}
       accessibilityLabel="Passaporte Local"
-      style={{ width: reduzido ? 126 : 180, height: reduzido ? 47 : 66, flexShrink: 0 }}
+      style={{ width: reduzido ? 112 : 160, height: reduzido ? 42 : 59, flexShrink: 0 }}
       resizeMode="contain"
     />
   );
@@ -76,7 +77,7 @@ export function Cabecalho({
   alinharInicio?: boolean;
 }) {
   return (
-    <View style={[visual.header, alinharInicio && { justifyContent: "flex-start" }]}>
+    <View style={[visual.header, { justifyContent: "flex-start" }]}>
       {voltar && (
         <Pressable
           accessibilityRole="button"
@@ -84,7 +85,7 @@ export function Cabecalho({
           onPress={() =>
             router.canGoBack() ? router.back() : router.replace("/inicio")
           }
-          style={{ padding: 8, ...(!titulo ? { position: "absolute", left: 0, zIndex: 1 } as const : {}) }}
+          style={{ minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center" }}
         >
           <Icone nome="voltar" tamanho={28} />
         </Pressable>
@@ -195,7 +196,7 @@ export function BilheteVisita({
       }
       style={[visual.ticket, compacto && { minHeight: 76, padding: 6 }]}
     >
-      <Image source={require("../../assets/prototipo/papel.png")} style={[StyleSheet.absoluteFill, { width: "100%", height: "100%", opacity: 0.25 }]} resizeMode="cover" />
+
       <MiniFoto visita={visita} compacto={compacto || telaCompacta} />
       <View style={{ flex: 1, minWidth: 0, gap: 5 }}>
         <Text
@@ -204,7 +205,8 @@ export function BilheteVisita({
         >
           {visita.lugar}
         </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Icone nome="lugar" tamanho={14} cor={cores.suave} /><Text style={[visual.meta, { flex: 1 }]}>{visita.cidade}, {visita.uf}</Text></View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Icone nome="lugar" tamanho={14} cor={cores.suave} /><Text style={[visual.meta, { flex: 1 }]}>{rotuloCidade(visita.cidade, visita.uf)}</Text></View>
+        {!!localizacaoVisita(visita.cidade, visita.uf).localidade && !compacto && <Text style={[visual.meta, { fontSize: 11 }]}>{localizacaoVisita(visita.cidade, visita.uf).localidade}</Text>}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Icone nome="calendario" tamanho={14} cor={cores.suave} /><Text style={[visual.meta, { flexShrink: 1 }]}>{formatarDataVisita(visita.data)}</Text></View>
         {!compacto && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Icone nome={visita.categoria === 'Parque' ? 'natureza' : visita.categoria === 'Museu' ? 'museu' : visita.categoria === 'Cafeteria' ? 'cafe' : 'lugar'} tamanho={14} cor={cores.suave} /><Text style={visual.meta}>{visita.categoria}</Text></View>}
       </View>

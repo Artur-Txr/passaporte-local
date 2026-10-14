@@ -1,3 +1,5 @@
+import { apresentarLembranca } from "../lib/lembranca";
+import { localizacaoVisita } from "../lib/cidades";
 import EstadoConsulta from "../componentes/EstadoConsulta";
 import { Dialogo } from "../componentes/Design";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
@@ -13,10 +15,13 @@ import AvaliacaoEstrelas from "../componentes/AvaliacaoEstrelas";
 import CarimboVisita from "../componentes/CarimboVisita";
 import { Cabecalho, Decoracao, cores, visual } from "../componentes/Design";
 export default function Detalhes() {
-  const { compacto } = useLayoutResponsivo();
+  const { compacto, largura } = useLayoutResponsivo();
+  const empilhar = compacto || largura < 400;
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const { visitas, excluirVisita, carregando, erro, recarregarVisitas } = useVisitas();
   const visita = visitas.find((v) => v.id === (Array.isArray(id) ? id[0] : id));
+  const texto = apresentarLembranca(visita?.comentario ?? "");
+  const localizacao = localizacaoVisita(visita?.cidade ?? "", visita?.uf ?? "");
   const [confirmar, setConfirmar] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
   const emAndamento = useRef(false);
@@ -50,16 +55,17 @@ export default function Detalhes() {
               {visita.lugar}
             </Text>
             <Text style={visual.subtitle}>
-              {visita.cidade}, {visita.uf}
+              {localizacao.cidade}, {visita.uf}
             </Text>
+            {!!localizacao.localidade && <Text style={visual.meta}>Localidade: {localizacao.localidade}</Text>}
             <View
               style={{
-                flexDirection: compacto ? "column" : "row",
-                alignItems: compacto ? "stretch" : "center",
+                flexDirection: empilhar ? "column" : "row",
+                alignItems: empilhar ? "stretch" : "center",
                 marginTop: 14,
               }}
             >
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: empilhar ? undefined : 1 }}>
                 <View
                   style={{
                     alignSelf: "flex-start",
@@ -70,7 +76,8 @@ export default function Detalhes() {
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><Icone nome={visita.categoria === 'Parque' ? 'natureza' : visita.categoria === 'Museu' ? 'museu' : visita.categoria === 'Cafeteria' ? 'cafe' : 'lugar'} tamanho={16} /><Text style={{ color: cores.verde, fontSize: 12 }}>{visita.categoria}</Text></View>
                 </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 14 }}><Icone nome="calendario" tamanho={17} /><Text style={visual.meta}>{formatarDataVisita(visita.data, true)}</Text></View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 14 }}><Icone nome="calendario" tamanho={17} /><Text style={[visual.meta, { flexShrink: 1 }]}>{formatarDataVisita(visita.data, true)}</Text></View>
+                {texto.dataAproximada && <Text style={[visual.meta, { marginTop: 6, color: cores.laranja }]}>Data aproximada</Text>}
                 <Text style={[visual.meta, { marginTop: 22 }]}>
                   Minha avaliação
                 </Text>
@@ -78,13 +85,14 @@ export default function Detalhes() {
               </View>
               <View
                 style={{
-                  width: 130,
-                  height: 138,
+                  width: 148,
+                  alignSelf: empilhar ? "center" : "auto",
+                  height: 160,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <View style={{ transform: [{ scale: 0.66 }] }}>
+                <View style={{ transform: [{ scale: 0.8 }] }}>
                   <CarimboVisita visita={visita} />
                 </View>
               </View>
@@ -99,7 +107,7 @@ export default function Detalhes() {
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}><Icone nome="editar" tamanho={20} /><Text style={visual.section}>Minha lembrança</Text></View>
               <Text style={[visual.subtitle, { marginTop: 8 }]}>
-                {visita.comentario.trim() ||
+                {texto.lembranca ||
                   "Nenhuma lembrança escrita para esta visita."}
               </Text>
             </View>
