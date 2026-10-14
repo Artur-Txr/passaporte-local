@@ -4,8 +4,10 @@
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
+    "start": "node ./node_modules/expo/bin/cli start",
+    "android": "node ./node_modules/expo/bin/cli start --android",
+    "abrir:pc": "node scripts/iniciar.cjs pc",
+    "abrir:celular": "node scripts/iniciar.cjs wifi",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs"
   },

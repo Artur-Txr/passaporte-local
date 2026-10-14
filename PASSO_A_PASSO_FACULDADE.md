@@ -1,5 +1,9 @@
 # Passaporte Local — abrir na faculdade
 
+Para **apresentar no PC sem instalar ferramentas**, use o pacote separado **Passaporte-Local-Apresentacao-PC.zip**, extraia tudo e execute **Abrir-App.cmd**. Ele já contém a versão web e Node.js para Windows x64. Veja APRESENTACAO_FACULDADE.md. Ainda precisa de internet para login, visitas e fotos.
+
+Os passos abaixo são para abrir e desenvolver o **código-fonte**, inclusive no Expo Go do celular. Os iniciadores Iniciar-PC.cmd e Iniciar-Celular-WiFi.cmd verificam as dependências e instalam pelo lockfile quando faltarem. Não é necessário instalar Expo globalmente.
+
 O ZIP inclui código, imagens, suas três fotografias e configuração pública do cliente Supabase. Não inclui senha da conta, chave administrativa, node_modules ou histórico Git.
 
 ## Preparar o computador
