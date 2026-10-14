@@ -1,3 +1,4 @@
+import EstadoConsulta from "../componentes/EstadoConsulta";
 import { Dialogo } from "../componentes/Design";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import { formatarDataVisita } from "../lib/formatacaoData";
@@ -14,7 +15,7 @@ import { Cabecalho, Decoracao, cores, visual } from "../componentes/Design";
 export default function Detalhes() {
   const { compacto } = useLayoutResponsivo();
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
-  const { visitas, excluirVisita } = useVisitas();
+  const { visitas, excluirVisita, carregando, erro, recarregarVisitas } = useVisitas();
   const visita = visitas.find((v) => v.id === (Array.isArray(id) ? id[0] : id));
   const [confirmar, setConfirmar] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
@@ -133,9 +134,7 @@ export default function Detalhes() {
             </Pressable>
           </>
         ) : (
-          <Text style={visual.subtitle}>
-            Visita não encontrada. Volte à coleção.
-          </Text>
+          <EstadoConsulta carregando={carregando} erro={erro} tentarNovamente={recarregarVisitas} />
         )}
       </ScrollView>
       <Modal

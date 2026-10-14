@@ -1,3 +1,4 @@
+import EstadoConsulta from "../componentes/EstadoConsulta";
 import { Cabecalho, Decoracao } from "../componentes/Design";
 import { router } from "expo-router";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
@@ -6,7 +7,7 @@ import CarimboVisita from "../componentes/CarimboVisita";
 import { useVisitas } from "../contextos/VisitasContext";
 
 export default function Passaporte() {
-  const { visitas } = useVisitas();
+  const { visitas, carregando, erro, recarregarVisitas } = useVisitas();
 
   function voltar() {
     if (router.canGoBack()) {
@@ -20,6 +21,8 @@ export default function Passaporte() {
     <SafeAreaView style={styles.screen}>
       <Decoracao />
       <FlatList
+        refreshing={carregando}
+        onRefresh={recarregarVisitas}
         data={visitas}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.content}
@@ -35,8 +38,9 @@ export default function Passaporte() {
               Cada carimbo representa uma história que você viveu.
             </Text>
 
+            {!!erro && visitas.length > 0 && <Text accessibilityLiveRegion="polite" style={styles.description}>Não foi possível atualizar. Seus carimbos anteriores continuam visíveis. Puxe para baixo para tentar novamente.</Text>}
             <Text style={styles.count}>
-              {visitas.length}{" "}
+              {carregando && !visitas.length ? '—' : visitas.length}{" "}
               {visitas.length === 1
                 ? "carimbo na coleção"
                 : "carimbos na coleção"}
@@ -72,7 +76,7 @@ export default function Passaporte() {
           </Pressable>
         )}
         ListEmptyComponent={
-          <View style={styles.emptyCard}>
+          carregando || erro ? <EstadoConsulta carregando={carregando} erro={erro} tentarNovamente={recarregarVisitas} /> : <View style={styles.emptyCard}>
             <Text style={styles.emptyTitle}>
               Sua coleção começa com um passeio
             </Text>

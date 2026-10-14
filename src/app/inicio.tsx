@@ -1,3 +1,4 @@
+import { chaveCidade } from "../lib/cidades";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import Icone from "../componentes/Icone";
 import { router } from "expo-router";
@@ -6,6 +7,7 @@ import {
   Image,
   Pressable,
   ScrollView,
+  RefreshControl,
   Text,
   View,
 } from "react-native";
@@ -29,12 +31,15 @@ export default function Inicio() {
       ? sessao.user.user_metadata.nome
       : "Viajante";
   const cidades = new Set(
-    visitas.map((v) => `${v.cidade.trim().toLocaleLowerCase()}|${v.uf}`),
+    visitas.map((v) => chaveCidade(v.cidade, v.uf)),
   ).size;
   return (
     <SafeAreaView style={visual.screen}>
       <Decoracao />
-      <ScrollView contentContainerStyle={visual.content}>
+      <ScrollView contentContainerStyle={visual.content}
+        alwaysBounceVertical
+        refreshControl={<RefreshControl refreshing={carregando} onRefresh={() => { if (!carregando) recarregarVisitas(); }} colors={[cores.verde]} tintColor={cores.verde} />}
+      >
         <View
           style={{
             flexDirection: "row",
@@ -69,7 +74,10 @@ export default function Inicio() {
         <Text style={[visual.section, { fontSize: 20, marginTop: 8 }]}>
           Olá, {nome.split(" ")[0]}
         </Text>
-        <Text style={visual.title}>Meu passaporte</Text>
+        <View style={{ flexDirection: compacto ? "column" : "row", alignItems: compacto ? "flex-start" : "center", gap: 8 }}>
+          <Text style={[visual.title, { flex: 1 }]}>Meu passaporte</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Atualizar visitas" disabled={carregando} onPress={recarregarVisitas} style={{ paddingVertical: 12, paddingLeft: 8 }}><Text style={visual.link}>{carregando ? "Atualizando…" : "Atualizar"}</Text></Pressable>
+        </View>
         <Text style={visual.subtitle}>Cada lugar, uma nova história.</Text>
         <Pressable
           accessibilityRole="button"
@@ -115,9 +123,9 @@ export default function Inicio() {
                 <Text
                   style={{ color: "#FFF", fontSize: 28, fontWeight: "700" }}
                 >
-                  {carregando ? "—" : visitas.length}
+                  {carregando && !visitas.length ? "—" : visitas.length}
                 </Text>
-                <Text style={{ color: "#E2E5D5", fontSize: 12 }}>visitas</Text>
+                <Text style={{ color: "#E2E5D5", fontSize: 12 }}>{visitas.length === 1 ? "visita" : "visitas"}</Text>
               </View>
               <View
                 style={{
@@ -129,9 +137,9 @@ export default function Inicio() {
                 <Text
                   style={{ color: "#FFF", fontSize: 28, fontWeight: "700" }}
                 >
-                  {carregando ? "—" : cidades}
+                  {carregando && !visitas.length ? "—" : cidades}
                 </Text>
-                <Text style={{ color: "#E2E5D5", fontSize: 12 }}>cidades</Text>
+                <Text style={{ color: "#E2E5D5", fontSize: 12 }}>{cidades === 1 ? "cidade" : "cidades"}</Text>
               </View>
             </View>
           </View>
@@ -145,7 +153,7 @@ export default function Inicio() {
             marginTop: 18,
           }}
         >
-          <Text style={visual.section}>Últimos carimbos</Text>
+          <Text style={visual.section}>Últimos carimbos cadastrados</Text>
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push("/visitas")}
@@ -153,9 +161,10 @@ export default function Inicio() {
             <Text style={visual.link}>Ver todas</Text>
           </Pressable>
         </View>
-        {carregando ? (
+        {!!erro && visitas.length > 0 && <Pressable accessibilityRole="button" onPress={recarregarVisitas}><Text accessibilityLiveRegion="polite" style={visual.subtitle}>Não foi possível atualizar. Mostrando as visitas anteriores. Toque para tentar novamente.</Text></Pressable>}
+        {carregando && !visitas.length ? (
           <ActivityIndicator style={{ margin: 25 }} color={cores.verde} />
-        ) : erro ? (
+        ) : erro && !visitas.length ? (
           <Pressable onPress={recarregarVisitas}>
             <Text style={visual.subtitle}>
               {erro} Toque para tentar novamente.

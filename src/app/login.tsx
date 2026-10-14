@@ -1,3 +1,4 @@
+import { mensagemErroAuth } from "../lib/errosAutenticacao";
 import Icone from "../componentes/Icone";
 import CampoTexto from "../componentes/CampoTexto";
 import { Cabecalho, Decoracao } from "../componentes/Design";
@@ -24,16 +25,23 @@ export default function Login() {
   const [entrando, setEntrando] = useState(false);
 
   const envioEmAndamento = useRef(false);
+  const [mensagem, setMensagem] = useState('');
+  function avisar(titulo: string, texto: string, botoes?: Parameters<typeof Alert.alert>[2], opcoes?: Parameters<typeof Alert.alert>[3]) {
+    setMensagem(`${titulo}. ${texto}`);
+    if (Platform.OS !== 'web') Alert.alert(titulo, texto, botoes, opcoes);
+  }
+
 
   async function entrar() {
     if (envioEmAndamento.current) {
       return;
     }
 
+    setMensagem("");
     const emailFormatado = email.trim();
 
     if (!emailFormatado || !senha) {
-      Alert.alert("Preencha os campos", "Informe seu e-mail e sua senha.");
+      avisar("Preencha os campos", "Informe seu e-mail e sua senha.");
       return;
     }
 
@@ -47,17 +55,15 @@ export default function Login() {
       });
 
       if (error) {
-        Alert.alert(
+        avisar(
           "Não foi possível entrar",
-          error.message === "Invalid login credentials"
-            ? "Confira seu e-mail e sua senha."
-            : error.message,
+          mensagemErroAuth(error),
         );
         return;
       }
 
       if (!data.session) {
-        Alert.alert(
+        avisar(
           "Não foi possível entrar",
           "Nenhuma sessão foi recebida. Tente novamente.",
         );
@@ -66,9 +72,9 @@ export default function Login() {
 
       router.replace("/inicio");
     } catch {
-      Alert.alert(
+      avisar(
         "Falha de conexão",
-        "Não foi possível conectar ao Supabase. Confira sua internet e tente novamente.",
+        "Não foi possível conectar. Confira sua internet e tente novamente.",
       );
     } finally {
       envioEmAndamento.current = false;
@@ -97,6 +103,7 @@ export default function Login() {
           keyboardDismissMode="on-drag"
         >
           <Cabecalho />
+          {!!mensagem && <Text accessibilityLiveRegion="polite" style={{ color: "#9B4028", marginVertical: 12 }}>{mensagem}</Text>}
 
           <Text style={styles.title}>Que bom ter{"\n"}você aqui</Text>
 

@@ -1,3 +1,4 @@
+import { chaveCidade } from "../lib/cidades";
 import { Dialogo } from "../componentes/Design";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import Icone from '../componentes/Icone';
@@ -25,7 +26,7 @@ import {
 export default function Perfil() {
   const { compacto } = useLayoutResponsivo();
   const { sessao, carregando, sair } = useAutenticacao();
-  const { visitas, carregando: carregandoVisitas, erro } = useVisitas();
+  const { visitas, carregando: carregandoVisitas, erro, recarregarVisitas } = useVisitas();
   const [saindo, setSaindo] = useState(false);
   const [confirmar, setConfirmar] = useState(false);
   const [falha, setFalha] = useState("");
@@ -51,7 +52,7 @@ export default function Perfil() {
   const cidades = Array.from(
     new Map(
       visitas.map((v) => [
-        `${v.cidade.trim().toLowerCase()}|${v.uf}`,
+        chaveCidade(v.cidade, v.uf),
         `${v.cidade} · ${v.uf}`,
       ]),
     ).values(),
@@ -105,8 +106,8 @@ export default function Perfil() {
         </View>
         <View style={{ flexDirection: compacto ? "column" : "row", gap: 10, marginBottom: 20 }}>
           {[
-            ["lugar", carregandoVisitas || erro ? "—" : visitas.length, "visitas"],
-            ["cidade", carregandoVisitas || erro ? "—" : cidades.length, "cidades"],
+            ["lugar", (carregandoVisitas || erro) && !visitas.length ? "—" : visitas.length, "visitas"],
+            ["cidade", (carregandoVisitas || erro) && !visitas.length ? "—" : cidades.length, "cidades"],
           ].map(([icone, n, rotulo]) => (
             <View
               key={rotulo}
@@ -128,6 +129,7 @@ export default function Perfil() {
             </View>
           ))}
         </View>
+        {!!erro && <Pressable accessibilityRole="button" onPress={recarregarVisitas}><Text accessibilityLiveRegion="polite" style={visual.subtitle}>Não foi possível atualizar suas visitas. Toque para tentar novamente.</Text></Pressable>}
         <Text style={visual.section}>Minha conta</Text>
         <View
           style={{

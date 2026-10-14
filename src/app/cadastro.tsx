@@ -1,3 +1,4 @@
+import { mensagemErroAuth } from "../lib/errosAutenticacao";
 import Icone from "../componentes/Icone";
 import CampoTexto from "../componentes/CampoTexto";
 import { Cabecalho, Decoracao } from "../componentes/Design";
@@ -26,6 +27,12 @@ export default function Cadastro() {
   const [cadastrando, setCadastrando] = useState(false);
 
   const envioEmAndamento = useRef(false);
+  const [mensagem, setMensagem] = useState('');
+  function avisar(titulo: string, texto: string, botoes?: Parameters<typeof Alert.alert>[2], opcoes?: Parameters<typeof Alert.alert>[3]) {
+    setMensagem(`${titulo}. ${texto}`);
+    if (Platform.OS !== 'web') Alert.alert(titulo, texto, botoes, opcoes);
+  }
+
 
   function voltar() {
     if (router.canGoBack()) {
@@ -41,10 +48,11 @@ export default function Cadastro() {
     }
 
     const nomeFormatado = nome.trim();
+    setMensagem("");
     const emailFormatado = email.trim();
 
     if (!nomeFormatado || !emailFormatado || !senha || !confirmacao) {
-      Alert.alert(
+      avisar(
         "Preencha os campos",
         "Informe seu nome, e-mail e os dois campos de senha.",
       );
@@ -52,17 +60,17 @@ export default function Cadastro() {
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFormatado)) {
-      Alert.alert("Confira o e-mail", "Informe um endereço de e-mail válido.");
+      avisar("Confira o e-mail", "Informe um endereço de e-mail válido.");
       return;
     }
 
     if (senha.length < 8) {
-      Alert.alert("Escolha uma senha maior", "Use pelo menos 8 caracteres.");
+      avisar("Escolha uma senha maior", "Use pelo menos 8 caracteres.");
       return;
     }
 
     if (senha !== confirmacao) {
-      Alert.alert(
+      avisar(
         "As senhas são diferentes",
         "Digite a mesma senha nos dois campos.",
       );
@@ -84,7 +92,7 @@ export default function Cadastro() {
       });
 
       if (error) {
-        Alert.alert("Não foi possível cadastrar", error.message);
+        avisar("Não foi possível cadastrar", mensagemErroAuth(error));
         return;
       }
 
@@ -94,7 +102,7 @@ export default function Cadastro() {
       if (data.session) {
         router.replace("/inicio");
       } else {
-        Alert.alert(
+        avisar(
           "Confira seu e-mail",
           "Se o cadastro precisar de confirmação, você receberá um e-mail. Confirme sua conta antes de entrar.",
           [
@@ -107,7 +115,7 @@ export default function Cadastro() {
         );
       }
     } catch {
-      Alert.alert(
+      avisar(
         "Falha de conexão",
         "Confira sua internet e tente novamente.",
       );
@@ -130,6 +138,7 @@ export default function Cadastro() {
           keyboardDismissMode="on-drag"
         >
           <Cabecalho alinharInicio />
+          {!!mensagem && <Text accessibilityLiveRegion="polite" style={{ color: "#9B4028", marginVertical: 12 }}>{mensagem}</Text>}
 
           <Text style={styles.title}>Crie seu{"\n"}passaporte</Text>
 

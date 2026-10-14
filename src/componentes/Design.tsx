@@ -1,8 +1,9 @@
+import useFotoPrivada from "./useFotoPrivada";
 import type { ReactNode } from "react";
 import useLayoutResponsivo from "./useLayoutResponsivo";
 import { formatarDataVisita } from "../lib/formatacaoData";
 import Icone from "./Icone";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Image,
   Modal,
@@ -13,8 +14,6 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
-import { useAutenticacao } from "../contextos/AutenticacaoContext";
-import { obterUrlFoto } from "../servicos/fotosService";
 import type { Visita } from "../dados/visitas";
 
 export const cores = {
@@ -154,26 +153,13 @@ export function NavegacaoInferior({
   );
 }
 export function MiniFoto({ visita, compacto = false }: { visita: Visita; compacto?: boolean }) {
-  const { sessao } = useAutenticacao();
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => {
-    let ativa = true;
-    setUrl(null);
-    if (visita.foto_path && sessao)
-      void obterUrlFoto(sessao.user.id, visita.foto_path)
-        .then((u) => {
-          if (ativa) setUrl(u);
-        })
-        .catch(() => {});
-    return () => {
-      ativa = false;
-    };
-  }, [visita.foto_path, sessao?.user.id]);
+  const { url, erro, carregando, tentarNovamente, falhar } = useFotoPrivada(visita.foto_path ?? null);
+  if (visita.foto_path && (erro || carregando)) return <Pressable disabled={carregando} accessibilityRole="button" accessibilityLabel={carregando ? 'Carregando foto' : 'Tentar carregar foto novamente'} onPress={(evento) => { evento.stopPropagation(); tentarNovamente(); }} style={[visual.thumb, compacto && { width: 80, height: 68 }, { justifyContent: 'center', alignItems: 'center', padding: 4 }]}><Text style={{ color: cores.verde, fontSize: 11, textAlign: 'center' }}>{carregando ? 'Carregando…' : 'Foto indisponível. Tentar novamente'}</Text></Pressable>;
   return url ? (
     <Image
       source={{ uri: url }}
       style={[visual.thumb, compacto && { width: 80, height: 68 }]}
-      onError={() => setUrl(null)}
+      onError={falhar}
     />
   ) : (
     <View

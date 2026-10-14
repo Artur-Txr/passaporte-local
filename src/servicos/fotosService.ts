@@ -1,3 +1,4 @@
+import { registrarUpload } from './uploadsPendentesService';
 import { supabase } from '../lib/supabase';
 import { conferirTamanhoFoto } from '../lib/limitesFoto';
 
@@ -63,6 +64,7 @@ export async function enviarFoto(
     throw error;
   }
 
+  await registrarUpload(usuarioId, data.path);
   return data.path;
 }
 

@@ -1,3 +1,4 @@
+import { confirmarUpload, revisarUploadsAntigos } from '../servicos/uploadsPendentesService';
 import {
   createContext,
   useContext,
@@ -20,6 +21,7 @@ import { useAutenticacao } from './AutenticacaoContext';
 
 type VisitasContextData = {
   visitas: Visita[];
+  revisao: number;
   carregando: boolean;
   erro: string | null;
   recarregarVisitas: () => void;
@@ -72,6 +74,8 @@ function DadosVisitasProvider({
   const [tentativa, setTentativa] = useState(0);
 
   const ativo = useRef(true);
+
+  useEffect(() => { if (usuarioId) void revisarUploadsAntigos(usuarioId); }, [usuarioId]);
 
   useEffect(() => {
     ativo.current = true;
@@ -160,6 +164,8 @@ function DadosVisitasProvider({
     );
 
     conferirSessaoAtiva();
+    if (novaVisita.foto_path) await confirmarUpload(idUsuario, novaVisita.foto_path);
+    conferirSessaoAtiva();
 
     setVisitas((listaAtual) => [
       novaVisita,
@@ -212,6 +218,8 @@ function DadosVisitasProvider({
     );
 
     conferirSessaoAtiva();
+    if (visitaAtualizada.foto_path) await confirmarUpload(idUsuario, visitaAtualizada.foto_path);
+    conferirSessaoAtiva();
 
     setVisitas((listaAtual) =>
       listaAtual.map((visita) =>
@@ -224,6 +232,7 @@ function DadosVisitasProvider({
     <VisitasContext.Provider
       value={{
         visitas,
+        revisao: tentativa,
         carregando,
         erro,
         recarregarVisitas,

@@ -1,3 +1,6 @@
+import type { Visita } from "../dados/visitas";
+import EstadoConsulta from "../componentes/EstadoConsulta";
+import useProtegerFormulario from "../componentes/useProtegerFormulario";
 import { formatarEntradaData } from "../lib/formatacaoData";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import CampoTexto from "../componentes/CampoTexto";
@@ -27,17 +30,19 @@ import type { FotoSelecionada } from "../servicos/selecaoFotoService";
 import { categorias, estados, dataValida } from "../lib/validacaoVisita";
 
 export default function EditarVisita() {
-  const { compacto } = useLayoutResponsivo();
-  const { visitas, editarVisita } = useVisitas();
-  const { sessao } = useAutenticacao();
-
-  const { id } = useLocalSearchParams<{
-    id?: string | string[];
-  }>();
-
+  const { id } = useLocalSearchParams<{ id?: string | string[] }>();
+  const { visitas, carregando, erro, recarregarVisitas } = useVisitas();
   const visitaId = Array.isArray(id) ? id[0] : id;
   const visita = visitas.find((item) => item.id === visitaId);
+  if (!visita) return <SafeAreaView style={styles.screen}><Cabecalho voltar titulo="Editar visita" /><EstadoConsulta carregando={carregando} erro={erro} tentarNovamente={recarregarVisitas} /></SafeAreaView>;
+  return <FormularioEdicao key={visita.id} visita={visita} />;
+}
 
+function FormularioEdicao({ visita }: { visita: Visita }) {
+  const { compacto } = useLayoutResponsivo();
+  const { editarVisita } = useVisitas();
+  const { sessao } = useAutenticacao();
+  const original = useRef(visita).current;
   const [lugar, setLugar] = useState(visita?.lugar ?? "");
   const [cidade, setCidade] = useState(visita?.cidade ?? "");
   const [uf, setUf] = useState(visita?.uf ?? "");
@@ -63,6 +68,9 @@ export default function EditarVisita() {
   } | null>(null);
 
   const bloqueado = salvando || selecionandoFoto;
+  const alterado = lugar !== original.lugar || cidade !== original.cidade || uf !== original.uf || categoria !== original.categoria || data !== original.data || comentario !== original.comentario || avaliacao !== (original.avaliacao ?? null) || !!foto || removerFotoAtual;
+  const concluirESair = useProtegerFormulario(alterado, bloqueado);
+
   const caminhoAtual = visita?.foto_path ?? null;
 
   function acompanharSelecao(selecionando: boolean) {
@@ -179,7 +187,7 @@ export default function EditarVisita() {
         }
       }
 
-      voltar();
+      concluirESair(voltar);
     } catch {
       informarErro(
         "Não foi possível atualizar",

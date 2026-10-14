@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import useFotoPrivada from "./useFotoPrivada";
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -9,7 +10,6 @@ import {
   View,
 } from 'react-native';
 import { useAutenticacao } from '../contextos/AutenticacaoContext';
-import { obterUrlFoto } from '../servicos/fotosService';
 
 type FotoVisitaProps = {
   caminho: string | null;
@@ -24,48 +24,7 @@ export default function FotoVisita({
   const usuarioId = sessao?.user.id ?? null;
 
   const [ampliada, setAmpliada] = useState(false);
-  const [url, setUrl] = useState<string | null>(null);
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState(false);
-  const [tentativa, setTentativa] = useState(0);
-
-  useEffect(() => {
-    let ativo = true;
-
-    setUrl(null);
-    setErro(false);
-
-    if (!usuarioId || !caminho) {
-      setCarregando(false);
-      return;
-    }
-
-    setCarregando(true);
-
-    async function carregarFoto() {
-      try {
-        const endereco = await obterUrlFoto(
-          usuarioId!,
-          caminho!,
-        );
-
-        if (ativo) {
-          setUrl(endereco);
-        }
-      } catch {
-        if (ativo) {
-          setErro(true);
-          setCarregando(false);
-        }
-      }
-    }
-
-    void carregarFoto();
-
-    return () => {
-      ativo = false;
-    };
-  }, [usuarioId, caminho, tentativa]);
+  const { url, carregando, erro, tentarNovamente, falhar } = useFotoPrivada(caminho);
 
   if (!caminho) {
     return (
@@ -95,11 +54,8 @@ export default function FotoVisita({
           style={[styles.image, compacto && { height: 140, aspectRatio: undefined }]}
           resizeMode="cover"
           accessibilityLabel="Foto da visita"
-          onLoad={() => setCarregando(false)}
-          onError={() => {
-            setErro(true);
-            setCarregando(false);
-          }}
+
+          onError={falhar}
         />
         </Pressable>
       )}
@@ -118,7 +74,7 @@ export default function FotoVisita({
           </Text>
 
           <Pressable
-            onPress={() => setTentativa((valor) => valor + 1)}
+            onPress={tentarNovamente}
             accessibilityRole="button"
             style={({ pressed }) => [
               styles.button,

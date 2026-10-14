@@ -46,3 +46,6 @@ example
 .responsive-web/
 expo-bluestacks.log
 expo-bluestacks-error.log
+
+# Fotos pessoais usadas somente para importacao privada
+assets/visitas-pessoais/

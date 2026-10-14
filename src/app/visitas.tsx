@@ -1,7 +1,7 @@
+import { chaveCidade, normalizarTexto } from "../lib/cidades";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import Icone from '../componentes/Icone';
 import { useState } from "react";
-import ImportarExemplos from '../componentes/ImportarExemplos';
 import { router } from "expo-router";
 import {
   ActivityIndicator,
@@ -22,12 +22,7 @@ import {
   cores,
   visual,
 } from "../componentes/Design";
-const normalizar = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
+const normalizar = normalizarTexto;
 export default function Visitas() {
   const { compacto } = useLayoutResponsivo();
   const { visitas, carregando, erro, recarregarVisitas } = useVisitas();
@@ -37,7 +32,7 @@ export default function Visitas() {
   const cidades = Array.from(
     new Map(
       visitas.map((v) => [
-        `${normalizar(v.cidade)}|${v.uf}`,
+        chaveCidade(v.cidade, v.uf),
         `${v.cidade} · ${v.uf}`,
       ]),
     ).entries(),
@@ -48,13 +43,16 @@ export default function Visitas() {
       (normalizar(v.lugar).includes(normalizar(busca)) ||
         normalizar(v.cidade).includes(normalizar(busca))) &&
       (!categoria || v.categoria === categoria) &&
-      (!cidadeAtiva || `${normalizar(v.cidade)}|${v.uf}` === cidadeAtiva),
+      (!cidadeAtiva || chaveCidade(v.cidade, v.uf) === cidadeAtiva),
   );
   return (
     <SafeAreaView style={visual.screen}>
       <Decoracao />
       <FlatList
-        data={carregando || erro ? [] : filtradas}
+        data={filtradas}
+        refreshing={carregando}
+        onRefresh={() => { if (!carregando) recarregarVisitas(); }}
+        alwaysBounceVertical
         keyExtractor={(v) => v.id}
         contentContainerStyle={visual.content}
         keyboardShouldPersistTaps="handled"
@@ -62,7 +60,11 @@ export default function Visitas() {
         ListHeaderComponent={
           <>
             <Cabecalho />
-            <Text style={visual.title}>Minhas visitas</Text>
+            <View style={{ flexDirection: compacto ? "column" : "row", alignItems: compacto ? "flex-start" : "center", gap: 8 }}>
+              <Text style={[visual.title, { flex: 1 }]}>Minhas visitas</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel="Atualizar visitas" disabled={carregando} onPress={recarregarVisitas} style={{ paddingVertical: 12, paddingLeft: 8 }}><Text style={visual.link}>{carregando ? "Atualizando…" : "Atualizar"}</Text></Pressable>
+            </View>
+            {!!erro && visitas.length > 0 && <Text accessibilityLiveRegion="polite" style={visual.subtitle}>Não foi possível atualizar. Mostrando as visitas anteriores; toque em Atualizar para tentar novamente.</Text>}
             <View style={{ marginTop: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: cores.borda, borderRadius: 9, paddingLeft: 10, backgroundColor: '#F4F1E8' }}>
             <Icone nome="busca" tamanho={20} cor={cores.suave} />
             <TextInput
@@ -144,7 +146,6 @@ export default function Visitas() {
           >
             <Text style={visual.buttonText}>＋ Nova visita</Text>
           </Pressable>
-          {__DEV__ && <ImportarExemplos />}
           </>
         }
       />

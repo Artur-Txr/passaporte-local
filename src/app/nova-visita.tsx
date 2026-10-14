@@ -1,3 +1,4 @@
+import useProtegerFormulario from "../componentes/useProtegerFormulario";
 import { formatarEntradaData } from "../lib/formatacaoData";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import CampoTexto from "../componentes/CampoTexto";
@@ -52,6 +53,9 @@ export default function NovaVisita() {
   } | null>(null);
 
   const bloqueado = salvando || selecionandoFoto;
+  const alterado = !!(lugar || cidade || uf || categoria || data || comentario || avaliacao || foto);
+  const concluirESair = useProtegerFormulario(alterado, bloqueado);
+
 
   function acompanharSelecao(selecionando: boolean) {
     selecaoEmAndamento.current = selecionando;
@@ -149,7 +153,7 @@ export default function NovaVisita() {
         foto_path: caminhoFoto,
       });
 
-      voltar();
+      concluirESair(voltar);
     } catch {
       informarErro(
         "Não foi possível salvar",

@@ -186,13 +186,24 @@ export default function RecuperarSenha() {
                 autoComplete="email"
                 accessibilityLabel="E-mail da conta"
               />
+              <Pressable
+                disabled={ocupado}
+                onPress={() => {
+                  setMensagem("");
+                  setEtapa("link");
+                }}
+                accessibilityRole="button"
+                style={styles.back}
+              >
+                <Text style={styles.link}>Já tenho um link de recuperação</Text>
+              </Pressable>
             </>
           )}
           {etapa === "link" && (
             <>
               <Text style={styles.description}>
-                Se houver uma conta com esse e-mail, você receberá a mensagem.
-                Confira também a pasta de spam.
+                Use o link de recuperação que você recebeu por e-mail.
+                Se acabou de solicitar, confira também a pasta de spam.
               </Text>
               <Text style={styles.description}>
                 Copie o endereço do botão de recuperação no e-mail e cole
