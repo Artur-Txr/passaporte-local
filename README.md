@@ -1,98 +1,75 @@
 # Passaporte Local
 
-Aplicativo React Native para registrar passeios, consultar lembranças e montar um passaporte de visitas. Projeto de Artur Teixeira para Desenvolvimento Mobile, UniRios, professor Edemilton Alcides.
+Diário pessoal de passeios, lugares e memórias pelo Brasil. Projeto de Artur Teixeira para Desenvolvimento Mobile, Sistemas de Informação, UniRios. Professor: Edemilton Alcides.
 
-## Estado em 13/10/2026
+## Abrir e apresentar
 
-Implementados no código: cadastro, login, persistência de sessão, saída, criação/listagem/detalhes/edição/exclusão de visitas, avaliação de 1 a 5, fotos opcionais, passaporte, perfil, busca por lugar/cidade e filtros combinados por categoria e cidade. Sessão válida abre diretamente a coleção.
+**[Abrir protótipo navegável com HTTPS](https://artur-txr.github.io/passaporte-local/)**
 
-Verificados em 09/10/2026: instalação das dependências com npm ci, verificação TypeScript, 8 testes locais e exportação Android. No Expo Go do BlueStacks, login manual, criação de visita com foto da galeria, edição da avaliação para 4 estrelas e manutenção da sessão, foto e avaliação após reabrir o aplicativo foram confirmados. O total passou de 3 para 4 visitas. A existência do código não substitui os testes de cada fluxo.
+- [Apresentação editorial em PDF](docs/apresentacao/Passaporte_Local_Editorial.pdf): nove slides principais e uma página de créditos, com link e QR Code no slide 7.
+- [PowerPoint editável](docs/apresentacao/Passaporte_Local_Editorial_Editavel.pptx).
+- [Roteiro de aproximadamente sete minutos](docs/apresentacao/Passaporte_Local_Roteiro_Editorial.pdf).
+- [Slides em Full HD](docs/apresentacao/slides) e [créditos](docs/apresentacao/Creditos_Fotografias.md).
+- [Como apresentar na faculdade](APRESENTACAO_FACULDADE.md).
 
-Recuperação de senha implementada via link copiado do e-mail para o aplicativo. Pendentes: envio e troca real de senha, isolamento entre contas, filtros no Android, cancelamento e confirmação da exclusão, câmera, troca de foto e falha de conexão. Em 13/10/2026, a retomada no emulador encontrou falha ao baixar o aplicativo do servidor Expo; esses testes não foram concluídos nessa sessão.
+![Capa editorial do Passaporte Local](docs/apresentacao/slides/Slide_01.png)
 
-## Tecnologias
+## Duas versões no mesmo repositório
 
-React Native 0.86, Expo SDK 57, React 19, TypeScript, Expo Router, AsyncStorage, Expo ImagePicker e Supabase (Auth, PostgreSQL e Storage privado).
+| | Protótipo público | Base do aplicativo mobile |
+|---|---|---|
+| Local | `docs/` | `src/`, `assets/`, `supabase/` |
+| Tecnologia | HTML, CSS e JavaScript | React Native, Expo, TypeScript, Expo Router |
+| Acesso | Simulado, com dados fictícios | Código de integração com Supabase Auth |
+| Persistência | IndexedDB do navegador | Serviços de visitas e fotos com Supabase |
+| Fotos por visita | Até cinco, com capa | Modelo atual com um `foto_path` por visita |
+| Identidade | Nova logo, três paletas | Interface mobile anterior, ainda precisa acompanhar o redesign |
 
-## Executar no Windows e BlueStacks
+O site demonstra 17 telas e estados de interface, com 13 visitas, nove cidades e 27 fotografias reais. Datas, avaliações e comentários dos exemplos são fictícios. As fotografias não representam viagens pessoais do autor.
 
-1. Instale Node.js 24 LTS, Git e BlueStacks. Use Expo Go compatível com SDK 57.
-2. Na pasta do projeto, execute `npm ci` para instalar as versões do package-lock.json.
-3. Copie `.env.example` para `.env.local` e configure a URL e a chave pública do seu projeto Supabase. Nunca use chave secret ou service_role no aplicativo.
-4. Execute `Iniciar-BlueStacks.cmd` e mantenha a janela aberta.
-5. No Expo Go, em Enter URL, conecte a `exp://10.0.2.2:8081`. Esse endereço corresponde ao computador na rede virtual do BlueStacks.
+Login no protótipo não cria uma conta real. Dados inseridos ficam neste navegador e não sincronizam com outros aparelhos. Acesso inicial ao site e downloads exigem internet. Recuperação de senha, ajuda e backup não integram a versão pública de 17 telas.
 
-Para outro dispositivo, execute `npm start` e use a URL de rede exibida pelo Expo.
+A base mobile possui seus próprios fluxos de autenticação e serviços Supabase. Sua presença no código não prova que o backend foi validado nesta revisão. As telas e o modelo de álbum do protótipo ainda precisam ser alinhados ao aplicativo final.
 
-Verificação do código: `npm run typecheck`. Testes de validação dos links e senhas: `npm test` (Node.js 24).
+## Desenvolver a base mobile
 
-O .env.local e node_modules são ignorados pelo Git. As dependências reportaram 29 vulnerabilidades na recuperação; revisar antes de uma entrega final. Não aplicar atualizações incompatíveis sem testar o Expo.
+Use Node.js 24 e o lockfile versionado:
 
-## Modelo lógico
+```powershell
+npm.cmd ci
+Copy-Item .env.example .env.local
+# Configure a URL e a chave pública do seu próprio projeto Supabase.
+npm.cmd run abrir:pc
+```
 
-`auth.users (1) -> (1) perfis (1) -> (0..N) visitas`
+Outros modos: `Iniciar-Celular-WiFi.cmd`, `Iniciar-Celular.cmd` e `Iniciar-BlueStacks.cmd`. [Passo a passo completo](PASSO_A_PASSO_FACULDADE.md).
 
-- auth.users: identidade e credenciais gerenciadas pelo Supabase Auth.
-- perfis: id (PK/FK de auth.users), nome e criado_em.
-- visitas: id, usuario_id (FK de perfis), lugar, cidade, uf, categoria, data_visita, comentario, avaliacao, foto_path, criado_em e atualizado_em.
-- Fotos: bucket privado fotos-visitas. A visita guarda o caminho; a exibição usa URLs assinadas.
-- Políticas RLS restringem os registros à conta proprietária. Scripts de estrutura e políticas estão em supabase/migrations. No projeto recuperado, o banco já existe; não reaplicar scripts indiscriminadamente.
+`10.0.2.2` serve para o BlueStacks. No celular físico, use a URL que o iniciador mostrar. Nenhum `.env.local`, senha, chave administrativa ou dependência instalada faz parte deste repositório.
 
-O planejamento chama a avaliação de nota; a implementação usa o campo avaliacao.
+## Verificações
 
-## Checklist de demonstração e testes
+```powershell
+npm.cmd test
+npm.cmd run typecheck
+npm.cmd run verificar:prototipo
+```
 
-- [ ] Criar conta e entrar; validar campos vazios e credenciais inválidas.
-- [ ] Criar visita; conferir data inexistente/futura e campos obrigatórios.
-- [ ] Consultar detalhes; combinar busca, cidade e categoria; limpar filtros.
-- [x] Editar avaliação e retornar aos detalhes com o valor atualizado (BlueStacks, 09/10/2026).
-- [ ] Excluir somente após confirmação; conferir atualização da coleção.
-- [x] Fechar/reabrir o aplicativo e demonstrar sessão, foto e avaliação persistentes (09/10/2026). Reinício completo do dispositivo pendente.
-- [ ] Confirmar que uma segunda conta não acessa visitas/fotos da primeira.
-- [ ] Testar foto da galeria, câmera, permissão negada e falha de conexão.
-- [x] Implementar recuperação de senha e testar validações locais.
-- [ ] Validar envio de e-mail, link expirado e troca real de senha no Supabase.
+O verificador do protótipo usa apenas Node.js e confere as 17 telas, os dados demonstrativos, os arquivos de fotos, as variantes da marca e referências locais. A revisão atual está em [REVISAO_APP.md](REVISAO_APP.md).
 
-## Entregas da disciplina
+## Planejamento
 
-Fase 1: apresentação em 20 ou 22 de outubro, PDF de planejamento e link do GitHub Projects.
-Fase 2: apresentação em 24 ou 26 de novembro, aplicativo funcional, repositório e README, vídeo de até 10 minutos no Google Drive. Confirmar a data individual com o professor. Envio no AVA pelo aluno.
+- Alinhar o mobile à identidade visual e às telas atuais.
+- Planejar a migração de foto única para álbum de até cinco fotos, com ordem e capa.
+- Validar autenticação, isolamento entre contas, uploads e persistência em ambiente próprio.
+- Repetir os testes da versão final em celular físico.
+- Confirmar cronograma, quadro Projects e entregas com o professor. As datas antigas são propostas a confirmar.
 
-[Quadro de acompanhamento](https://github.com/users/Artur-Txr/projects/1)
+[Quadro informado do projeto](https://github.com/users/Artur-Txr/projects/1). Este quadro não foi alterado na revisão. Vídeo e envio ao AVA continuam sendo etapas separadas.
 
-Manter o quadro e o repositório coerentes com os testes efetivamente realizados. O vídeo, a atualização do quadro e o envio ao AVA ainda estão pendentes.
+## Organização e fontes
 
-## Recuperação de senha no BlueStacks
-
-Na tela de login, toque em Esqueci minha senha, informe seu e-mail e solicite a recuperação. No e-mail, copie o endereço do botão de recuperação e cole no aplicativo. O link original é validado pelo Supabase antes de liberar a nova senha. Use pelo menos 8 caracteres e confirme a senha.
-
-Copie o link original da mensagem: depois de abrir o link no navegador ele pode ser consumido. Se expirar ou já tiver sido usado, solicite outro e-mail. O app aceita somente links HTTPS de recuperação do projeto configurado, sem abrir o endereço de redirecionamento. Tokens e senhas não são registrados nos logs.
-
-O envio depende da configuração de e-mail e dos limites do Supabase. O SMTP padrão pode restringir destinatários; para uso geral, configure um SMTP adequado no painel do projeto. Nenhum e-mail real foi enviado durante os testes automatizados.
-
-## Verificação em 09/10/2026
-
-- TypeScript: passou.
-- Exportação Android com Hermes: passou.
-- Testes locais de recuperação: 8 passaram (datas, links válidos, domínio/protocolo incorretos, tipo de link, token ausente e confirmação de senha).
-- Revisão das políticas do Supabase: perfis e visitas restringem acesso pelo auth.uid(); Storage restringe pelo bucket privado e pasta do proprietário. Isso é revisão de configuração, não substitui teste funcional entre duas contas.
-
-
-Roteiro de demonstração e testes manuais: [ROTEIRO_TESTES.md](ROTEIRO_TESTES.md). A opção de câmera está implementada, mas precisa de teste no emulador; no BlueStacks, a captura depende da câmera disponível no computador.
-
-
-## Interface baseada nos protótipos
-
-A interface segue as telas do PDF Passaporte Local: apresentação com colagem, logo e paisagem nos formulários de conta, início com resumo e últimos carimbos, listagem separada com filtros, formulário com foto no topo, detalhes e confirmação de exclusão, perfil com cidades e navegação inferior. Os elementos decorativos foram extraídos das referências fornecidas; as visitas, contagens e fotos são dados reais da conta. Uma visita sem foto usa um marcador visual.
-
-No navegador, a interface fica em uma moldura de até 430 px para facilitar a avaliação como aplicativo mobile. O Android ocupa a tela disponível. A recuperação de senha mantém o fluxo de link por e-mail. A captura por câmera depende do dispositivo/emulador.
-
-## Exemplos para apresentação
-
-Na versão de desenvolvimento, a tela Visitas oferece Adicionar exemplos do Brasil. Importa Lençóis Maranhenses, Praia do Sancho e Cataratas do Iguaçu com fotos reais, títulos DEMONSTRAÇÃO, data fictícia e sem avaliação pessoal. As fotos usam o armazenamento privado da conta. Créditos e licenças: [assets/demonstracao/CREDITOS.md](assets/demonstracao/CREDITOS.md). O botão ignora exemplos já cadastrados com o mesmo título.
-
-
-Fotos: limite atual de 20 MB por imagem (JPEG, PNG ou WebP), validado na seleção e no upload. Em 13/10/2026, o bucket privado fotos-visitas foi configurado para file_size_limit=20971520. Em outra instalação, ajuste esse limite nas configurações do bucket; a migração histórica 006 registra o limite original de 5 MB.
-
-
-Carimbos: o aplicativo mantém o estilo do protótipo, com VISITADO em arco, paisagem central, bordas duplas e a data da visita abreviada. Os selos postais por estado não foram aplicados.
+- `docs/`: versão publicada pelo GitHub Pages, usando `main` e `/docs`.
+- `docs/apresentacao/`: material acadêmico atual, com um único exemplar de cada entrega.
+- `historico/`: documentação anterior preservada para consulta, sem substituir as instruções atuais.
+- `supabase/migrations/`: histórico do banco mobile. Não reaplique nem apague migrações sem conferir o ambiente.
+- [Créditos do protótipo](docs/CREDITOS.md) e [exemplos do mobile](assets/demonstracao/CREDITOS.md).

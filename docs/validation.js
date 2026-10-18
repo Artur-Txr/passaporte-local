@@ -1,4 +1,4 @@
-/* Strict shared validation for stored data and portable backups. */
+/* Validation of the locally stored demo collection. */
 const UF_CODES=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 function validLocalDate(value){if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const [y,m,d]=value.split('-').map(Number);if(y<1900||y>9999)return false;const date=new Date(y,m-1,d,12);return date.getFullYear()===y&&date.getMonth()===m-1&&date.getDate()===d}
 function safePhoto(value){if(typeof value!=='string')return false;if(/^assets\/[a-z0-9-]+\.jpg$/.test(value))return initialVisits.some(v=>(v.photos||[v.photo]).includes(value));return /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(value)&&value.length<4*1024*1024}

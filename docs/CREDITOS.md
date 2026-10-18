@@ -36,4 +36,4 @@ Cada imagem e suas versões reduzidas mantêm a licença indicada. Crédito não
 
 A segunda foto de Santa Bárbara foi substituída por outra fotografia do mesmo lugar, de Adelano Lázaro, para garantir resolução real. A versão do Museu do Amanhã ao anoitecer é de Bruno Tamm Rabello, com edições por ArionStar e Wilfredor conforme o histórico da fonte.
 
-Fonte Manrope: SIL OFL. Lucide: ISC. Marca Página vivida: desenvolvida para Passaporte Local. Licenças em assets/.
+Fonte Manrope: SIL OFL. Lucide: ISC. Logo de pin, montanhas, sol e água do Passaporte Local, preservada sem redesenho. Licenças em assets/.

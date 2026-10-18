@@ -1,3 +1,5 @@
+> Roteiro da base React Native / Supabase. Não descreve o site estático de 17 telas. Resultados e confirmações datados abaixo são históricos. Para o estado atual, veja [REVISAO_APP.md](REVISAO_APP.md).
+
 # Roteiro de testes e demonstração — Passaporte Local
 
 Use registros identificados como TESTE DEMONSTRAÇÃO para evitar confusão com visitas pessoais. Execute as operações manualmente e marque somente o que foi comprovado. Não inclua senhas, links de recuperação ou chaves no vídeo.

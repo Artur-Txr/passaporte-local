@@ -1,63 +1,54 @@
-# Revisão do Passaporte Local — 14/10/2026
+# Varredura do repositório — 18/10/2026
 
-Revisão estática dos fluxos de apresentação, cadastro/login, recuperação, início, lista, nova visita, edição, detalhes, passaporte, perfil e serviços de fotos/visitas. Nesta revisão não houve inspeção visual em novos dispositivos nem alteração do banco. SMTP adiado por decisão do usuário.
+Base inspecionada: commit `94ab2408038ffdf23dc5f0cad28db53240faea97`, com 237 arquivos versionados. A revisão diferencia o protótipo público da base mobile existente. Nenhum banco, conta, política RLS, configuração do Supabase ou histórico Git foi apagado.
 
-## Verificação executada
+## Atualizado
 
-- `npm.cmd test`: 12 testes passaram.
-- `npm.cmd run typecheck`: passou.
-- Os testes existentes cobrem datas, limite de tamanho, códigos de UF e validações de recuperação. Não cobrem os ciclos de tela abaixo.
-- O usuário já confirmou no Android: câmera, galeria, salvar/reabrir com foto, edição, exclusão, busca/filtros e sessão persistente.
+- README principal com acesso HTTPS, entregas acadêmicas e distinção entre `docs/` e o aplicativo React Native.
+- Apresentação editorial com nove slides principais e créditos, PPTX editável, roteiro, QR e slides 1920 × 1080 em `docs/apresentacao/`.
+- Instruções de apresentação e de desenvolvimento. Removidas as afirmações de que `.env.local` e fotografias pessoais acompanham o repositório.
+- Créditos da logo atual no protótipo.
+- Links do painel lateral para o PDF e o roteiro publicados.
+- Empacotador Windows deixou de depender de `../../work/apresentacao-licencas` da máquina de origem. Agora recebe a pasta de licenças explicitamente. O empacotamento completo não foi reexecutado.
+- Comando `npm run verificar:prototipo` para conferir telas, dados e referências de arquivos sem instalar dependências.
+- `.gitignore` ampliado para arquivos locais de ambiente e hospedagem.
 
-## Prioridade alta
+## Removido e preservado
 
-1. **Edição antes de terminar a consulta** — `src/app/editar-visita.tsx`: os campos são inicializados com `useState(visita?.campo ?? '')`. Se a rota abrir antes de as visitas chegarem, o formulário permanece vazio mesmo quando o registro aparecer. Separar o carregamento do formulário e montá-lo somente quando a visita for encontrada; preservar mudanças do usuário durante atualizações posteriores. Reproduzir abrindo diretamente a rota e recarregando com a consulta atrasada.
-2. **Proteção de alterações não salvas** — nova visita e edição não têm bloqueio de saída por alterações pendentes. Voltar pode descartar textos e foto selecionada sem confirmação; durante envio, sair também merece proteção. Incluir confirmação tanto no botão do cabeçalho quanto no voltar do Android, sem bloquear a saída após salvar com sucesso.
-3. **Carregamento, erro e vazio distintos** — passaporte lê apenas visitas e pode apresentar coleção vazia enquanto carrega ou após falha inicial. Detalhes e edição podem apresentar registro não encontrado antes da consulta terminar. Oferecer indicador, mensagem de erro com tentativa e estado vazio somente após consulta concluída.
+Removidos 26 arquivos confirmados sem referência de uso: 20 imagens do template Expo em `assets/images/`, três cartões estáticos antigos em `assets/cidades/` e três aliases `*-logo.svg` que eram cópias exatas das variantes `*-claro.svg` usadas pelo site. Lista completa em [qualidade/arquivos-removidos-2026-10-18.json](qualidade/arquivos-removidos-2026-10-18.json).
 
-## Prioridade média
+Os arquivos continuam recuperáveis no histórico Git. SVGs de origem úteis da identidade e migrações foram preservados. Os documentos anteriores foram copiados para `historico/`, com seus resultados e datas originais, e as instruções atuais ficaram na raiz.
 
-4. **Fotos após falha ou expiração** — MiniFoto em `Design.tsx` ignora erro da assinatura e troca falha da imagem pelo mesmo marcador de visita sem foto. Não renova URLs enquanto caminho/usuário forem iguais; assinatura dura uma hora. Atualizar a lista não necessariamente renova miniaturas já montadas. Distinguir ausência de foto de falha e permitir nova tentativa/renovação ao retornar ao app.
-5. **Arquivos sem visita associada** — nova visita e edição enviam a foto antes de salvar o registro. Há reaproveitamento na repetição da mesma tentativa, mas sair após falha ou escolher outra imagem pode deixar arquivo sem referência. Definir limpeza de uploads temporários sem remover arquivos de operações que possam ter sido confirmadas pelo servidor após uma falha de rede.
-6. **Erros no navegador e tradução** — login/cadastro usam Alert.alert para validação/erros; validar apresentação na web e adotar mensagens visíveis no formulário. Alguns erros do serviço são exibidos em inglês. Traduzir por código e manter detalhes técnicos fora do texto para o usuário.
-7. **Cidades e ordenação consistentes** — busca normaliza acentos, mas os totais de início/perfil não usam a mesma normalização. São Paulo e Sao Paulo podem contar separadamente. Definir uma função compartilhada de identidade cidade/UF. A lista ordena por criação do registro; definir se Últimos carimbos deve seguir cadastro ou data da visita e comunicar a escolha.
+Retirada uma variável sem uso de recuperação no protótipo. A recuperação de senha da base mobile foi mantida, pois pertence a uma implementação diferente.
 
-## Entrega e validações restantes
+## Verificação realizada
 
-- `app.json` não define ícone próprio ou adaptive icon. Preparar identidade para uma futura instalação; o uso pelo Expo Go não comprova o ícone de um APK.
-- Conferir visualmente larguras pequenas, fonte ampliada, teclado aberto e nomes longos. Código responsivo existente não substitui essa conferência.
-- Testar isolamento entre duas contas e perda/retorno de conexão; não estão comprovados pelos testes de uma única conta.
-- Testar envio real de imagem acima de 5 MB e próxima de 20 MB, observando tempo e memória.
-- Recuperação completa de senha permanece pendente: o envio real retornou limite de e-mails e o link recebido foi recusado. SMTP fica adiado.
-- Atualizar ZIP e publicar os commits locais antes da entrega. O script Wi-Fi atual fixa o IP deste computador e precisa ser portável para outra rede.
+- **22 testes existentes passaram**, executados com Node.js 24 sobre a cópia do commit inspecionado.
+- **TypeScript passou** na instalação local existente. Antes de executar, comparei todo o texto de `src/`, `tsconfig.json`, `package.json` e o lockfile com a cópia remota: eram equivalentes, desconsideradas apenas as quebras de linha. Nenhum arquivo TypeScript foi modificado nesta atualização.
+- **153 layouts do protótipo**: 17 telas/estados × três paletas × larguras de 360, 390 e 430 px. Sem erros de execução, transbordamento horizontal ou botões para as telas removidas. [Resultado](qualidade/prototipo-153-layouts-2026-10-18.json).
+- Verificador estático: 17 telas, 13 visitas, nove cidades, 27 fotos e referências locais existentes.
+- Links relativos da documentação conferidos.
+- PDF editorial e roteiro renderizados e revisados, QR decodificado no PDF e links do slide 7 com destino coincidente. PPTX verificado estruturalmente, sem inspeção no Microsoft PowerPoint.
+- Busca por padrões conhecidos de chaves privadas e tokens: nenhum achado nos arquivos textuais inspecionados. Isso não equivale a uma auditoria completa de segurança nem verifica segredos do histórico anterior.
 
-Ordem sugerida: inicialização da edição e estados de consulta; proteção contra perda de alterações; recuperação das fotos; acabamento visual e pacote de entrega.
+## Pendências reais
 
+### Dependências mobile
 
-## Implementação após a revisão
+`npm audit --package-lock-only --json` encontrou **30 alertas: 19 altos e 11 moderados**, sem alertas críticos. [Relatório bruto](qualidade/npm-audit-2026-10-18.json).
 
-- Edição separada em carregamento e formulário, montado por id somente após encontrar a visita. Atualizações posteriores não sobrescrevem o preenchimento em andamento.
-- Confirmação de descarte nos formulários, bloqueio de saída durante operação, proteção no voltar Android e aviso ao fechar/recarregar a página web. Salvar com sucesso libera a saída. Fechar forçadamente o processo nativo não mantém um rascunho.
-- Detalhes, edição e passaporte distinguem carregamento, erro e registro ausente; passaporte permite atualizar puxando para baixo.
-- Fotos e miniaturas compartilham tratamento de falha, nova tentativa e renovação ao retornar ao app, a cada 50 minutos e ao atualizar a lista.
-- Diário local por usuário registra uploads pendentes. Ao montar a sessão, uploads registrados há mais de 24 horas são consultados: arquivos vinculados são preservados; somente arquivos sem referência podem ser removidos. Falha de consulta preserva o arquivo. O mecanismo não limpa arquivos antigos anteriores à implementação nem funciona se o diário local for apagado.
-- Login/cadastro exibem feedback também no navegador e traduzem erros por código. Normalização compartilhada de cidade/UF evita duplicação por acentos/espaços; início identifica explicitamente carimbos por ordem de cadastro.
-- Ícones de instalação e favicon configurados com a logo original dentro de composição SVG quadrada. A aparência final na máscara do launcher depende de um build instalado.
-- Iniciador Wi-Fi detecta a interface local, evitando IP fixo e interfaces virtuais conhecidas. Guia da faculdade atualizado.
+As sugestões do npm incluem mudanças de versão principal e até versões incompatíveis com o conjunto atual. Não foi executado `npm audit fix --force`. A atualização precisa de um ramo dedicado, revisão de compatibilidade do SDK Expo e nova validação de build e dispositivo. Esses alertas pertencem às dependências do mobile e das suas ferramentas. O site `docs/` não carrega o runtime React Native/Expo.
 
-### Evidência e limites desta implementação
+### Alinhamento mobile / protótipo
 
-15 testes automatizados passaram, incluindo cidades, mensagens de autenticação e elegibilidade segura de uploads. TypeScript e exportação web passaram. O navegador integrado não alcançou os servidores locais de conferência; portanto não foi possível confirmar visualmente as novas telas em múltiplas dimensões neste ambiente. Os testes anteriores do usuário em Android continuam registrados separadamente em ROTEIRO_TESTES.md.
+A base mobile ainda usa a identidade visual anterior e um `foto_path` por visita. O protótipo demonstra a nova identidade e até cinco fotos. Planejar a migração do álbum, a capa e a ordem das fotos antes de apresentar esses recursos como paridade do mobile. Não alterar ou apagar as migrações históricas para ocultar essa diferença.
 
-Continuam como validações físicas: confirmação de descarte no Android, múltiplas telas/fonte ampliada, falha e retorno de rede, upload real perto de 20 MB e isolamento com duas contas autenticadas. Não foram criadas contas nem alteradas senhas para simular esses testes. SMTP e recuperação por e-mail permanecem adiados pelo usuário.
+Os itens de revisão mobile de 14/10 já têm correções visíveis no código, como formulário montado após a visita carregar e proteção de alterações pendentes. O relato anterior foi preservado como histórico e não tratado como lista atual de falhas confirmadas.
 
-Exportação Android com bytecode Hermes também passou. A primeira tentativa foi bloqueada na pasta temporária do sandbox; repetida com TEMP/TMP em work/build-temp, concluiu com sucesso. Isso valida o empacotamento JavaScript, não equivale a gerar ou instalar um APK.
+### Dispositivo, backend e acompanhamento
 
+Repetir testes em celular físico da versão final. Não houve novos testes de câmera, galeria, isolamento entre contas ou gravação em Supabase nesta varredura. O usuário havia relatado testes em etapas anteriores, mas isso não substitui a validação desta revisão.
 
-## Ajustes visuais a partir das capturas do Android
+Há **17 issues abertas**, várias com datas antigas nos títulos. Não foram encerradas automaticamente. Reconciliar primeiro os critérios: por exemplo, a issue #3 inclui envio da Fase 1 e a #18 inclui vídeo, ações que não foram realizadas aqui. As datas permanecem propostas a confirmar com o professor. O quadro Projects e o AVA não foram alterados.
 
-Em 14/10/2026: logo original mantida, com tamanhos e alinhamento consistentes nos cabeçalhos; login/cadastro centralizam o conteúdo na área útil de telas altas, reservando espaço para a paisagem e mantendo rolagem. Cartões de visitas usam fundo limpo. Atualizar virou ação com ícone, indicador de carregamento e área mínima de toque de 44 pontos. Detalhes indicam o toque para ampliar a foto; carimbo maior com nome mais legível; aviso conhecido de data aproximada separado visualmente da lembrança, sem alterar o comentário salvo.
-
-Perfil usa cartão compacto com foto real já vinculada às visitas e quantidade por cidade. Rio do Sal é apresentado como localidade de Paulo Afonso, com agrupamento consistente nos totais/filtros e preservação dos nomes originais no cadastro. Fonte municipal: https://pauloafonso.ba.gov.br/secretario-municipal-de-turismo-visita-sitios-com-pinturas-rupestres-no-rio-do-sal/ . O agrupamento contempla somente as variantes conhecidas Rio do Sal/Rio de Sal em BA; não é um serviço geral de geocodificação.
-
-22 testes passaram e TypeScript passou. A conferência visual final no Android ainda depende de recarregar a nova versão; o navegador integrado encontrou conexão recusada em localhost:8090. Não houve alteração dos registros no Supabase.
+Os próximos passos são revisar essas issues, configurar verificação automática no GitHub Actions e trabalhar na compatibilidade das dependências em uma mudança separada.

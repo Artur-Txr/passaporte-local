@@ -49,3 +49,13 @@ expo-bluestacks-error.log
 
 # Fotos pessoais usadas somente para importacao privada
 assets/visitas-pessoais/
+
+# Configuração e artefatos locais de hospedagem
+.openai/
+.netlify/
+.vercel/
+work/
+tmp/
+.env
+.env.*
+!.env.example

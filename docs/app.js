@@ -7,7 +7,7 @@ const categoryIcons={'Museu':'landmark','Cafeteria':'coffee','Centro histórico'
 const photosOf=v=>(v.photos||[v.photo]).filter(Boolean).slice(0,5);
 let chosenPhotos=[],photoIndex=0,viewerReturn=null,replacePhotoIndex=null;
 let visits=structuredClone(initialVisits),selected=1,route='welcome',stars=0,chosenPhoto='',draft=null,errors={},query='',cityFilter='',catFilter='',userName='Artur Silva';
-let userEmail='artur@exemplo.com',sortOrder='desc',selectedCity='',dirty=false,formBaseline='',navStack=[],pendingAction=null,modalReturn=null,recoveryEmail='',saving=false;
+let userEmail='artur@exemplo.com',sortOrder='desc',selectedCity='',dirty=false,formBaseline='',navStack=[],pendingAction=null,modalReturn=null,saving=false;
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const normalize=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('pt-BR');
 const cityKey=v=>normalize(v.city)+'|'+v.uf;

@@ -1,0 +1,19 @@
+{
+  "slidesPrincipais": 9,
+  "paginasCreditos": 1,
+  "PNGPrincipal": [
+    1920,
+    1080
+  ],
+  "linkPublico": "https://artur-txr.github.io/passaporte-local/",
+  "HTTPSstatus": 200,
+  "QRDecodificadoNoPDFFinal": true,
+  "rodapeNaCapa": false,
+  "imagensGeradasPorIA": false,
+  "paginasPDFInspecionadas": 10,
+  "roteiroPaginas": 3,
+  "PPTXobjetosEditaveis": true,
+  "PowerPointAberto": false,
+  "testeCelularFisico": false,
+  "layoutOverflow": []
+}
