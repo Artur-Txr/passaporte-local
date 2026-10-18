@@ -1,0 +1,26 @@
+{
+  "default": "petroleo",
+  "palettes": [
+    {
+      "key": "petroleo",
+      "name": "Moderno e elegante",
+      "primary": "#123B4A",
+      "accent": "#E87961",
+      "background": "#F7F9FA"
+    },
+    {
+      "key": "indigo",
+      "name": "Criativo e jovem",
+      "primary": "#4546A0",
+      "accent": "#E9B949",
+      "background": "#F6F7FB"
+    },
+    {
+      "key": "terracota",
+      "name": "Acolhedor e ligado a viagens",
+      "primary": "#AD543E",
+      "accent": "#244858",
+      "background": "#FAF5ED"
+    }
+  ]
+}
