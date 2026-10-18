@@ -2,9 +2,9 @@
 
 ## PDF e protótipo atuais
 
-1. Baixe [o PDF editorial](docs/apresentacao/Passaporte_Local_Editorial.pdf) antes da aula.
+1. Salve sua cópia local do PDF editorial antes da aula.
 2. Abra em tela cheia e apresente as páginas 1 a 9. A décima página é apenas de créditos.
-3. Estude pelo [roteiro](docs/apresentacao/Passaporte_Local_Roteiro_Editorial.pdf). Tempo de referência: cerca de sete minutos.
+3. Estude pelo [roteiro em texto](docs/apresentacao/Roteiro_Editavel.md) ou pela sua cópia local em PDF. Tempo de referência: cerca de sete minutos.
 4. No slide 7, use o botão ou o QR Code para abrir https://artur-txr.github.io/passaporte-local/.
 5. Se a internet falhar, continue pelas capturas do PDF. O PDF baixado pode ser apresentado sem conexão.
 
