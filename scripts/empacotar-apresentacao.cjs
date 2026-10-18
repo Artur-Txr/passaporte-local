@@ -30,5 +30,22 @@ fs.writeFileSync(path.join(destino, 'licencas/DEPENDENCIAS.txt'), 'Avisos das de
 for (const [arquivo, args] of [['Abrir-App.cmd', ''], ['Abrir-App-na-Rede.cmd', ' --rede']]) {
   fs.writeFileSync(path.join(destino, arquivo), `@echo off\r\ncd /d "%~dp0"\r\n"runtime\\node.exe" "scripts\\servidor-apresentacao.cjs"${args}\r\npause\r\n`);
 }
-fs.copyFileSync(path.join(raiz, 'APRESENTACAO_FACULDADE.md'), path.join(destino, 'LEIA-ME.md'));
+fs.writeFileSync(path.join(destino, 'LEIA-ME.md'), [
+  '# Passaporte Local — versão para PC',
+  '',
+  'Pacote para Windows x64, com runtime Node.js incluído.',
+  '',
+  '## Abrir o aplicativo',
+  '',
+  '1. Extraia todo o conteúdo do pacote para uma pasta.',
+  '2. Execute `Abrir-App.cmd` e mantenha o terminal aberto.',
+  '3. Abra no navegador o endereço informado no terminal.',
+  '',
+  'Para acesso por outros dispositivos da mesma rede, execute `Abrir-App-na-Rede.cmd` e use o endereço informado. O firewall e a rede precisam permitir a conexão.',
+  '',
+  'Serviços de autenticação e armazenamento remoto exigem internet e a configuração usada na exportação web.',
+  '',
+  'Os avisos de licença estão na pasta `licencas/`.',
+  '',
+].join('\n'), 'utf8');
 console.log('Pacote preparado em ' + destino);

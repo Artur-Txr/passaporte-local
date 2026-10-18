@@ -1,8 +1,8 @@
 # Passaporte Local
 
-Diário pessoal de passeios, lugares e memórias pelo Brasil. Projeto de Artur Teixeira para Desenvolvimento Mobile, Sistemas de Informação, UniRios. Professor: Edemilton Alcides.
+Diário pessoal de passeios, lugares e memórias pelo Brasil, desenvolvido com React Native, Expo e TypeScript.
 
-## Abrir e apresentar
+## Explorar o protótipo
 
 **[Abrir protótipo navegável com HTTPS](https://artur-txr.github.io/passaporte-local/)**
 
@@ -37,7 +37,7 @@ Copy-Item .env.example .env.local
 npm.cmd run abrir:pc
 ```
 
-Outros modos: `Iniciar-Celular-WiFi.cmd`, `Iniciar-Celular.cmd` e `Iniciar-BlueStacks.cmd`. [Passo a passo completo](PASSO_A_PASSO_FACULDADE.md).
+Outros modos: `Iniciar-Celular-WiFi.cmd`, `Iniciar-Celular.cmd` e `Iniciar-BlueStacks.cmd`.
 
 `10.0.2.2` serve para o BlueStacks. No celular físico, use a URL que o iniciador mostrar. Nenhum `.env.local`, senha, chave administrativa ou dependência instalada faz parte deste repositório.
 
