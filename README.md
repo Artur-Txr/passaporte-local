@@ -6,9 +6,6 @@ Diário pessoal de passeios, lugares e memórias pelo Brasil. Projeto de Artur T
 
 **[Abrir protótipo navegável com HTTPS](https://artur-txr.github.io/passaporte-local/)**
 
-- [PowerPoint editável](docs/apresentacao/Passaporte_Local_Editorial_Editavel.pptx).
-- [Slides em Full HD](docs/apresentacao/slides) e [créditos](docs/apresentacao/Creditos_Fotografias.md).
-- [Como apresentar na faculdade](APRESENTACAO_FACULDADE.md).
 
 ![Capa editorial do Passaporte Local](docs/apresentacao/slides/Slide_01.png)
 
