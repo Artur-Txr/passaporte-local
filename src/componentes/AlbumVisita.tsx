@@ -11,7 +11,7 @@ export default function AlbumVisita({ fotos }: { fotos: string[] }) {
   const ativa = selecionada && fotos.includes(selecionada) ? selecionada : fotos[0];
   return (
     <>
-      <FotoVisita key={ativa} caminho={ativa ?? null} />
+      <FotoVisita key={ativa} caminho={ativa ?? null} fotos={fotos} />
       {fotos.length > 1 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 8 }}>
           {fotos.map((foto, indice) => (

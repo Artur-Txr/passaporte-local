@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { camposPublicacao, type Publicacao } from './comunidadeService';
+import { normalizarTexto } from '../lib/cidades';
 
 export async function consultarFavorito(visitaId: string, usuarioId: string) {
   const { data, error } = await supabase.from('favoritos').select('visita_id').eq('usuario_id', usuarioId).eq('visita_id', visitaId).maybeSingle();
@@ -14,9 +15,11 @@ export async function definirFavorito(visitaId: string, usuarioId: string, salva
   if (error) throw error;
 }
 
-export async function listarFavoritos(usuarioId: string, pagina: number): Promise<Publicacao[]> {
-  const { data, error } = await supabase.from('favoritos').select(`visitas(${camposPublicacao})`)
-    .eq('usuario_id', usuarioId).order('criado_em', { ascending: false }).order('visita_id', { ascending: false }).range(pagina * 20, pagina * 20 + 19);
+export async function listarFavoritos(usuarioId: string, pagina: number, busca = ''): Promise<Publicacao[]> {
+  let consulta = supabase.from('favoritos').select(`visitas!inner(${camposPublicacao})`).eq('usuario_id', usuarioId);
+  const termo = normalizarTexto(busca).replace(/[%_\\]/g, '\\$&');
+  if (termo) consulta = consulta.ilike('visitas.busca_texto', `%${termo}%`);
+  const { data, error } = await consulta.order('criado_em', { ascending: false }).order('visita_id', { ascending: false }).range(pagina * 20, pagina * 20 + 19);
   if (error) throw error;
   return (data ?? []).map(linha => linha.visitas).filter(Boolean) as unknown as Publicacao[];
 }
@@ -32,10 +35,12 @@ export type Notificacao = {
   visitas: { lugar: string } | null;
 };
 
-export async function listarNotificacoes(usuarioId: string, pagina: number): Promise<Notificacao[]> {
-  const { data, error } = await supabase.from('notificacoes')
+export async function listarNotificacoes(usuarioId: string, pagina: number, somenteNaoLidas = false): Promise<Notificacao[]> {
+  let consulta = supabase.from('notificacoes')
     .select('id,visita_id,ator_id,tipo,lida_em,criado_em,ator:perfis!notificacoes_ator_id_fkey(nome,avatar_path),visitas(lugar)')
-    .eq('usuario_id', usuarioId).order('criado_em', { ascending: false }).order('id', { ascending: false }).range(pagina * 20, pagina * 20 + 19);
+    .eq('usuario_id', usuarioId);
+  if (somenteNaoLidas) consulta = consulta.is('lida_em', null);
+  const { data, error } = await consulta.order('criado_em', { ascending: false }).order('id', { ascending: false }).range(pagina * 20, pagina * 20 + 19);
   if (error) throw error;
   return (data ?? []) as unknown as Notificacao[];
 }
@@ -48,5 +53,11 @@ export async function contarNaoLidas(usuarioId: string) {
 
 export async function marcarLida(id: string, usuarioId: string) {
   const { error } = await supabase.from('notificacoes').update({ lida_em: new Date().toISOString() }).eq('id', id).eq('usuario_id', usuarioId);
+  if (error) throw error;
+}
+
+export async function marcarTodasLidas(usuarioId: string) {
+  if (!usuarioId) throw new Error('Sessão necessária.');
+  const { error } = await supabase.from('notificacoes').update({ lida_em: new Date().toISOString() }).eq('usuario_id', usuarioId).is('lida_em', null);
   if (error) throw error;
 }

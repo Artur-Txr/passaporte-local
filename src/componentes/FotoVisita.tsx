@@ -4,7 +4,6 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Image,
-  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -12,15 +11,18 @@ import {
   View,
 } from 'react-native';
 import { useAutenticacao } from '../contextos/AutenticacaoContext';
+import GaleriaFotos from './GaleriaFotos';
 
 type FotoVisitaProps = {
   caminho: string | null;
   compacto?: boolean;
+  fotos?: string[];
 };
 
 export default function FotoVisita({
   caminho,
   compacto = false,
+  fotos,
 }: FotoVisitaProps) {
   const { sessao } = useAutenticacao();
   const { height } = useWindowDimensions();
@@ -43,12 +45,7 @@ export default function FotoVisita({
 
   return (
     <View style={styles.container}>
-      <Modal visible={ampliada && !!url} transparent animationType="fade" onRequestClose={() => setAmpliada(false)}>
-        <View style={{ flex: 1, backgroundColor: "#000E", justifyContent: "center", padding: 16 }}>
-          {url && <Image source={{ uri: url }} style={{ width: "100%", height: "80%" }} resizeMode="contain" accessibilityLabel="Foto completa da visita" />}
-          <Pressable accessibilityRole="button" onPress={() => setAmpliada(false)} style={{ alignSelf: "center", padding: 16 }}><Text style={{ color: "#FFF", fontWeight: "700" }}>Fechar foto</Text></Pressable>
-        </View>
-      </Modal>
+      {ampliada && <GaleriaFotos fotos={fotos?.length ? fotos : [caminho]} inicial={caminho} fechar={() => setAmpliada(false)} />}
       {url && !erro && (
         <Pressable accessibilityRole="button" accessibilityLabel="Ampliar foto da visita" onPress={() => setAmpliada(true)}>
         <Image
