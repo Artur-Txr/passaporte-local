@@ -22,7 +22,6 @@ function Navegacao({ fontesProntas }: { fontesProntas: boolean }) {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="recuperar-senha" />
-      <Stack.Screen name="auth/callback" />
 
       <Stack.Protected guard={!conectado}>
         <Stack.Screen name="login" />

@@ -11,7 +11,6 @@ Aplicativo mobile para registrar passeios, guardar fotos e compartilhar descober
 ## Recursos
 
 - Cadastro, login e recuperação de senha.
-- Integração com Google por OAuth e PKCE, com ativação do provedor descrita em [LOGIN-GOOGLE.md](LOGIN-GOOGLE.md).
 - Perfil com nome e fotografia.
 - Visitas com até cinco fotos e escolha da capa.
 - Busca por lugar ou cidade e filtros por categoria.

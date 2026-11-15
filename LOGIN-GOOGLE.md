@@ -1,8 +1,12 @@
-# Login com Google
+# Login com Google — suspenso
+
+O login Google foi retirado das telas, das rotas e das dependências diretas do aplicativo. O provedor foi desativado no Supabase. O acesso atual usa e-mail e senha e funciona no Expo Go.
+
+O projeto e as credenciais no Google Cloud foram preservados para retomada futura. As instruções abaixo documentam a integração anterior. O código pode ser recuperado pelo histórico do Git, a partir do commit `788e32e`.
 
 ## Configuração atual
 
-O projeto Google Cloud [Passaporte Local](https://console.cloud.google.com/auth/overview?project=quixotic-vent-514813-f4) está configurado. O cliente OAuth Web foi vinculado ao Supabase e o provedor Google está ativado. Os retornos `passaportelocal://auth/callback` e `http://localhost:8081/auth/callback` estão autorizados no Supabase.
+O projeto Google Cloud [Passaporte Local](https://console.cloud.google.com/auth/overview?project=quixotic-vent-514813-f4) está configurado. O cliente OAuth Web permanece registrado no Supabase, com o provedor Google desativado. Os retornos `passaportelocal://auth/callback` e `http://localhost:8081/auth/callback` estão autorizados no Supabase.
 
 O aplicativo Google está em modo de testes, com a conta do proprietário incluída na lista de usuários de teste. Os escopos configurados são `openid`, `userinfo.email` e `userinfo.profile`. O segredo do cliente fica no Supabase e não é distribuído com o aplicativo.
 
@@ -10,7 +14,7 @@ Foi verificado que o Supabase inicia o fluxo OAuth com PKCE e redireciona para o
 
 ## Integração do aplicativo
 
-As telas de login e cadastro incluem Entrar com Google. A autorização acontece no navegador do sistema, e o Supabase troca o código de autorização por uma sessão com PKCE. O perfil usa o nome da conta Google quando não há um nome definido no aplicativo.
+Na integração anterior, as telas de login e cadastro incluíam Entrar com Google. A autorização acontece no navegador do sistema, e o Supabase troca o código de autorização por uma sessão com PKCE. O perfil usa o nome da conta Google quando não há um nome definido no aplicativo.
 
 O acesso com e-mail e senha continua disponível. O login Google exige a configuração do provedor e uma versão instalada do aplicativo. O Expo Go não oferece suporte ao retorno OAuth com o esquema próprio deste projeto.
 
