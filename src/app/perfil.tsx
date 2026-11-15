@@ -1,3 +1,4 @@
+import BotaoNotificacoes from '../componentes/BotaoNotificacoes';
 import { paleta } from "../lib/paleta";
 import Text from "../componentes/Texto";
 import Avatar from '../componentes/Avatar';
@@ -70,10 +71,11 @@ export default function Perfil() {
       <ScrollView contentContainerStyle={visual.content}>
         <Text style={[visual.meta, { color: paleta.petroleo, fontWeight: "800", letterSpacing: 1.2 }]}>SEU DIÁRIO TEM A SUA CARA</Text>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <Text accessibilityRole="header" style={visual.title}>Meu perfil</Text>
-          <Pressable accessibilityRole="button" onPress={() => router.push("./editar-perfil")} style={{ paddingVertical: 12 }}>
-            <Text style={visual.link}>Editar perfil</Text>
-          </Pressable>
+          <Text accessibilityRole="header" style={[visual.title, { flex: 1 }]}>Meu perfil</Text>
+          <View style={{ flexDirection: "row", gap: 8, alignItems: "center", marginLeft: 8 }}><BotaoNotificacoes />
+          <Pressable accessibilityRole="button" accessibilityLabel="Editar perfil" onPress={() => router.push("./editar-perfil")} style={{ width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: paleta.borda }}>
+            <Icone nome="editar" tamanho={22} />
+          </Pressable></View>
         </View>
         {emailPendente === "1" && (
           <Text accessibilityLiveRegion="polite" style={visual.subtitle}>

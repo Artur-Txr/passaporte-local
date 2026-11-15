@@ -19,7 +19,7 @@ export type Publicacao = {
 
 const tamanhoPagina = 20;
 
-export const camposPublicacao = 'id,usuario_id,lugar,cidade,uf,categoria,data_visita,comentario,foto_path,fotos_adicionais,latitude,longitude,perfis(nome,avatar_path)';
+export const camposPublicacao = 'id,usuario_id,lugar,cidade,uf,categoria,data_visita,comentario,foto_path,fotos_adicionais,latitude,longitude,perfis!visitas_usuario_id_fkey(nome,avatar_path)';
 
 export async function listarPublicacoes(pagina: number, filtros: { busca?: string; categoria?: string; usuarioId?: string } = {}): Promise<Publicacao[]> {
   const inicio = pagina * tamanhoPagina;

@@ -1,3 +1,4 @@
+import BotaoNotificacoes from '../componentes/BotaoNotificacoes';
 import { paleta } from "../lib/paleta";
 import Text from "../componentes/Texto";
 import Avatar from '../componentes/Avatar';
@@ -66,6 +67,8 @@ export default function Inicio() {
             <Text style={visual.subtitle}>Olá, {nome.split(" ")[0]}</Text>
             <Text accessibilityRole="header" style={visual.title}>Meu passaporte</Text>
           </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginLeft: 8 }}>
+          <BotaoNotificacoes />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Meu perfil"
@@ -81,8 +84,8 @@ export default function Inicio() {
           >
             <Avatar nome={nome} caminho={perfilAtual?.avatar_path} tamanho={48} />
           </Pressable>
+          </View>
         </View>
-        <AtalhosPessoais />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Ver minhas visitas"
@@ -138,6 +141,7 @@ export default function Inicio() {
           </View>
           <Icone nome="proximo" tamanho={24} cor={paleta.coral} />
         </Pressable>
+        <AtalhosPessoais />
         <View
           style={{
             flexDirection: "row",

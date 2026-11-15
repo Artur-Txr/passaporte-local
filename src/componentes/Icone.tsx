@@ -23,6 +23,9 @@ const glifos = {
   expandir: "\ue5cf",
   proximo: "\ue5cc",
   atualizar: "\ue5d5",
+  notificacoes: "\ue7f4",
+  mapa: "\ue55b",
+  salvar: "\ue866",
 };
 export default function Icone({
   nome,
