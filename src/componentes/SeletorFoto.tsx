@@ -1,3 +1,5 @@
+import { paleta } from "../lib/paleta";
+import Text from "./Texto";
 import { Dialogo } from "./Design";
 import Icone from "./Icone";
 import { useRef, useState } from "react";
@@ -7,7 +9,7 @@ import {
   Modal,
   Pressable,
   StyleSheet,
-  Text,
+
   View,
 } from "react-native";
 import {
@@ -70,7 +72,7 @@ export default function SeletorFoto({
           minHeight: fotoAtual && !foto ? 48 : 95,
           flexDirection: fotoAtual && !foto ? "row" : "column",
           gap: fotoAtual && !foto ? 8 : 0,
-          backgroundColor: "#F0EDE2",
+          backgroundColor: paleta.claro,
           overflow: "hidden",
           alignItems: "center",
           justifyContent: "center",
@@ -84,7 +86,7 @@ export default function SeletorFoto({
           />
         ) : (
           <>
-            {!fotoAtual && <View pointerEvents="none" style={{ position: "absolute", right: -8, bottom: -10, width: 110, height: 85, transform: [{ rotate: "12deg" }], opacity: 0.55, borderWidth: 6, borderColor: "#FCFAF3" }}>
+            {!fotoAtual && <View pointerEvents="none" style={{ position: "absolute", right: -8, bottom: -10, width: 110, height: 85, transform: [{ rotate: "12deg" }], opacity: 0.55, borderWidth: 6, borderColor: "#FFFFFF" }}>
               <Image source={require("../../assets/prototipo/paisagem.png")} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
             </View>}
             <Icone nome="camera" tamanho={30} />

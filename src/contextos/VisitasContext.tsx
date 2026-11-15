@@ -1,4 +1,4 @@
-import { confirmarUpload, revisarUploadsAntigos } from '../servicos/uploadsPendentesService';
+import { confirmarUpload, registrarUpload, revisarUploadsAntigos } from '../servicos/uploadsPendentesService';
 import {
   createContext,
   useContext,
@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Alert } from 'react-native';
-import type { Visita } from '../dados/visitas';
+import { fotosDaVisita, type Visita } from '../dados/visitas';
 import { excluirFoto } from '../servicos/fotosService';
 import {
   atualizarVisita,
@@ -164,7 +164,7 @@ function DadosVisitasProvider({
     );
 
     conferirSessaoAtiva();
-    if (novaVisita.foto_path) await confirmarUpload(idUsuario, novaVisita.foto_path);
+    for (const caminho of fotosDaVisita(novaVisita)) await confirmarUpload(idUsuario, caminho);
     conferirSessaoAtiva();
 
     setVisitas((listaAtual) => [
@@ -181,7 +181,7 @@ function DadosVisitasProvider({
       throw new Error('A visita não foi encontrada.');
     }
 
-    const caminhoFoto = visita.foto_path ?? null;
+    const caminhos = fotosDaVisita(visita);
 
     await removerVisita(idUsuario, id);
 
@@ -191,17 +191,16 @@ function DadosVisitasProvider({
       listaAtual.filter((item) => item.id !== id),
     );
 
-    if (caminhoFoto) {
-      try {
-        await excluirFoto(idUsuario, caminhoFoto);
-      } catch {
-        if (ativo.current) {
-          Alert.alert(
-            'Visita excluída',
-            'A visita foi removida, mas não foi possível apagar o arquivo da foto do armazenamento.',
-          );
-        }
+    let falhou = false;
+    for (const caminho of caminhos) {
+      try { await excluirFoto(idUsuario, caminho); }
+      catch {
+        falhou = true;
+        await registrarUpload(idUsuario, caminho);
       }
+    }
+    if (falhou && ativo.current) {
+      Alert.alert('Visita excluída', 'Algumas fotos não puderam ser removidas do armazenamento. O app tentará novamente.');
     }
   }
 
@@ -210,6 +209,7 @@ function DadosVisitasProvider({
     dados: DadosVisita,
   ) {
     const idUsuario = obterUsuarioId();
+    const anterior = visitas.find((visita) => visita.id === id);
 
     const visitaAtualizada = await atualizarVisita(
       idUsuario,
@@ -218,7 +218,13 @@ function DadosVisitasProvider({
     );
 
     conferirSessaoAtiva();
-    if (visitaAtualizada.foto_path) await confirmarUpload(idUsuario, visitaAtualizada.foto_path);
+    const caminhos = fotosDaVisita(visitaAtualizada);
+    for (const caminho of caminhos) await confirmarUpload(idUsuario, caminho);
+    if (anterior) {
+      for (const caminho of fotosDaVisita(anterior)) {
+        if (!caminhos.includes(caminho)) await registrarUpload(idUsuario, caminho);
+      }
+    }
     conferirSessaoAtiva();
 
     setVisitas((listaAtual) =>

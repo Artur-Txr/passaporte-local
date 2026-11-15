@@ -1,3 +1,4 @@
+import { paleta } from "../lib/paleta";
 import { router } from 'expo-router';
 import { Image, Pressable, Text, View } from 'react-native';
 import type { Visita } from '../dados/visitas';
@@ -5,19 +6,20 @@ import useFotoPrivada from './useFotoPrivada';
 import useLayoutResponsivo from './useLayoutResponsivo';
 import Icone from './Icone';
 import { cores } from './Design';
+import { chaveCidade } from '../lib/cidades';
 
-export default function CartaoCidade({ nome, visita, quantidade, localidades, unico }: {
-  nome: string; visita: Visita; quantidade: number; localidades: string[]; unico: boolean;
+export default function CartaoCidade({ nome, visita, quantidade, localidades, unico, fotoLocal }: {
+  nome: string; visita: Visita; quantidade: number; localidades: string[]; unico: boolean; fotoLocal?: number;
 }) {
   const { compacto } = useLayoutResponsivo();
   const { url, erro, carregando, tentarNovamente, falhar } = useFotoPrivada(visita.foto_path ?? null);
-  return <Pressable accessibilityRole="button" accessibilityLabel={`Abrir visita de ${nome}, ${quantidade} ${quantidade === 1 ? 'visita' : 'visitas'}`}
-    onPress={() => router.push({ pathname: '/detalhes', params: { id: visita.id } })}
-    style={({ pressed }) => ({ width: unico || compacto ? '100%' : '48%', borderRadius: 14, borderWidth: 1, borderColor: cores.borda, backgroundColor: '#FCFAF3', padding: 10, gap: 10, opacity: pressed ? 0.8 : 1 })}>
+  return <Pressable accessibilityRole="button" accessibilityLabel={`Ver visitas em ${nome}`}
+    onPress={() => router.push({ pathname: './cidade', params: { chave: chaveCidade(visita.cidade, visita.uf) } })}
+    style={({ pressed }) => ({ width: unico || compacto ? '100%' : '48%', borderRadius: 14, borderWidth: 1, borderColor: cores.borda, backgroundColor: '#FFFFFF', padding: 10, gap: 10, opacity: pressed ? 0.8 : 1 })}>
     <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-      {url && !erro ? <Image source={{ uri: url }} accessibilityLabel={`Foto de ${visita.lugar}`} resizeMode="cover" onError={falhar} style={{ width: 72, height: 72, borderRadius: 10, backgroundColor: '#E8EBDD' }} /> :
-        <Pressable accessibilityRole="button" accessibilityLabel="Tentar carregar foto da cidade" disabled={!erro || carregando} onPress={evento => { evento.stopPropagation(); tentarNovamente(); }} style={{ width: 72, height: 72, borderRadius: 10, backgroundColor: '#E8EBDD', alignItems: 'center', justifyContent: 'center' }}>
-          <Icone nome={erro ? 'atualizar' : 'cidade'} tamanho={26} cor="#687958" />
+      {fotoLocal || (url && !erro) ? <Image source={fotoLocal ?? { uri: url ?? undefined }} accessibilityLabel={`Foto de ${visita.lugar}`} resizeMode="cover" onError={fotoLocal ? undefined : falhar} style={{ width: 72, height: 72, borderRadius: 10, backgroundColor: paleta.claro }} /> :
+        <Pressable accessibilityRole="button" accessibilityLabel="Tentar carregar foto da cidade" disabled={!erro || carregando} onPress={evento => { evento.stopPropagation(); tentarNovamente(); }} style={{ width: 72, height: 72, borderRadius: 10, backgroundColor: paleta.claro, alignItems: 'center', justifyContent: 'center' }}>
+          <Icone nome={erro ? 'atualizar' : 'cidade'} tamanho={26} cor={paleta.petroleo} />
           {!!erro && <Text style={{ fontSize: 10, color: cores.verde }}>Tentar de novo</Text>}
         </Pressable>}
       <View style={{ flex: 1, minWidth: 0, gap: 5 }}>

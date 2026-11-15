@@ -96,14 +96,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   estrela: {
-    color: '#53645B',
+    color: '#5D6D76',
     fontSize: 36,
   },
   estrelaSelecionada: {
     color: '#C76B48',
   },
   descricao: {
-    color: '#53645B',
+    color: '#5D6D76',
     fontSize: 14,
     marginTop: 8,
   },
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   textoLimpar: {
-    color: '#183F35',
+    color: '#123B4A',
     fontSize: 14,
     fontWeight: '700',
   },

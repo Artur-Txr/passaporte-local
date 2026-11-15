@@ -1,3 +1,4 @@
+import { paleta } from "../lib/paleta";
 import useFotoPrivada from "./useFotoPrivada";
 import { useState } from 'react';
 import {
@@ -7,6 +8,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useAutenticacao } from '../contextos/AutenticacaoContext';
@@ -21,6 +23,7 @@ export default function FotoVisita({
   compacto = false,
 }: FotoVisitaProps) {
   const { sessao } = useAutenticacao();
+  const { height } = useWindowDimensions();
   const usuarioId = sessao?.user.id ?? null;
 
   const [ampliada, setAmpliada] = useState(false);
@@ -51,7 +54,7 @@ export default function FotoVisita({
         <Image
           key={url}
           source={{ uri: url }}
-          style={[styles.image, compacto && { height: 140, aspectRatio: undefined }]}
+          style={[styles.image, { height: compacto ? 140 : Math.min(210, Math.max(140, height * 0.27)) }]}
           resizeMode="cover"
           accessibilityLabel="Foto da visita"
 
@@ -64,7 +67,7 @@ export default function FotoVisita({
 
       {carregando && !erro && (
         <View style={styles.status}>
-          <ActivityIndicator size="large" color="#183F35" />
+          <ActivityIndicator size="large" color={paleta.petroleo} />
           <Text style={styles.message}>Carregando foto...</Text>
         </View>
       )}
@@ -99,9 +102,8 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    aspectRatio: 1.35,
     borderRadius: 16,
-    backgroundColor: '#F7F1E5',
+    backgroundColor: paleta.papel,
   },
   status: {
     alignItems: 'center',
@@ -109,13 +111,13 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   message: {
-    color: '#53645B',
+    color: paleta.suave,
     fontSize: 15,
     lineHeight: 24,
     marginTop: 12,
   },
   button: {
-    backgroundColor: '#183F35',
+    backgroundColor: paleta.petroleo,
     borderRadius: 14,
     paddingHorizontal: 22,
     paddingVertical: 14,

@@ -1,3 +1,5 @@
+import { paleta } from "../lib/paleta";
+import Text from "../componentes/Texto";
 import { Cabecalho, Decoracao } from "../componentes/Design";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
@@ -8,7 +10,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
+
   TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -179,7 +181,7 @@ export default function RecuperarSenha() {
                 onChangeText={setEmail}
                 editable={!ocupado}
                 placeholder="seuemail@exemplo.com"
-                placeholderTextColor="#7C827A"
+                placeholderTextColor={paleta.suave}
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
@@ -216,7 +218,7 @@ export default function RecuperarSenha() {
                 onChangeText={setLink}
                 editable={!ocupado}
                 placeholder="https://…"
-                placeholderTextColor="#7C827A"
+                placeholderTextColor={paleta.suave}
                 autoCapitalize="none"
                 autoCorrect={false}
                 accessibilityLabel="Link de recuperação"
@@ -318,25 +320,25 @@ export default function RecuperarSenha() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#F8F5EC" },
+  screen: { flex: 1, backgroundColor: paleta.papel },
   content: { width: "100%", maxWidth: 600, alignSelf: "center", flexGrow: 1, padding: 20, paddingBottom: 40 },
   back: { alignSelf: "flex-start", paddingVertical: 11, marginBottom: 20 },
-  link: { color: "#183F35", fontSize: 14, fontWeight: "600" },
+  link: { color: paleta.petroleo, fontSize: 14, fontWeight: "600" },
   label: {
-    color: "#C76B48",
+    color: paleta.petroleo,
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 2,
   },
-  title: { color: "#183F35", fontSize: 29, fontWeight: "800", marginTop: 20 },
+  title: { color: paleta.petroleo, fontSize: 29, fontWeight: "800", marginTop: 20 },
   description: {
-    color: "#53645B",
+    color: paleta.suave,
     fontSize: 14,
     lineHeight: 24,
     marginTop: 16,
   },
   field: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 13,
     fontWeight: "600",
     marginTop: 14,
@@ -344,15 +346,15 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: "#FFF",
-    color: "#183F35",
+    color: paleta.petroleo,
     borderWidth: 1,
-    borderColor: "#DED9CE",
+    borderColor: paleta.borda,
     borderRadius: 9,
     padding: 16,
     fontSize: 16,
   },
   button: {
-    backgroundColor: "#183F35",
+    backgroundColor: paleta.petroleo,
     borderRadius: 9,
     padding: 13,
     alignItems: "center",

@@ -1,3 +1,5 @@
+import { paleta } from "../lib/paleta";
+import Text from "../componentes/Texto";
 import { mensagemErroAuth } from "../lib/errosAutenticacao";
 import Icone from "../componentes/Icone";
 import CampoTexto from "../componentes/CampoTexto";
@@ -11,7 +13,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
+
   TextInput,
   View,
 } from "react-native";
@@ -140,16 +142,16 @@ export default function Cadastro() {
           <Cabecalho alinharInicio />
           {!!mensagem && <Text accessibilityLiveRegion="polite" style={{ color: "#9B4028", marginVertical: 12 }}>{mensagem}</Text>}
 
-          <Text style={styles.title}>Crie seu{"\n"}passaporte</Text>
+          <Text style={styles.title}>Crie seu{"\n"}passaporte.</Text>
 
-          <Text style={styles.description}>Suas memórias começam aqui.</Text>
+          <Text style={styles.description}>Um lugar para guardar as suas histórias.</Text>
 
           <Text style={styles.fieldLabel}>Nome</Text>
 
           <CampoTexto icone="perfil"
             style={styles.input}
             placeholder="Como você se chama?"
-            placeholderTextColor="#7C827A"
+            placeholderTextColor={paleta.suave}
             value={nome}
             onChangeText={setNome}
             maxLength={80}
@@ -163,7 +165,7 @@ export default function Cadastro() {
           <CampoTexto icone="email"
             style={styles.input}
             placeholder="seuemail@exemplo.com"
-            placeholderTextColor="#7C827A"
+            placeholderTextColor={paleta.suave}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -179,7 +181,7 @@ export default function Cadastro() {
             <CampoTexto icone="senha"
               style={[styles.input, { paddingRight: 48 }]}
               placeholder="Pelo menos 8 caracteres"
-              placeholderTextColor="#7C827A"
+              placeholderTextColor={paleta.suave}
               value={senha}
               onChangeText={setSenha}
               secureTextEntry={!mostrarSenha}
@@ -194,9 +196,9 @@ export default function Cadastro() {
                 mostrarSenha ? "Ocultar senha" : "Mostrar senha"
               }
               onPress={() => setMostrarSenha((v) => !v)}
-              style={{ position: "absolute", right: 8, top: 4, padding: 8 }}
+              style={{ position: "absolute", right: 4, top: 4, minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center" }}
             >
-              <Icone nome={mostrarSenha ? "olhoFechado" : "olho"} tamanho={20} cor="#53645B" />
+              <Icone nome={mostrarSenha ? "olhoFechado" : "olho"} tamanho={20} cor={paleta.suave} />
             </Pressable>
           </View>
 
@@ -206,7 +208,7 @@ export default function Cadastro() {
             <CampoTexto icone="senha"
               style={[styles.input, { paddingRight: 48 }]}
               placeholder="Digite a senha novamente"
-              placeholderTextColor="#7C827A"
+              placeholderTextColor={paleta.suave}
               value={confirmacao}
               onChangeText={setConfirmacao}
               secureTextEntry={!mostrarSenha}
@@ -220,9 +222,9 @@ export default function Cadastro() {
                 mostrarSenha ? "Ocultar senha" : "Mostrar senha"
               }
               onPress={() => setMostrarSenha((v) => !v)}
-              style={{ position: "absolute", right: 8, top: 4, padding: 8 }}
+              style={{ position: "absolute", right: 4, top: 4, minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center" }}
             >
-              <Icone nome={mostrarSenha ? "olhoFechado" : "olho"} tamanho={20} cor="#53645B" />
+              <Icone nome={mostrarSenha ? "olhoFechado" : "olho"} tamanho={20} cor={paleta.suave} />
             </Pressable>
           </View>
 
@@ -245,7 +247,7 @@ export default function Cadastro() {
             onPress={() => router.replace("/login")}
             style={{ alignItems: "center", padding: 16 }}
           >
-            <Text style={{ color: "#BC592F", fontSize: 13 }}>
+            <Text style={{ color: "#B74D39", fontSize: 13 }}>
               Já tenho conta: Entrar
             </Text>
           </Pressable>
@@ -258,7 +260,7 @@ export default function Cadastro() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8F5EC",
+    backgroundColor: paleta.papel,
   },
   keyboard: {
     flex: 1,
@@ -266,9 +268,9 @@ const styles = StyleSheet.create({
   content: { width: "100%", maxWidth: 460, alignSelf: "center",
     flexGrow: 1,
     padding: 20,
-    paddingBottom: 176,
-    paddingTop: 24,
-    justifyContent: "center",
+    paddingBottom: 32,
+    paddingTop: 32,
+    justifyContent: "flex-start",
   },
   backButton: {
     alignSelf: "flex-start",
@@ -277,49 +279,52 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   backText: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 14,
     fontWeight: "600",
   },
   label: {
-    color: "#C76B48",
+    color: paleta.petroleo,
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 2,
   },
   title: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 29,
     fontWeight: "800",
     marginTop: 12,
   },
   description: {
-    color: "#53645B",
+    color: paleta.suave,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 8,
   },
   fieldLabel: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 13,
     fontWeight: "600",
     marginTop: 10,
     marginBottom: 5,
   },
   input: {
-    backgroundColor: "#F6F3EB",
-    color: "#183F35",
+    backgroundColor: "#FFFFFF",
+    color: paleta.petroleo,
     borderWidth: 1,
-    borderColor: "#DED9CE",
-    borderRadius: 9,
+    borderColor: paleta.borda,
+    borderRadius: 14,
     paddingHorizontal: 12,
-    paddingVertical: 11,
-    fontSize: 14,
+    minHeight: 52,
+    paddingVertical: 14,
+    fontSize: 16,
   },
   button: {
-    backgroundColor: "#183F35",
+    backgroundColor: paleta.petroleo,
     borderRadius: 18,
-    padding: 13,
+    minHeight: 52,
+    justifyContent: "center",
+    padding: 15,
     alignItems: "center",
     marginTop: 12,
   },

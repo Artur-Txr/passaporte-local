@@ -8,7 +8,14 @@ export type Visita = {
   comentario: string;
   avaliacao?: number | null;
   foto_path?: string | null;
+  fotos_adicionais?: string[];
+  latitude?: number | null;
+  longitude?: number | null;
 };
+
+export function fotosDaVisita(visita: Visita): string[] {
+  return [...new Set([...(visita.foto_path ? [visita.foto_path] : []), ...(visita.fotos_adicionais ?? [])])];
+}
 
 export const visitas: Visita[] = [
   {

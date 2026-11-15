@@ -1,3 +1,4 @@
+import { paleta } from "../lib/paleta";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -8,6 +9,7 @@ import {
   useAutenticacao,
 } from "../contextos/AutenticacaoContext";
 import { VisitasProvider } from "../contextos/VisitasContext";
+import { FeedbackProvider } from '../contextos/FeedbackContext';
 
 function Navegacao({ fontesProntas }: { fontesProntas: boolean }) {
   const { sessao, carregando, erro } = useAutenticacao();
@@ -29,11 +31,20 @@ function Navegacao({ fontesProntas }: { fontesProntas: boolean }) {
       <Stack.Protected guard={conectado}>
         <Stack.Screen name="inicio" />
         <Stack.Screen name="visitas" />
+        <Stack.Screen name="explorar" />
+        <Stack.Screen name="publicacao" />
+        <Stack.Screen name="perfil-publico" />
+        <Stack.Screen name="favoritos" />
+        <Stack.Screen name="notificacoes" />
+        <Stack.Screen name="mapa" />
         <Stack.Screen name="nova-visita" />
         <Stack.Screen name="detalhes" />
         <Stack.Screen name="editar-visita" />
         <Stack.Screen name="passaporte" />
         <Stack.Screen name="perfil" />
+        <Stack.Screen name="editar-perfil" />
+        <Stack.Screen name="cidade" />
+        <Stack.Screen name="colecao-prototipo" />
       </Stack.Protected>
     </Stack>
   );
@@ -41,10 +52,12 @@ function Navegacao({ fontesProntas }: { fontesProntas: boolean }) {
 
 export default function Layout() {
   const [fontes, erroFontes] = useFonts({
-    Simbolos: require("@expo-google-fonts/material-symbols/400Regular/MaterialSymbols_400Regular.ttf"),
+    Manrope: require("../../assets/identidade/Manrope.ttf"),
+    Simbolos: require("../../assets/identidade/Simbolos.ttf"),
   });
   return (
     <AutenticacaoProvider>
+      <FeedbackProvider>
       <VisitasProvider>
         <View style={styles.workspace}>
           <View style={styles.appFrame}>
@@ -53,6 +66,7 @@ export default function Layout() {
           </View>
         </View>
       </VisitasProvider>
+      </FeedbackProvider>
     </AutenticacaoProvider>
   );
 }
@@ -60,7 +74,7 @@ export default function Layout() {
 const styles = StyleSheet.create({
   workspace: {
     flex: 1,
-    backgroundColor: "#E9E2D5",
+    backgroundColor: paleta.claro,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -76,13 +90,13 @@ const styles = StyleSheet.create({
           borderRadius: 22,
           overflow: "hidden" as const,
           borderWidth: 1,
-          borderColor: "#D8D1C3",
+          borderColor: paleta.borda,
         }
       : {}),
   },
   loading: {
     flex: 1,
-    backgroundColor: "#F7F1E5",
+    backgroundColor: paleta.papel,
     justifyContent: "center",
     alignItems: "center",
   },

@@ -1,22 +1,21 @@
+import { paleta } from "../lib/paleta";
+import Text from "../componentes/Texto";
 import { apresentarLembranca } from "../lib/lembranca";
 import { localizacaoVisita } from "../lib/cidades";
 import EstadoConsulta from "../componentes/EstadoConsulta";
 import { Dialogo } from "../componentes/Design";
-import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import { formatarDataVisita } from "../lib/formatacaoData";
 import Icone from "../componentes/Icone";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
-import { Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Modal, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useVisitas } from "../contextos/VisitasContext";
-import FotoVisita from "../componentes/FotoVisita";
-import AvaliacaoEstrelas from "../componentes/AvaliacaoEstrelas";
-import CarimboVisita from "../componentes/CarimboVisita";
+import AlbumVisita from "../componentes/AlbumVisita";
+import CreditosFotos from '../componentes/CreditosFotos';
+import { fotosDaVisita } from "../dados/visitas";
 import { Cabecalho, Decoracao, cores, visual } from "../componentes/Design";
 export default function Detalhes() {
-  const { compacto, largura } = useLayoutResponsivo();
-  const empilhar = compacto || largura < 400;
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const { visitas, excluirVisita, carregando, erro, recarregarVisitas } = useVisitas();
   const visita = visitas.find((v) => v.id === (Array.isArray(id) ? id[0] : id));
@@ -50,7 +49,8 @@ export default function Detalhes() {
         <Cabecalho titulo="Detalhes da visita" voltar />
         {visita ? (
           <>
-            <FotoVisita caminho={visita.foto_path ?? null} />
+            <AlbumVisita key={visita.id} fotos={fotosDaVisita(visita)} />
+            <CreditosFotos fotos={fotosDaVisita(visita)} />
             <Text style={[visual.title, { fontSize: 27, marginTop: 14 }]}>
               {visita.lugar}
             </Text>
@@ -58,44 +58,19 @@ export default function Detalhes() {
               {localizacao.cidade}, {visita.uf}
             </Text>
             {!!localizacao.localidade && <Text style={visual.meta}>Localidade: {localizacao.localidade}</Text>}
+            <View style={{ marginTop: 14 }}>
             <View
               style={{
-                flexDirection: empilhar ? "column" : "row",
-                alignItems: empilhar ? "stretch" : "center",
-                marginTop: 14,
+                alignSelf: "flex-start",
+                backgroundColor: paleta.claro,
+                borderRadius: 7,
+                padding: 8,
               }}
             >
-              <View style={{ flex: empilhar ? undefined : 1 }}>
-                <View
-                  style={{
-                    alignSelf: "flex-start",
-                    backgroundColor: "#E1E5D4",
-                    borderRadius: 7,
-                    padding: 8,
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><Icone nome={visita.categoria === 'Parque' ? 'natureza' : visita.categoria === 'Museu' ? 'museu' : visita.categoria === 'Cafeteria' ? 'cafe' : 'lugar'} tamanho={16} /><Text style={{ color: cores.verde, fontSize: 12 }}>{visita.categoria}</Text></View>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 14 }}><Icone nome="calendario" tamanho={17} /><Text style={[visual.meta, { flexShrink: 1 }]}>{formatarDataVisita(visita.data, true)}</Text></View>
-                {texto.dataAproximada && <Text style={[visual.meta, { marginTop: 6, color: cores.laranja }]}>Data aproximada</Text>}
-                <Text style={[visual.meta, { marginTop: 14 }]}>
-                  Minha avaliação
-                </Text>
-                <AvaliacaoEstrelas valor={visita.avaliacao ?? null} />
-              </View>
-              <View
-                style={{
-                  width: 148,
-                  alignSelf: empilhar ? "center" : "auto",
-                  height: 160,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <View style={{ transform: [{ scale: 0.8 }] }}>
-                  <CarimboVisita visita={visita} />
-                </View>
-              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><Icone nome={visita.categoria === 'Parque' ? 'natureza' : visita.categoria === 'Museu' ? 'museu' : visita.categoria === 'Cafeteria' ? 'cafe' : 'lugar'} tamanho={16} /><Text style={{ color: cores.verde, fontSize: 12 }}>{visita.categoria}</Text></View>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 14 }}><Icone nome="calendario" tamanho={17} /><Text style={[visual.meta, { flexShrink: 1 }]}>{formatarDataVisita(visita.data, true)}</Text></View>
+            {texto.dataAproximada && <Text style={[visual.meta, { marginTop: 6, color: cores.laranja }]}>Data aproximada</Text>}
             </View>
             <View
               style={{
@@ -157,7 +132,7 @@ export default function Detalhes() {
               style={{
                 alignSelf: "center",
                 padding: 12,
-                backgroundColor: "#F5E4D7",
+                backgroundColor: paleta.coralClaro,
                 borderRadius: 30,
                 marginBottom: 12,
               }}
@@ -170,7 +145,7 @@ export default function Detalhes() {
               Excluir esta visita?
             </Text>
             <Text style={[visual.subtitle, { textAlign: "center" }]}>
-              A visita e a foto serão removidas do seu passaporte.
+              A visita e suas fotos serão removidas do seu passaporte.
             </Text>
             <Pressable
               accessibilityRole="button"

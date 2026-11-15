@@ -1,3 +1,4 @@
+import { paleta } from "../lib/paleta";
 import { Text } from "react-native";
 const glifos = {
   inicio: "\ue88a",
@@ -26,7 +27,7 @@ const glifos = {
 export default function Icone({
   nome,
   tamanho = 24,
-  cor = "#123E34",
+  cor = paleta.petroleo,
 }: {
   nome: keyof typeof glifos;
   tamanho?: number;

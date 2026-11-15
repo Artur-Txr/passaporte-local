@@ -1,7 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { dataValida } from '../src/lib/validacaoVisita.ts';
+import { fotosDaVisita } from '../src/dados/visitas.ts';
 const hoje = new Date(2026, 9, 9, 15, 30);
+
+test('preserva a capa das visitas antigas e a ordem das fotos do álbum', () => {
+  assert.deepEqual(fotosDaVisita({ foto_path: 'capa.jpg' }), ['capa.jpg']);
+  assert.deepEqual(fotosDaVisita({ foto_path: null }), []);
+  assert.deepEqual(fotosDaVisita({
+    foto_path: 'capa.jpg',
+    fotos_adicionais: ['foto-2.jpg', 'capa.jpg', 'foto-3.jpg'],
+  }), ['capa.jpg', 'foto-2.jpg', 'foto-3.jpg']);
+});
 
 test('aceita hoje e datas válidas passadas, incluindo ano bissexto', () => {
   for (const data of ['09/10/2026', '29/02/2024', '01/01/1900']) {

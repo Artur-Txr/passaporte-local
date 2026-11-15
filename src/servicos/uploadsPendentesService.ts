@@ -33,9 +33,12 @@ export async function revisarUploadsAntigos(usuarioId: string) {
     for (const upload of lista.filter(i => uploadPodeSerRevisado(i, usuarioId, Date.now())).slice(0, 20)) {
       const { data: sessao } = await supabase.auth.getSession();
       if (sessao.session?.user.id !== usuarioId) return;
-      const { data, error } = await supabase.from('visitas').select('id').eq('usuario_id', usuarioId).eq('foto_path', upload.caminho).limit(1);
-      if (error || !data) continue;
-      if (!data.length) {
+      const [capa, album] = await Promise.all([
+        supabase.from('visitas').select('id').eq('usuario_id', usuarioId).eq('foto_path', upload.caminho).limit(1),
+        supabase.from('visitas').select('id').eq('usuario_id', usuarioId).contains('fotos_adicionais', [upload.caminho]).limit(1),
+      ]);
+      if (capa.error || album.error || !capa.data || !album.data) continue;
+      if (!capa.data.length && !album.data.length) {
         const { error: falha } = await supabase.storage.from('fotos-visitas').remove([upload.caminho]);
         if (falha) continue;
       }

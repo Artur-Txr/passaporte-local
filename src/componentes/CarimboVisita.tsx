@@ -1,3 +1,4 @@
+import { paleta } from "../lib/paleta";
 import { StyleSheet, Text, View } from 'react-native';
 import type { Visita } from '../dados/visitas';
 
@@ -6,7 +7,7 @@ function dataCarimbo(data: string) {
   const [dia, mes, ano] = data.split('/');
   return meses[Number(mes) - 1] ? `${dia} ${meses[Number(mes) - 1]} ${ano}` : data;
 }
-const tinta = '#687958';
+const tinta = paleta.petroleo;
 
 function Paisagem() {
   return <View style={styles.paisagem}>
@@ -43,15 +44,15 @@ export default function CarimboVisita({ visita }: { visita: Visita }) {
 const styles = StyleSheet.create({
   carimbo: { width: 180, height: 180, borderRadius: 90, borderWidth: 2, borderColor: tinta, backgroundColor: 'transparent', transform: [{ rotate: '-9deg' }] },
   anelInterno: { position: 'absolute', inset: 5, borderRadius: 85, borderWidth: 1, borderColor: tinta },
-  anelFalhado: { position: 'absolute', inset: 2, borderRadius: 88, borderWidth: 1, borderStyle: 'dashed', borderColor: '#929D80' },
+  anelFalhado: { position: 'absolute', inset: 2, borderRadius: 88, borderWidth: 1, borderStyle: 'dashed', borderColor: paleta.borda },
   letra: { position: 'absolute', width: 28, textAlign: 'center', fontSize: 15, fontWeight: '800', color: tinta },
   miolo: { position: 'absolute', left: 26, right: 26, top: 43, alignItems: 'center' },
   paisagem: { width: 104, height: 52 },
   predio: { position: 'absolute', bottom: 3, width: 13, backgroundColor: tinta, paddingTop: 4, gap: 4 },
   janelas: { flexDirection: 'row', justifyContent: 'space-evenly' },
-  janela: { width: 2, height: 3, backgroundColor: '#EEECDD' },
+  janela: { width: 2, height: 3, backgroundColor: paleta.papel },
   arvore: { position: 'absolute', bottom: 4, width: 23, alignItems: 'center' },
-  copa: { width: 23, height: 24, borderRadius: 12, backgroundColor: tinta, borderWidth: 2, borderColor: '#F8F5EC' },
+  copa: { width: 23, height: 24, borderRadius: 12, backgroundColor: tinta, borderWidth: 2, borderColor: paleta.papel },
   tronco: { width: 3, height: 12, backgroundColor: tinta },
   chao: { position: 'absolute', bottom: 0, width: 104, height: 2, backgroundColor: tinta },
   data: { fontSize: 14, fontWeight: '800', color: tinta, marginTop: 5, letterSpacing: 0.4 },

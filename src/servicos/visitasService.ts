@@ -14,10 +14,13 @@ type VisitaBanco = {
   comentario: string;
   avaliacao: number | null;
   foto_path: string | null;
+  fotos_adicionais: string[];
+  latitude: number | null;
+  longitude: number | null;
 };
 
 const CAMPOS =
-  'id, usuario_id, lugar, cidade, uf, categoria, data_visita, comentario, avaliacao, foto_path';
+  'id, usuario_id, lugar, cidade, uf, categoria, data_visita, comentario, avaliacao, foto_path, fotos_adicionais, latitude, longitude';
 
 function dataParaBanco(data: string) {
   const [dia, mes, ano] = data.split('/');
@@ -76,6 +79,9 @@ function converterVisita(registro: VisitaBanco): Visita {
     comentario: registro.comentario,
     avaliacao: registro.avaliacao,
     foto_path: registro.foto_path,
+    fotos_adicionais: registro.fotos_adicionais,
+    latitude: registro.latitude,
+    longitude: registro.longitude,
   };
 }
 
@@ -102,6 +108,7 @@ export async function cadastrarVisita(
 ): Promise<Visita> {
   conferirAvaliacao(dados.avaliacao);
   conferirFoto(usuarioId, dados.foto_path);
+  dados.fotos_adicionais?.forEach((caminho) => conferirFoto(usuarioId, caminho));
 
   const { data, error } = await supabase
     .from('visitas')
@@ -115,6 +122,9 @@ export async function cadastrarVisita(
       comentario: dados.comentario.trim(),
       avaliacao: dados.avaliacao ?? null,
       foto_path: dados.foto_path ?? null,
+      fotos_adicionais: dados.fotos_adicionais ?? [],
+      latitude: dados.latitude ?? null,
+      longitude: dados.longitude ?? null,
     })
     .select(CAMPOS)
     .single();
@@ -133,6 +143,7 @@ export async function atualizarVisita(
 ): Promise<Visita> {
   conferirAvaliacao(dados.avaliacao);
   conferirFoto(usuarioId, dados.foto_path);
+  dados.fotos_adicionais?.forEach((caminho) => conferirFoto(usuarioId, caminho));
 
   const { data, error } = await supabase
     .from('visitas')
@@ -149,6 +160,8 @@ export async function atualizarVisita(
       ...(dados.foto_path !== undefined
         ? { foto_path: dados.foto_path }
         : {}),
+      ...(dados.fotos_adicionais !== undefined ? { fotos_adicionais: dados.fotos_adicionais } : {}),
+      ...(dados.latitude !== undefined ? { latitude: dados.latitude, longitude: dados.longitude } : {}),
     })
     .eq('id', visitaId)
     .eq('usuario_id', usuarioId)

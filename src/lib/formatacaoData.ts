@@ -14,3 +14,6 @@ export function formatarEntradaData(texto: string) {
   if (digitos.length <= 4) return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
   return `${digitos.slice(0, 2)}/${digitos.slice(2, 4)}/${digitos.slice(4)}`;
 }
+
+export const compararDatasVisitas = (a: string, b: string) =>
+  a.split("/").reverse().join("-").localeCompare(b.split("/").reverse().join("-"));

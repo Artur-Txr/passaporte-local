@@ -1,3 +1,5 @@
+import { paleta } from "../lib/paleta";
+import Text from "./Texto";
 import { rotuloCidade, localizacaoVisita } from "../lib/cidades";
 import useFotoPrivada from "./useFotoPrivada";
 import type { ReactNode } from "react";
@@ -11,61 +13,35 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
+
   View,
 } from "react-native";
 import { router } from "expo-router";
 import type { Visita } from "../dados/visitas";
 
 export const cores = {
-  verde: "#123E34",
-  papel: "#F8F5EC",
-  tinta: "#12342D",
-  laranja: "#BC592F",
-  borda: "#DDD8CC",
-  suave: "#5B635C",
+  verde: paleta.petroleo,
+  papel: paleta.papel,
+  tinta: paleta.tinta,
+  laranja: "#B74D39",
+  coral: paleta.coral,
+  borda: paleta.borda,
+  suave: paleta.suave,
 };
 export function Logo({ pequeno = false }: { pequeno?: boolean }) {
   const { compacto } = useLayoutResponsivo();
   const reduzido = pequeno || compacto;
   return (
     <Image
-      source={require("../../assets/prototipo/logo-fiel.png")}
+      source={require("../../assets/identidade/logo.png")}
       accessibilityLabel="Passaporte Local"
-      style={{ width: reduzido ? 112 : 160, height: reduzido ? 42 : 59, flexShrink: 0 }}
+      style={{ width: reduzido ? 112 : 160, height: reduzido ? 34 : 48, flexShrink: 0 }}
       resizeMode="contain"
     />
   );
 }
 export function Decoracao({ paisagem = false }: { paisagem?: boolean }) {
-  return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Image
-        source={require("../../assets/prototipo/folhas.png")}
-        style={{
-          position: "absolute",
-          right: 0,
-          top: 50,
-          width: 112,
-          height: 118,
-          opacity: 0.65,
-        }}
-        resizeMode="contain"
-      />
-      {paisagem && (
-        <Image
-          source={require("../../assets/prototipo/paisagem.png")}
-          style={{
-            position: "absolute",
-            bottom: 0,
-            width: "100%",
-            height: 156,
-          }}
-          resizeMode="stretch"
-        />
-      )}
-    </View>
-  );
+  return null;
 }
 export function Cabecalho({
   titulo,
@@ -102,23 +78,23 @@ export function Cabecalho({
           {titulo}
         </Text>
       )}
-      <Logo pequeno={!!titulo} />
+      {!titulo && <Logo />}
     </View>
   );
 }
 export function NavegacaoInferior({
   ativa,
 }: {
-  ativa: "inicio" | "visitas" | "perfil";
+  ativa: "inicio" | "visitas" | "explorar" | "perfil";
 }) {
   return (
     <View style={visual.nav}>
-      {(["inicio", "visitas", "perfil"] as const).map((item, i) => (
+      {(["inicio", "visitas", "explorar", "perfil"] as const).map((item, i) => (
         <Pressable
           key={item}
           accessibilityRole="button"
           accessibilityState={{ selected: ativa === item }}
-          onPress={() => router.replace(`/${item}`)}
+          onPress={() => router.replace(item === "explorar" ? "./explorar" : `/${item}`)}
           style={visual.navItem}
         >
           <Icone
@@ -127,24 +103,24 @@ export function NavegacaoInferior({
                 ? "inicio"
                 : item === "visitas"
                   ? "lugar"
-                  : "perfil"
+                  : item === "explorar" ? "mundo" : "perfil"
             }
             tamanho={24}
-            cor={ativa === item ? cores.laranja : cores.suave}
+            cor={ativa === item ? cores.verde : cores.suave}
           />
           <Text
             style={{
               fontSize: 11,
-              color: ativa === item ? cores.laranja : cores.suave,
+              color: ativa === item ? cores.verde : cores.suave,
             }}
           >
-            {["Início", "Visitas", "Perfil"][i]}
+            {["Início", "Visitas", "Explorar", "Perfil"][i]}
           </Text>
           <View
             style={{
               height: 2,
               width: 28,
-              backgroundColor: ativa === item ? cores.laranja : "transparent",
+              backgroundColor: ativa === item ? cores.coral : "transparent",
               marginTop: 4,
             }}
           />
@@ -168,13 +144,13 @@ export function MiniFoto({ visita, compacto = false }: { visita: Visita; compact
         visual.thumb,
         compacto && { width: 80, height: 68 },
         {
-          backgroundColor: "#E6E7D9",
+          backgroundColor: paleta.claro,
           alignItems: "center",
           justifyContent: "center",
         },
       ]}
     >
-      <Icone nome="lugar" tamanho={36} cor="#74826A" />
+      <Icone nome="lugar" tamanho={36} cor={paleta.petroleo} />
       <Text style={{ color: cores.verde, fontSize: 10 }}>VISITADO</Text>
     </View>
   );
@@ -182,22 +158,26 @@ export function MiniFoto({ visita, compacto = false }: { visita: Visita; compact
 export function BilheteVisita({
   visita,
   compacto = false,
+  miniatura,
+  aoAbrir,
 }: {
   visita: Visita;
   compacto?: boolean;
+  miniatura?: import("react").ReactNode;
+  aoAbrir?: () => void;
 }) {
   const { compacto: telaCompacta } = useLayoutResponsivo();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Ver detalhes de ${visita.lugar}`}
-      onPress={() =>
+      onPress={aoAbrir ?? (() =>
         router.push({ pathname: "/detalhes", params: { id: visita.id } })
-      }
+      )}
       style={[visual.ticket, compacto && { minHeight: 76, padding: 6 }]}
     >
 
-      <MiniFoto visita={visita} compacto={compacto || telaCompacta} />
+      {miniatura ?? <MiniFoto visita={visita} compacto={compacto || telaCompacta} />}
       <View style={{ flex: 1, minWidth: 0, gap: 5 }}>
         <Text
           numberOfLines={2}
@@ -279,7 +259,7 @@ export function Filtro({
 }
 export const visual = StyleSheet.create({
   screen: { flex: 1, backgroundColor: cores.papel },
-  content: { width: "100%", maxWidth: 600, alignSelf: "center", padding: 16, paddingBottom: 24 },
+  content: { width: "100%", maxWidth: 600, alignSelf: "center", padding: 22, paddingBottom: 32 },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -298,13 +278,15 @@ export const visual = StyleSheet.create({
   section: { fontSize: 16, fontWeight: "700", color: cores.tinta },
   button: {
     backgroundColor: cores.verde,
-    borderRadius: 15,
+    borderRadius: 16,
+    minHeight: 52,
+    justifyContent: "center",
     padding: 14,
     alignItems: "center",
     marginTop: 14,
   },
   buttonText: { color: "#FFF", fontSize: 15, fontWeight: "600" },
-  link: { color: cores.laranja, fontSize: 12, textDecorationLine: "underline" },
+  link: { color: cores.verde, fontSize: 14, textDecorationLine: "underline" },
   nav: {
     width: "100%", maxWidth: 600, alignSelf: "center",
     flexDirection: "row",
@@ -314,32 +296,33 @@ export const visual = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
   },
-  navItem: { flex: 1, alignItems: "center", gap: 3 },
+  navItem: { minHeight: 52, justifyContent: "center", flex: 1, alignItems: "center", gap: 3 },
   ticket: {
     flexDirection: "row",
     gap: 12,
     alignItems: "center",
-    padding: 8,
-    marginTop: 9,
+    padding: 12,
+    marginTop: 12,
     borderWidth: 1,
     borderColor: cores.borda,
-    borderRadius: 11,
-    backgroundColor: "#FCFAF3",
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
     minHeight: 104,
     overflow: "hidden",
   },
-  thumb: { width: 91, height: 85, borderRadius: 6 },
+  thumb: { width: 91, height: 85, borderRadius: 12 },
   meta: { fontSize: 12, color: cores.suave },
   select: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    padding: 11,
+    minHeight: 48,
+    padding: 12,
     borderWidth: 1,
     borderColor: cores.borda,
     borderRadius: 8,
-    backgroundColor: "#F3F0E7",
+    backgroundColor: "#FFFFFF",
   },
   overlay: {
     flex: 1,

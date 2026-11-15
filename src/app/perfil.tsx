@@ -1,32 +1,38 @@
+import { paleta } from "../lib/paleta";
+import Text from "../componentes/Texto";
+import Avatar from '../componentes/Avatar';
+import AtalhosPessoais from '../componentes/AtalhosPessoais';
+import usePerfilAtual from '../componentes/usePerfilAtual';
 import { agruparCidades } from "../lib/cidades";
 import { Dialogo } from "../componentes/Design";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import Icone from '../componentes/Icone';
 import CartaoCidade from '../componentes/CartaoCidade';
-import { Redirect } from "expo-router";
+import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Modal,
   Pressable,
   ScrollView,
-  Text,
+
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAutenticacao } from "../contextos/AutenticacaoContext";
 import { useVisitas } from "../contextos/VisitasContext";
 import {
-  Cabecalho,
   Decoracao,
   NavegacaoInferior,
   cores,
   visual,
 } from "../componentes/Design";
 export default function Perfil() {
+  const perfilAtual = usePerfilAtual();
+  const { emailPendente } = useLocalSearchParams<{ emailPendente?: string }>();
   const { compacto } = useLayoutResponsivo();
   const { sessao, carregando, sair } = useAutenticacao();
-  const { visitas, carregando: carregandoVisitas, erro, recarregarVisitas } = useVisitas();
+  const { visitas, erro, recarregarVisitas } = useVisitas();
   const [saindo, setSaindo] = useState(false);
   const [confirmar, setConfirmar] = useState(false);
   const [falha, setFalha] = useState("");
@@ -42,14 +48,8 @@ export default function Perfil() {
     typeof sessao.user.user_metadata.nome === "string"
       ? sessao.user.user_metadata.nome
       : "Viajante";
-  const iniciais = nome
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((n: string) => n[0])
-    .join("")
-    .toUpperCase();
-  const cidades = agruparCidades(visitas);
+  const todas = [...visitas];
+  const cidades = agruparCidades(todas);
   async function encerrar() {
     if (emAndamento.current) return;
     emAndamento.current = true;
@@ -68,9 +68,18 @@ export default function Perfil() {
     <SafeAreaView style={visual.screen}>
       <Decoracao />
       <ScrollView contentContainerStyle={visual.content}>
-        <Cabecalho alinharInicio />
-        <Text style={visual.title}>Meu perfil</Text>
-        <Text style={visual.subtitle}>Meu passaporte pessoal</Text>
+        <Text style={[visual.meta, { color: paleta.petroleo, fontWeight: "800", letterSpacing: 1.2 }]}>SEU DIÁRIO TEM A SUA CARA</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Text accessibilityRole="header" style={visual.title}>Meu perfil</Text>
+          <Pressable accessibilityRole="button" onPress={() => router.push("./editar-perfil")} style={{ paddingVertical: 12 }}>
+            <Text style={visual.link}>Editar perfil</Text>
+          </Pressable>
+        </View>
+        {emailPendente === "1" && (
+          <Text accessibilityLiveRegion="polite" style={visual.subtitle}>
+            Confira sua caixa de entrada para confirmar a mudança de e-mail.
+          </Text>
+        )}
         <View
           style={{
             flexDirection: "row",
@@ -79,42 +88,30 @@ export default function Perfil() {
             marginVertical: 20,
           }}
         >
-          <View
-            style={{
-              width: 66,
-              height: 66,
-              borderRadius: 33,
-              backgroundColor: cores.laranja,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ color: "#FFF", fontSize: 27, fontWeight: "700" }}>
-              {iniciais}
-            </Text>
+          <Avatar nome={nome} caminho={perfilAtual?.avatar_path} tamanho={66} />
+          <View style={{ flex: 1 }}>
+            <Text style={[visual.section, { fontSize: 19 }]}>{nome}</Text>
+            <Text style={visual.meta}>{sessao.user.email}</Text>
           </View>
-          <Text style={[visual.section, { fontSize: 19, flex: 1 }]}>
-            {nome}
-          </Text>
         </View>
         <View style={{ flexDirection: compacto ? "column" : "row", gap: 10, marginBottom: 20 }}>
           {[
-            ["lugar", (carregandoVisitas || erro) && !visitas.length ? "—" : visitas.length, "visitas"],
-            ["cidade", (carregandoVisitas || erro) && !visitas.length ? "—" : cidades.length, "cidades"],
+            ["lugar", todas.length, "visitas"],
+            ["cidade", cidades.length, "cidades"],
           ].map(([icone, n, rotulo]) => (
             <View
               key={rotulo}
               style={{
                 flex: 1,
                 padding: 14,
-                backgroundColor: "#EEEDE2",
+                backgroundColor: paleta.claro,
                 borderRadius: 10,
                 flexDirection: "row",
                 gap: 14,
                 alignItems: "center",
               }}
             >
-              <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: rotulo === "cidades" ? "#F1DDC9" : "#DFE8D8", alignItems: "center", justifyContent: "center" }}><Icone nome={rotulo === "cidades" ? "cidade" : "lugar"} tamanho={25} cor={rotulo === "cidades" ? cores.laranja : cores.verde} /></View>
+              <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: rotulo === "cidades" ? paleta.coralClaro : paleta.claro, alignItems: "center", justifyContent: "center" }}><Icone nome={rotulo === "cidades" ? "cidade" : "lugar"} tamanho={25} cor={rotulo === "cidades" ? cores.laranja : cores.verde} /></View>
               <View>
                 <Text style={[visual.section, { fontSize: 22 }]}>{n}</Text>
                 <Text style={visual.meta}>{n === 1 ? String(rotulo).replace(/s$/, "") : rotulo}</Text>
@@ -123,6 +120,7 @@ export default function Perfil() {
           ))}
         </View>
         {!!erro && <Pressable accessibilityRole="button" onPress={recarregarVisitas}><Text accessibilityLiveRegion="polite" style={visual.subtitle}>Não foi possível atualizar suas visitas. Toque para tentar novamente.</Text></Pressable>}
+        <AtalhosPessoais />
         <Text style={visual.section}>Minha conta</Text>
         <View
           style={{
@@ -157,6 +155,7 @@ export default function Perfil() {
         <Text style={[visual.section, { marginTop: 20 }]}>
           Cidades no passaporte
         </Text>
+        <Text style={visual.subtitle}>Revisite suas histórias por cidade.</Text>
         <View
           style={{
             flexDirection: "row",
@@ -165,7 +164,7 @@ export default function Perfil() {
             marginTop: 12,
           }}
         >
-          {cidades.map(cidade => <CartaoCidade key={cidade.chave} nome={cidade.nome} visita={cidade.visita} quantidade={cidade.quantidade} localidades={cidade.localidades} unico={cidades.length === 1} />)}
+          {cidades.map(cidade => <CartaoCidade key={cidade.chave} nome={cidade.nome} visita={cidade.visita} quantidade={cidade.quantidade} localidades={cidade.localidades} unico />)}
         </View>
         {!cidades.length && (
           <Text style={visual.subtitle}>

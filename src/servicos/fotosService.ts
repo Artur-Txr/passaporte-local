@@ -72,7 +72,8 @@ export async function obterUrlFoto(
   usuarioId: string,
   caminho: string,
 ): Promise<string> {
-  conferirCaminho(usuarioId, caminho);
+  if (!usuarioId) throw new Error('Entre na sua conta para ver a foto.');
+  conferirCaminho(caminho.split('/')[0], caminho);
 
   const { data, error } = await supabase.storage
     .from(BUCKET)

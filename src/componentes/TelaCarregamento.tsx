@@ -1,3 +1,4 @@
+import { paleta } from "../lib/paleta";
 import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, AppState, Easing, Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,7 +28,7 @@ export default function TelaCarregamento() {
   return <SafeAreaView style={styles.screen}>
     <View style={styles.body} accessibilityRole="progressbar" accessibilityLabel="Preparando seu passaporte" accessibilityState={{ busy: true }}>
       <Animated.View style={{ transform: [{ scale: movimento.interpolate({ inputRange: [0, 1], outputRange: [1, 1.025] }) }] }}>
-        <Image source={require('../../assets/prototipo/logo-fiel.png')} resizeMode="contain" style={styles.logo} accessible={false} />
+        <Image source={require('../../assets/identidade/logo.png')} resizeMode="contain" style={styles.logo} accessible={false} />
       </Animated.View>
       <Text style={styles.title}>Sua próxima história começa aqui.</Text>
       <View style={styles.trajeto} accessible={false} importantForAccessibility="no-hide-descendants">
@@ -42,14 +43,14 @@ export default function TelaCarregamento() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F8F5EC', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 24 },
+  screen: { flex: 1, backgroundColor: paleta.papel, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 24 },
   body: { width: '100%', maxWidth: 380, alignItems: 'center', gap: 24 },
   logo: { width: 230, maxWidth: '100%', height: 86 },
-  title: { fontSize: 19, lineHeight: 27, fontWeight: '600', color: '#123E34', textAlign: 'center', maxWidth: 270 },
+  title: { fontSize: 19, lineHeight: 27, fontWeight: '600', color: paleta.petroleo, textAlign: 'center', maxWidth: 270 },
   trajeto: { width: 156, height: 22, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  linha: { position: 'absolute', left: 6, right: 6, height: 1, backgroundColor: '#C7CEBB' },
-  ponto: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#C7CEBB' },
-  marcador: { position: 'absolute', left: 0, width: 12, height: 12, borderRadius: 6, backgroundColor: '#BC592F', borderWidth: 2, borderColor: '#F8F5EC' },
-  message: { fontSize: 13, lineHeight: 20, color: '#5B635C', textAlign: 'center' },
-  footer: { marginTop: 40, fontSize: 12, lineHeight: 18, color: '#687958', textAlign: 'center' },
+  linha: { position: 'absolute', left: 6, right: 6, height: 1, backgroundColor: paleta.borda },
+  ponto: { width: 8, height: 8, borderRadius: 4, backgroundColor: paleta.borda },
+  marcador: { position: 'absolute', left: 0, width: 12, height: 12, borderRadius: 6, backgroundColor: '#B74D39', borderWidth: 2, borderColor: paleta.papel },
+  message: { fontSize: 13, lineHeight: 20, color: paleta.suave, textAlign: 'center' },
+  footer: { marginTop: 40, fontSize: 12, lineHeight: 18, color: paleta.petroleo, textAlign: 'center' },
 });

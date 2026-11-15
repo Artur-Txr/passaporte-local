@@ -1,6 +1,7 @@
 import { File } from 'expo-file-system';
 import { conferirTamanhoFoto } from '../lib/limitesFoto';
 import * as ImagePicker from 'expo-image-picker';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { Platform } from 'react-native';
 import type { TipoImagem } from './fotosService';
 
@@ -118,8 +119,29 @@ export async function selecionarFoto(origem: 'galeria' | 'camera' = 'galeria'):
 
   conferirTamanho(conteudo.byteLength);
 
+  const tipoOriginal = identificarTipo(conteudo);
+  if (imagem.width * imagem.height > 60000000) throw new Error('Escolha uma imagem com até 60 megapixels.');
+  const manipulador = ImageManipulator.manipulate(imagem.uri);
+  if (Math.max(imagem.width, imagem.height) > 1600) {
+    manipulador.resize(imagem.width >= imagem.height ? { width: 1600 } : { height: 1600 });
+  }
+  const renderizada = await manipulador.renderAsync();
+  let uri = imagem.uri;
+  try {
+    const formato = tipoOriginal === 'image/png' ? SaveFormat.PNG : tipoOriginal === 'image/webp' ? SaveFormat.WEBP : SaveFormat.JPEG;
+    const otimizada = await renderizada.saveAsync({ compress: 0.8, format: formato });
+    const bytes = Platform.OS === 'web' ? await (await fetch(otimizada.uri)).arrayBuffer() : await new File(otimizada.uri).arrayBuffer();
+    if (bytes.byteLength > 0 && bytes.byteLength < conteudo.byteLength) {
+      conteudo = bytes;
+      uri = otimizada.uri;
+    }
+  } finally {
+    renderizada.release();
+    manipulador.release();
+  }
+
   return {
-    uri: imagem.uri,
+    uri,
     conteudo,
     tipo: identificarTipo(conteudo),
   };

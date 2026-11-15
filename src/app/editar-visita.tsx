@@ -1,3 +1,10 @@
+import SeletorLocalizacao from "../componentes/SeletorLocalizacao";
+import useRascunho from "../componentes/useRascunho";
+import { coordenadasValidas, type Coordenadas } from "../lib/mapa";
+import { useFeedback } from "../contextos/FeedbackContext";
+import { fotosDaVisita } from "../dados/visitas";
+import { paleta } from "../lib/paleta";
+import Text from "../componentes/Texto";
 import type { Visita } from "../dados/visitas";
 import EstadoConsulta from "../componentes/EstadoConsulta";
 import useProtegerFormulario from "../componentes/useProtegerFormulario";
@@ -14,17 +21,14 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
+
   TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AvaliacaoEstrelas from "../componentes/AvaliacaoEstrelas";
-import FotoVisita from "../componentes/FotoVisita";
-import SeletorFoto from "../componentes/SeletorFoto";
+import EditorAlbum, { enviarAlbum, type FotoAlbum } from "../componentes/EditorAlbum";
 import { useAutenticacao } from "../contextos/AutenticacaoContext";
 import { useVisitas } from "../contextos/VisitasContext";
-import { enviarFoto, excluirFoto } from "../servicos/fotosService";
 import type { FotoSelecionada } from "../servicos/selecaoFotoService";
 
 import { categorias, estados, dataValida } from "../lib/validacaoVisita";
@@ -39,6 +43,8 @@ export default function EditarVisita() {
 }
 
 function FormularioEdicao({ visita }: { visita: Visita }) {
+  const avisar = useFeedback();
+  const [localizacao, setLocalizacao] = useState<Coordenadas | null>(coordenadasValidas(visita) ? { latitude: visita.latitude, longitude: visita.longitude } : null);
   const { compacto } = useLayoutResponsivo();
   const { editarVisita } = useVisitas();
   const { sessao } = useAutenticacao();
@@ -49,12 +55,8 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
   const [categoria, setCategoria] = useState(visita?.categoria ?? "");
   const [data, setData] = useState(visita?.data ?? "");
   const [comentario, setComentario] = useState(visita?.comentario ?? "");
-  const [avaliacao, setAvaliacao] = useState<number | null>(
-    visita?.avaliacao ?? null,
-  );
 
-  const [foto, setFoto] = useState<FotoSelecionada | null>(null);
-  const [removerFotoAtual, setRemoverFotoAtual] = useState(false);
+  const [fotos, setFotos] = useState<FotoAlbum[]>(() => fotosDaVisita(visita));
   const [selecionandoFoto, setSelecionandoFoto] = useState(false);
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
@@ -62,26 +64,29 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
 
   const envioEmAndamento = useRef(false);
   const selecaoEmAndamento = useRef(false);
-  const fotoEnviada = useRef<{
-    foto: FotoSelecionada;
-    caminho: string;
-  } | null>(null);
+  const fotosEnviadas = useRef(new Map<FotoSelecionada, string>());
 
-  const bloqueado = salvando || selecionandoFoto;
-  const alterado = lugar !== original.lugar || cidade !== original.cidade || uf !== original.uf || categoria !== original.categoria || data !== original.data || comentario !== original.comentario || avaliacao !== (original.avaliacao ?? null) || !!foto || removerFotoAtual;
+  const rascunho = useRascunho(
+    `passaporte:rascunho:${sessao?.user.id}:editar:${visita.id}`,
+    { lugar, cidade, uf, categoria, data, comentario, latitude: localizacao?.latitude ?? null, longitude: localizacao?.longitude ?? null },
+    dados => {
+      setLugar(dados.lugar); setCidade(dados.cidade); setUf(dados.uf);
+      setCategoria(dados.categoria); setData(dados.data); setComentario(dados.comentario);
+      setLocalizacao(coordenadasValidas(dados) ? { latitude: dados.latitude, longitude: dados.longitude } : null);
+    },
+  );
+  const bloqueado = salvando || selecionandoFoto || !rascunho.pronto;
+  const fotosOriginais = fotosDaVisita(original);
+  const fotosAlteradas = fotos.length !== fotosOriginais.length || fotos.some((foto, indice) => foto !== fotosOriginais[indice]);
+  const alterado = lugar !== original.lugar || cidade !== original.cidade || uf !== original.uf || categoria !== original.categoria || data !== original.data || comentario !== original.comentario || fotosAlteradas || localizacao?.latitude !== (original.latitude ?? undefined) || localizacao?.longitude !== (original.longitude ?? undefined);
   const concluirESair = useProtegerFormulario(alterado, bloqueado);
 
-  const caminhoAtual = visita?.foto_path ?? null;
 
   function acompanharSelecao(selecionando: boolean) {
     selecaoEmAndamento.current = selecionando;
     setSelecionandoFoto(selecionando);
   }
 
-  function alterarFoto(escolhida: FotoSelecionada | null) {
-    setFoto(escolhida);
-    setRemoverFotoAtual(escolhida === null);
-  }
 
   function voltar() {
     if (router.canGoBack()) {
@@ -98,7 +103,7 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
 
   async function salvarAlteracoes() {
     setErro("");
-    if (envioEmAndamento.current || selecaoEmAndamento.current) {
+    if (bloqueado || envioEmAndamento.current || selecaoEmAndamento.current) {
       return;
     }
 
@@ -141,29 +146,10 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
     envioEmAndamento.current = true;
     setSalvando(true);
 
-    const caminhoAnterior = caminhoAtual;
-
     try {
-      let novoCaminho = removerFotoAtual ? null : caminhoAnterior;
-
-      if (foto) {
-        if (fotoEnviada.current?.foto === foto) {
-          novoCaminho = fotoEnviada.current.caminho;
-        } else {
-          setEnviandoFoto(true);
-
-          try {
-            novoCaminho = await enviarFoto(usuarioId, foto.conteudo, foto.tipo);
-
-            fotoEnviada.current = {
-              foto,
-              caminho: novoCaminho,
-            };
-          } finally {
-            setEnviandoFoto(false);
-          }
-        }
-      }
+      setEnviandoFoto(fotos.some((foto) => typeof foto !== "string"));
+      const [capa, ...fotosAdicionais] = await enviarAlbum(usuarioId, fotos, fotosEnviadas.current);
+      setEnviandoFoto(false);
 
       await editarVisita(visita.id, {
         lugar: lugar.trim(),
@@ -172,26 +158,19 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
         categoria,
         data,
         comentario: comentario.trim(),
-        avaliacao,
-        foto_path: novoCaminho,
+        foto_path: capa ?? null,
+        fotos_adicionais: fotosAdicionais,
+        latitude: localizacao?.latitude ?? null,
+        longitude: localizacao?.longitude ?? null,
       });
 
-      if (caminhoAnterior && caminhoAnterior !== novoCaminho) {
-        try {
-          await excluirFoto(usuarioId, caminhoAnterior);
-        } catch {
-          Alert.alert(
-            "Visita atualizada",
-            "A alteração foi salva, mas não foi possível apagar o arquivo da foto antiga do armazenamento.",
-          );
-        }
-      }
-
+      await rascunho.limpar();
+      avisar("Visita atualizada.");
       concluirESair(voltar);
     } catch {
       informarErro(
         "Não foi possível atualizar",
-        "Os campos e a foto selecionada foram mantidos. Confira sua conexão e tente novamente.",
+        "Os campos e as fotos selecionadas foram mantidos. Confira sua conexão e tente novamente.",
       );
     } finally {
       envioEmAndamento.current = false;
@@ -213,6 +192,8 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
           keyboardDismissMode="on-drag"
         >
           <Cabecalho voltar titulo="Editar visita" />
+          {rascunho.restaurado && <Text style={styles.hint}>Texto do rascunho recuperado.</Text>}
+          {rascunho.falha && <Text style={styles.hint}>Não foi possível guardar o rascunho neste aparelho.</Text>}
 
           {!visita ? (
             <>
@@ -224,53 +205,10 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
           ) : (
             <>
 
-              <Text style={styles.description}>
-                Ajuste os dados e atualize sua lembrança.
-              </Text>
+              <Text style={styles.description}>Atualize sua história</Text>
+              <Text accessibilityRole="header" style={styles.title}>Sua visita, do seu jeito.</Text>
 
-              <Text style={styles.fieldLabel}>Foto da visita (opcional)</Text>
-
-              {caminhoAtual && !foto && !removerFotoAtual ? (
-                <View style={styles.currentPhoto}>
-                  <FotoVisita key={caminhoAtual} caminho={caminhoAtual} compacto />
-
-                  <Pressable
-                    disabled={bloqueado}
-                    onPress={() => setRemoverFotoAtual(true)}
-                    accessibilityRole="button"
-                    style={({ pressed }) => [
-                      styles.removeButton,
-                      (pressed || bloqueado) && styles.pressed,
-                    ]}
-                  >
-                    <Text style={styles.removeText}>Remover foto atual</Text>
-                  </Pressable>
-                </View>
-              ) : null}
-
-              {removerFotoAtual && caminhoAtual && !foto && (
-                <View style={styles.notice}>
-                  <Text style={styles.hint}>
-                    A foto atual será removida ao salvar.
-                  </Text>
-                  <Pressable
-                    disabled={bloqueado}
-                    onPress={() => setRemoverFotoAtual(false)}
-                    accessibilityRole="button"
-                    style={styles.undoButton}
-                  >
-                    <Text style={styles.backText}>Manter foto atual</Text>
-                  </Pressable>
-                </View>
-              )}
-
-              <SeletorFoto
-                fotoAtual={!!caminhoAtual && !removerFotoAtual}
-                foto={foto}
-                onChange={alterarFoto}
-                desabilitado={salvando}
-                onSelecionandoChange={acompanharSelecao}
-              />
+              <Text style={styles.fieldLabel}>Dados da visita</Text>
 
               <Text style={styles.fieldLabel}>Lugar *</Text>
               <CampoTexto icone="lugar"
@@ -321,7 +259,7 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
               <CampoTexto icone="calendario"
                 style={styles.input}
                 placeholder="DD/MM/AAAA"
-                placeholderTextColor="#7C827A"
+                placeholderTextColor={paleta.suave}
                 value={data}
                 onChangeText={(texto) => setData(formatarEntradaData(texto))}
                 maxLength={10}
@@ -330,14 +268,12 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
                 editable={!bloqueado}
               />
 
-              <Text style={styles.fieldLabel}>Sua avaliação (opcional)</Text>
-              <AvaliacaoEstrelas
-                valor={avaliacao}
-                onChange={setAvaliacao}
-                desabilitado={bloqueado}
-              />
+          <SeletorLocalizacao valor={localizacao} onChange={setLocalizacao} bloqueado={bloqueado} />
+              <Text style={[styles.fieldLabel, { marginTop: 24 }]}>Minha lembrança</Text>
 
-              <Text style={styles.fieldLabel}>Comentário (opcional)</Text>
+              <EditorAlbum fotos={fotos} onChange={setFotos} bloqueado={bloqueado} onSelecionandoChange={acompanharSelecao} />
+
+              <Text style={styles.fieldLabel}>Sua lembrança (opcional)</Text>
               <CampoTexto icone="editar"
                 style={[styles.input, styles.commentInput]}
                 value={comentario}
@@ -371,7 +307,7 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
               >
                 <Text style={styles.buttonText}>
                   {enviandoFoto
-                    ? "Enviando foto..."
+                    ? "Enviando fotos..."
                     : salvando
                       ? "Salvando..."
                       : "Salvar alterações"}
@@ -382,7 +318,7 @@ function FormularioEdicao({ visita }: { visita: Visita }) {
                 onPress={voltar}
                 style={{ alignItems: "center", padding: 14 }}
               >
-                <Text style={{ color: "#BC592F", fontWeight: "600" }}>
+                <Text style={{ color: "#B74D39", fontWeight: "600" }}>
                   Cancelar
                 </Text>
               </Pressable>
@@ -398,7 +334,7 @@ const styles = StyleSheet.create({
   error: { color: "#942F24", backgroundColor: "#FBEAE3", padding: 12, borderRadius: 9, marginTop: 12, fontSize: 14, lineHeight: 20 },
   screen: {
     flex: 1,
-    backgroundColor: "#F8F5EC",
+    backgroundColor: paleta.papel,
   },
   keyboard: {
     flex: 1,
@@ -413,41 +349,36 @@ const styles = StyleSheet.create({
     paddingRight: 16,
     marginBottom: 4,
   },
-  backText: {
-    color: "#183F35",
-    fontSize: 14,
-    fontWeight: "600",
-  },
   label: {
-    color: "#C76B48",
+    color: paleta.petroleo,
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 2,
   },
   title: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 32,
     fontWeight: "800",
     marginTop: 8,
   },
   description: {
-    color: "#53645B",
+    color: paleta.suave,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 12,
   },
   fieldLabel: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 13,
     fontWeight: "600",
     marginTop: 10,
     marginBottom: 5,
   },
   input: {
-    backgroundColor: "#F6F3EB",
-    color: "#183F35",
+    backgroundColor: "#FFFFFF",
+    color: paleta.petroleo,
     borderWidth: 1,
-    borderColor: "#DED9CE",
+    borderColor: paleta.borda,
     borderRadius: 9,
     paddingHorizontal: 12,
     paddingVertical: 14,
@@ -459,65 +390,42 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   categoryButton: {
-    backgroundColor: "#F6F3EB",
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#DED9CE",
+    borderColor: paleta.borda,
     borderRadius: 24,
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
   categorySelected: {
-    backgroundColor: "#183F35",
-    borderColor: "#183F35",
+    backgroundColor: paleta.petroleo,
+    borderColor: paleta.petroleo,
   },
   categoryText: {
-    color: "#53645B",
+    color: paleta.suave,
     fontSize: 14,
     fontWeight: "600",
   },
   categoryTextSelected: {
     color: "#FFFFFF",
   },
-  currentPhoto: {
-    marginBottom: 16,
-  },
-  removeButton: {
-    borderWidth: 1,
-    borderColor: "#A33B32",
-    borderRadius: 9,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 12,
-  },
-  removeText: {
-    color: "#A33B32",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  notice: {
-    marginBottom: 16,
-  },
-  undoButton: {
-    paddingVertical: 7,
-    alignSelf: "flex-start",
-  },
   commentInput: {
     minHeight: 80,
   },
   counter: {
-    color: "#53645B",
+    color: paleta.suave,
     fontSize: 12,
     textAlign: "right",
     marginTop: 8,
   },
   hint: {
-    color: "#53645B",
+    color: paleta.suave,
     fontSize: 13,
     lineHeight: 20,
     marginTop: 12,
   },
   button: {
-    backgroundColor: "#183F35",
+    backgroundColor: paleta.petroleo,
     borderRadius: 9,
     padding: 13,
     alignItems: "center",

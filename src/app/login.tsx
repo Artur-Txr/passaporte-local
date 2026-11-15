@@ -1,3 +1,5 @@
+import { paleta } from "../lib/paleta";
+import Text from "../componentes/Texto";
 import { mensagemErroAuth } from "../lib/errosAutenticacao";
 import Icone from "../componentes/Icone";
 import CampoTexto from "../componentes/CampoTexto";
@@ -11,7 +13,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
+
   TextInput,
   View,
 } from "react-native";
@@ -105,16 +107,16 @@ export default function Login() {
           <Cabecalho />
           {!!mensagem && <Text accessibilityLiveRegion="polite" style={{ color: "#9B4028", marginVertical: 12 }}>{mensagem}</Text>}
 
-          <Text style={styles.title}>Que bom ter{"\n"}você aqui</Text>
+          <Text style={styles.title}>Bom ter você{"\n"}por aqui.</Text>
 
-          <Text style={styles.description}>Entre no seu passaporte.</Text>
+          <Text style={styles.description}>Entre para continuar a sua jornada.</Text>
 
           <Text style={styles.fieldLabel}>E-mail</Text>
 
           <CampoTexto icone="email"
             style={styles.input}
             placeholder="seuemail@exemplo.com"
-            placeholderTextColor="#7C827A"
+            placeholderTextColor={paleta.suave}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -130,7 +132,7 @@ export default function Login() {
             <CampoTexto icone="senha"
               style={[styles.input, { paddingRight: 48 }]}
               placeholder="Digite sua senha"
-              placeholderTextColor="#7C827A"
+              placeholderTextColor={paleta.suave}
               value={senha}
               onChangeText={setSenha}
               secureTextEntry={!mostrarSenha}
@@ -145,9 +147,9 @@ export default function Login() {
                 mostrarSenha ? "Ocultar senha" : "Mostrar senha"
               }
               onPress={() => setMostrarSenha((v) => !v)}
-              style={{ position: "absolute", right: 8, top: 4, padding: 8 }}
+              style={{ position: "absolute", right: 4, top: 4, minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center" }}
             >
-              <Icone nome={mostrarSenha ? "olhoFechado" : "olho"} tamanho={20} cor="#53645B" />
+              <Icone nome={mostrarSenha ? "olhoFechado" : "olho"} tamanho={20} cor={paleta.suave} />
             </Pressable>
           </View>
 
@@ -159,7 +161,7 @@ export default function Login() {
           >
             <Text
               style={{
-                color: "#BC592F",
+                color: "#B74D39",
                 fontSize: 12,
                 textDecorationLine: "underline",
               }}
@@ -185,13 +187,13 @@ export default function Login() {
           <View
             style={{
               flexDirection: "row",
-              justifyContent: "center",
+              justifyContent: "flex-start",
               alignItems: "center",
               gap: 5,
               marginTop: 18,
             }}
           >
-            <Text style={{ color: "#53645B", fontSize: 12 }}>
+            <Text style={{ color: paleta.suave, fontSize: 12 }}>
               Ainda não tem conta?
             </Text>
             <Pressable
@@ -201,7 +203,7 @@ export default function Login() {
             >
               <Text
                 style={{
-                  color: "#BC592F",
+                  color: "#B74D39",
                   fontSize: 12,
                   textDecorationLine: "underline",
                 }}
@@ -219,7 +221,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8F5EC",
+    backgroundColor: paleta.papel,
   },
   keyboard: {
     flex: 1,
@@ -227,9 +229,9 @@ const styles = StyleSheet.create({
   content: { width: "100%", maxWidth: 460, alignSelf: "center",
     flexGrow: 1,
     padding: 20,
-    paddingBottom: 176,
-    paddingTop: 24,
-    justifyContent: "center",
+    paddingBottom: 32,
+    paddingTop: 32,
+    justifyContent: "flex-start",
   },
   backButton: {
     alignSelf: "flex-start",
@@ -238,50 +240,53 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   backText: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 14,
     fontWeight: "600",
   },
   label: {
-    color: "#C76B48",
+    color: paleta.petroleo,
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 2,
   },
   title: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 29,
     fontWeight: "800",
     marginTop: 12,
   },
   description: {
-    color: "#53645B",
+    color: paleta.suave,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 8,
     marginBottom: 16,
   },
   fieldLabel: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 13,
     fontWeight: "600",
     marginTop: 10,
     marginBottom: 5,
   },
   input: {
-    backgroundColor: "#F6F3EB",
-    color: "#183F35",
+    backgroundColor: "#FFFFFF",
+    color: paleta.petroleo,
     borderWidth: 1,
-    borderColor: "#DED9CE",
-    borderRadius: 9,
+    borderColor: paleta.borda,
+    borderRadius: 14,
     paddingHorizontal: 12,
-    paddingVertical: 11,
-    fontSize: 14,
+    minHeight: 52,
+    paddingVertical: 14,
+    fontSize: 16,
   },
   button: {
-    backgroundColor: "#183F35",
+    backgroundColor: paleta.petroleo,
     borderRadius: 18,
-    padding: 13,
+    minHeight: 52,
+    justifyContent: "center",
+    padding: 15,
     alignItems: "center",
     marginTop: 12,
   },
@@ -291,21 +296,23 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   signupDescription: {
-    color: "#53645B",
+    color: paleta.suave,
     fontSize: 14,
     textAlign: "center",
     marginTop: 28,
   },
   signupButton: {
     borderWidth: 1,
-    borderColor: "#183F35",
+    borderColor: paleta.petroleo,
     borderRadius: 18,
-    padding: 13,
+    minHeight: 52,
+    justifyContent: "center",
+    padding: 15,
     alignItems: "center",
     marginTop: 12,
   },
   signupText: {
-    color: "#183F35",
+    color: paleta.petroleo,
     fontSize: 14,
     fontWeight: "700",
   },

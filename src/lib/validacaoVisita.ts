@@ -1,4 +1,4 @@
-export const categorias = ['Parque', 'Museu', 'Cafeteria', 'Outro'];
+export const categorias = ['Museu', 'Cafeteria', 'Centro histórico', 'Arquitetura', 'Natureza', 'Trilha', 'Cachoeira', 'Praia', 'Parque', 'Mirante', 'Cultura', 'Gastronomia', 'Outro'];
 export const estados = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT',
   'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO',

@@ -1,5 +1,13 @@
+import { paleta } from "../lib/paleta";
+import Text from "../componentes/Texto";
+import Avatar from '../componentes/Avatar';
+import AtalhosPessoais from '../componentes/AtalhosPessoais';
+import usePerfilAtual from '../componentes/usePerfilAtual';
 import BotaoAtualizar from "../componentes/BotaoAtualizar";
-import { chaveCidade } from "../lib/cidades";
+import { chaveCidade, rotuloCidade } from "../lib/cidades";
+import { compararDatasVisitas } from "../lib/formatacaoData";
+import { formatarDataVisita } from "../lib/formatacaoData";
+import useFotoPrivada from "../componentes/useFotoPrivada";
 import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import Icone from "../componentes/Icone";
 import { router } from "expo-router";
@@ -9,7 +17,7 @@ import {
   Pressable,
   ScrollView,
   RefreshControl,
-  Text,
+
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,12 +26,12 @@ import { useVisitas } from "../contextos/VisitasContext";
 import {
   BilheteVisita,
   Decoracao,
-  Logo,
   NavegacaoInferior,
   cores,
   visual,
 } from "../componentes/Design";
 export default function Inicio() {
+  const perfilAtual = usePerfilAtual();
   const { compacto } = useLayoutResponsivo();
   const { sessao } = useAutenticacao();
   const { visitas, carregando, erro, recarregarVisitas } = useVisitas();
@@ -31,9 +39,15 @@ export default function Inicio() {
     typeof sessao?.user.user_metadata.nome === "string"
       ? sessao.user.user_metadata.nome
       : "Viajante";
+  const todas = [...visitas].sort((a, b) => compararDatasVisitas(b.data, a.data));
+  const [destaque, ...recentes] = todas.slice(0, 3);
+  const { url: fotoDestaque } = useFotoPrivada(destaque?.foto_path ?? null);
   const cidades = new Set(
-    visitas.map((v) => chaveCidade(v.cidade, v.uf)),
+    todas.map((v) => chaveCidade(v.cidade, v.uf)),
   ).size;
+  const abrir = (visita: (typeof todas)[number]) => {
+    router.push({ pathname: "/detalhes", params: { id: visita.id } });
+  };
   return (
     <SafeAreaView style={visual.screen}>
       <Decoracao />
@@ -48,45 +62,34 @@ export default function Inicio() {
             alignItems: "center",
           }}
         >
-          <Logo />
+          <View style={{ flex: 1 }}>
+            <Text style={visual.subtitle}>Olá, {nome.split(" ")[0]}</Text>
+            <Text accessibilityRole="header" style={visual.title}>Meu passaporte</Text>
+          </View>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Meu perfil"
             onPress={() => router.push("/perfil")}
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: 19,
-              backgroundColor: "#C3CCB7",
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: paleta.coral,
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Text style={{ color: cores.verde }}>
-              {nome
-                .split(" ")
-                .slice(0, 2)
-                .map((n: string) => n[0])
-                .join("")
-                .toUpperCase()}
-            </Text>
+            <Avatar nome={nome} caminho={perfilAtual?.avatar_path} tamanho={48} />
           </Pressable>
         </View>
-        <Text style={[visual.section, { fontSize: 20, marginTop: 8 }]}>
-          Olá, {nome.split(" ")[0]}
-        </Text>
-        <View style={{ flexDirection: compacto ? "column" : "row", alignItems: compacto ? "flex-start" : "center", gap: 8 }}>
-          <Text style={[visual.title, { flex: 1 }]}>Meu passaporte</Text>
-          <BotaoAtualizar carregando={carregando} onPress={recarregarVisitas} />
-        </View>
-        <Text style={visual.subtitle}>Cada lugar, uma nova história.</Text>
+        <AtalhosPessoais />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Abrir coleção de carimbos"
-          onPress={() => router.push("/passaporte")}
+          accessibilityLabel="Ver minhas visitas"
+          onPress={() => router.push("/visitas")}
           style={{
             backgroundColor: cores.verde,
-            borderRadius: 12,
+            borderRadius: 22,
             padding: compacto ? 12 : 20,
             marginTop: 16,
             flexDirection: "row",
@@ -95,56 +98,45 @@ export default function Inicio() {
             overflow: "hidden",
           }}
         >
-          <Image
-            source={require("../../assets/prototipo/capa-textura.png")}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "120%",
-              height: "120%",
-              opacity: 0.45,
-            }}
-            resizeMode="cover"
-          />
-          <Icone nome="lugar" tamanho={42} cor="#F6F1DE" />
+
+          <Icone nome="lugar" tamanho={42} cor={paleta.papel} />
           <View style={{ flex: 1 }}>
             <Text
               style={{
-                color: "#D6DEC9",
+                color: paleta.claro,
                 fontSize: 9,
                 letterSpacing: 3,
                 marginBottom: 12,
               }}
             >
-              PASSAPORTE LOCAL
+              COLEÇÃO DE LUGARES VIVIDOS
             </Text>
             <View style={{ flexDirection: "row", gap: compacto ? 12 : 28 }}>
               <View>
                 <Text
                   style={{ color: "#FFF", fontSize: 28, fontWeight: "700" }}
                 >
-                  {carregando && !visitas.length ? "—" : visitas.length}
+                  {todas.length}
                 </Text>
-                <Text style={{ color: "#E2E5D5", fontSize: 12 }}>{visitas.length === 1 ? "visita" : "visitas"}</Text>
+                <Text style={{ color: paleta.claro, fontSize: 12 }}>visitas guardadas</Text>
               </View>
               <View
                 style={{
                   borderLeftWidth: 1,
-                  borderColor: "#688373",
+                  borderColor: "#587783",
                   paddingLeft: compacto ? 12 : 28,
                 }}
               >
                 <Text
                   style={{ color: "#FFF", fontSize: 28, fontWeight: "700" }}
                 >
-                  {carregando && !visitas.length ? "—" : cidades}
+                  {cidades}
                 </Text>
-                <Text style={{ color: "#E2E5D5", fontSize: 12 }}>{cidades === 1 ? "cidade" : "cidades"}</Text>
+                <Text style={{ color: paleta.claro, fontSize: 12 }}>cidades conhecidas</Text>
               </View>
             </View>
           </View>
-          {!compacto && <Image source={require("../../assets/prototipo/carimbo-brasil.png")} style={{ width: 62, height: 68 }} resizeMode="contain" />}
+          <Icone nome="proximo" tamanho={24} cor={paleta.coral} />
         </Pressable>
         <View
           style={{
@@ -154,7 +146,7 @@ export default function Inicio() {
             marginTop: 18,
           }}
         >
-          <Text style={visual.section}>Últimos carimbos cadastrados</Text>
+          <Text style={visual.section}>Últimas descobertas</Text>
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push("/visitas")}
@@ -171,15 +163,35 @@ export default function Inicio() {
               {erro} Toque para tentar novamente.
             </Text>
           </Pressable>
-        ) : visitas.length === 0 ? (
+        ) : !destaque ? (
           <Text style={[visual.subtitle, { marginTop: 20 }]}>
-            Seu primeiro carimbo começa com uma visita.
+            A primeira história ainda está por vir.
           </Text>
-        ) : (
-          visitas
-            .slice(0, 3)
-            .map((v) => <BilheteVisita key={v.id} visita={v} compacto />)
+        ) : null}
+        {destaque && (
+          <>
+            <Pressable accessibilityRole="button" accessibilityLabel={`Ver detalhes de ${destaque.lugar}`} onPress={() => abrir(destaque)}
+              style={{ height: 190, backgroundColor: paleta.petroleo, borderRadius: 18, overflow: "hidden", justifyContent: "flex-end", marginVertical: 12 }}>
+              {fotoDestaque && (
+                <Image source={{ uri: fotoDestaque ?? undefined }}
+                  style={{ position: "absolute", width: "100%", height: "100%" }} />
+              )}
+              <Text style={{ position: "absolute", top: 12, right: 12, backgroundColor: paleta.papel, borderRadius: 12, paddingHorizontal: 8, paddingVertical: 5, color: paleta.petroleo, fontSize: 12 }}>
+                {formatarDataVisita(destaque.data)}
+              </Text>
+              <View style={{ backgroundColor: "#0D2B36E6", padding: 12 }}>
+                <Text style={{ color: "#FFF", fontSize: 18, fontWeight: "800" }}>{destaque.lugar}</Text>
+                <Text style={{ color: paleta.claro, fontSize: 12 }}>{rotuloCidade(destaque.cidade, destaque.uf)}</Text>
+              </View>
+            </Pressable>
+            {recentes.map((visita) => (
+              <BilheteVisita key={visita.id} visita={visita} compacto aoAbrir={() => abrir(visita)} />
+            ))}
+          </>
         )}
+        {!!erro && <BotaoAtualizar carregando={carregando} onPress={recarregarVisitas} />}
+      </ScrollView>
+      <View style={{ width: "100%", maxWidth: 600, alignSelf: "center", paddingHorizontal: 22, paddingBottom: 8 }}>
         <Pressable
           accessibilityRole="button"
           disabled={carregando || !!erro}
@@ -188,7 +200,7 @@ export default function Inicio() {
         >
           <Text style={visual.buttonText}>Registrar visita</Text>
         </Pressable>
-      </ScrollView>
+      </View>
       <NavegacaoInferior ativa="inicio" />
     </SafeAreaView>
   );
