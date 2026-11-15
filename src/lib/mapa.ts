@@ -7,6 +7,11 @@ export function coordenadasValidas(valor: unknown): valor is Coordenadas {
   return Number.isFinite(latitude) && Number.isFinite(longitude) && latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
 }
 
+export function urlRota(valor: unknown): string | null {
+  if (!coordenadasValidas(valor)) return null;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${valor.latitude},${valor.longitude}`)}`;
+}
+
 export function htmlMapa(marcadores: MarcadorMapa[], editavel: boolean) {
   const dados = JSON.stringify(marcadores.filter(coordenadasValidas)).replace(/</g, '\\u003c');
   return `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#map{height:100%;margin:0}body{font-family:sans-serif;background:#E7EEF1}.leaflet-popup-content button{background:#123B4A;color:white;border:0;padding:12px;border-radius:8px}</style></head><body><div id="map"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>

@@ -1,7 +1,23 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { coordenadasValidas, htmlMapa } from '../src/lib/mapa.ts';
+import { coordenadasValidas, htmlMapa, urlRota } from '../src/lib/mapa.ts';
 import { agendarRascunho } from '../src/lib/filaRascunho.ts';
+
+test('rota aponta para as coordenadas da visita sem fixar a origem do visitante', () => {
+  const url = new URL(urlRota({ latitude: -12.97, longitude: -38.5 }));
+  assert.equal(url.origin, 'https://www.google.com');
+  assert.equal(url.pathname, '/maps/dir/');
+  assert.equal(url.searchParams.get('api'), '1');
+  assert.equal(url.searchParams.get('destination'), '-12.97,-38.5');
+  assert.equal(url.searchParams.has('origin'), false);
+  assert.equal(new URL(urlRota({ latitude: 0, longitude: 0 })).searchParams.get('destination'), '0,0');
+});
+
+test('visitas sem localização válida não geram uma rota para um local incorreto', () => {
+  for (const valor of [null, {}, { latitude: null, longitude: null }, { latitude: -12, longitude: null }, { latitude: 91, longitude: 0 }, { latitude: 0, longitude: NaN }]) {
+    assert.equal(urlRota(valor), null);
+  }
+});
 
 test('mapa aceita coordenadas reais e rejeita pares incompletos e valores não finitos', () => {
   assert.equal(coordenadasValidas({ latitude: -12.97, longitude: -38.5 }), true);

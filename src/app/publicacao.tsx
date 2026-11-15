@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AlbumVisita from '../componentes/AlbumVisita';
+import LocalizacaoVisita from '../componentes/LocalizacaoVisita';
 import Avatar from '../componentes/Avatar';
 import InteracoesPublicacao from '../componentes/InteracoesPublicacao';
 import BotaoFavorito from '../componentes/BotaoFavorito';
@@ -38,6 +39,7 @@ export default function DetalhesPublicacao() {
         <AlbumVisita fotos={fotosDaVisita({ ...visita, data: visita.data_visita })} />
         <Text style={[visual.title, { marginTop: 14 }]}>{visita.lugar}</Text>
         <Text style={visual.subtitle}>{visita.cidade} · {visita.uf}</Text>
+        <LocalizacaoVisita key={visita.id} visita={visita} />
         <Text style={visual.subtitle}>{visita.categoria} · {formatarDataVisita(visita.data_visita.split('-').reverse().join('/'), true)}</Text>
         <View style={{ marginVertical: 20 }}><Text style={visual.section}>Minha lembrança</Text><Text style={visual.subtitle}>{visita.comentario || 'Uma descoberta para guardar.'}</Text></View>
         <InteracoesPublicacao key={visita.id} visitaId={visita.id} />

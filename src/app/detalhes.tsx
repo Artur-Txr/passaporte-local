@@ -12,6 +12,7 @@ import { Alert, Modal, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useVisitas } from "../contextos/VisitasContext";
 import AlbumVisita from "../componentes/AlbumVisita";
+import LocalizacaoVisita from "../componentes/LocalizacaoVisita";
 import { fotosDaVisita } from "../dados/visitas";
 import { Cabecalho, Decoracao, cores, visual } from "../componentes/Design";
 export default function Detalhes() {
@@ -56,6 +57,7 @@ export default function Detalhes() {
               {localizacao.cidade}, {visita.uf}
             </Text>
             {!!localizacao.localidade && <Text style={visual.meta}>Localidade: {localizacao.localidade}</Text>}
+            <LocalizacaoVisita key={visita.id} visita={visita} />
             <View style={{ marginTop: 14 }}>
             <View
               style={{
