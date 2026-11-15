@@ -1,5 +1,26 @@
 export type Coordenadas = { latitude: number; longitude: number };
 export type MarcadorMapa = Coordenadas & { id: string; titulo: string };
+export type LugarEncontrado = Coordenadas & { id: string; nome: string; endereco: string };
+
+export function interpretarLugares(dados: unknown): LugarEncontrado[] {
+  if (!dados || typeof dados !== 'object' || !('features' in dados) || !Array.isArray(dados.features)) return [];
+  const resultados: LugarEncontrado[] = [];
+  for (const item of dados.features) {
+    const par = item?.geometry?.coordinates;
+    if (item?.geometry?.type !== 'Point' || !Array.isArray(par)) continue;
+    const ponto = { latitude: par[1], longitude: par[0] };
+    if (!coordenadasValidas(ponto)) continue;
+    const propriedades = item.properties ?? {};
+    const texto = (valor: unknown) => typeof valor === 'string' ? valor : '';
+    const nome = texto(propriedades.name) || texto(propriedades.street) || texto(propriedades.city);
+    if (!nome) continue;
+    const endereco = [...new Set([texto(propriedades.street), texto(propriedades.housenumber), texto(propriedades.city), texto(propriedades.state), texto(propriedades.country)].filter(Boolean))].join(' · ');
+    const id = `${ponto.latitude},${ponto.longitude},${nome}`;
+    if (!resultados.some(local => local.id === id)) resultados.push({ ...ponto, id, nome, endereco });
+    if (resultados.length === 5) break;
+  }
+  return resultados;
+}
 
 export function coordenadasValidas(valor: unknown): valor is Coordenadas {
   if (!valor || typeof valor !== 'object') return false;

@@ -254,7 +254,7 @@ export default function NovaVisita() {
             Digite dia, mês e ano. As barras são preenchidas automaticamente.
           </Text>
 
-          <SeletorLocalizacao valor={localizacao} onChange={setLocalizacao} bloqueado={bloqueado} />
+          <SeletorLocalizacao buscaInicial={[lugar, cidade, uf].filter(Boolean).join(", ")} valor={localizacao} onChange={setLocalizacao} bloqueado={bloqueado} />
           <Text style={[styles.fieldLabel, { marginTop: 24 }]}>Minha lembrança</Text>
 
           <EditorAlbum fotos={fotos} onChange={setFotos} bloqueado={bloqueado} onSelecionandoChange={acompanharSelecao} />

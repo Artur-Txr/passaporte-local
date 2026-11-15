@@ -17,7 +17,8 @@ Aplicativo mobile para registrar passeios, guardar fotos e compartilhar descober
 - Publicações, perfis públicos, curtidas e comentários.
 - Lista Quero conhecer para salvar lugares.
 - Notificações de interações nas próprias visitas.
-- Mapa com localização escolhida no cadastro ou na edição.
+- Mapa com marcação manual, busca por nome ou endereço e localização atual no cadastro e na edição.
+- Localização e abertura de rota nos detalhes das visitas.
 - Rascunhos dos textos de visitas e comentários.
 - Otimização das novas fotografias antes do envio.
 
@@ -25,7 +26,7 @@ A identidade visual usa azul-petróleo, coral e a fonte Manrope.
 
 ## Tecnologias
 
-React Native, Expo SDK 57, TypeScript, Expo Router e Supabase. Os mapas usam Leaflet e OpenStreetMap.
+React Native, Expo SDK 57, TypeScript, Expo Router e Supabase. Os mapas usam Leaflet e OpenStreetMap. A busca de lugares usa Photon, e a posição atual usa Expo Location.
 
 ## Executar o aplicativo
 
@@ -58,6 +59,12 @@ npx expo start --localhost
 No Expo Go, use `exp://10.0.2.2:8081`. Se o terminal informar outra porta, ajuste o endereço.
 
 Os arquivos `Iniciar-BlueStacks.cmd`, `Iniciar-Celular-WiFi.cmd` e `Iniciar-PC.cmd` também estão disponíveis na raiz.
+
+## Localização das visitas
+
+No cadastro ou na edição, toque em Selecionar localização. Você pode usar a localização atual, buscar um lugar incluindo a cidade ou tocar diretamente no mapa. Confira o ponto e confirme antes de salvar a visita.
+
+A permissão de localização é solicitada ao tocar em Usar localização atual. O aplicativo exibe a precisão informada pelo aparelho. A busca de lugares depende de internet e consulta o serviço público Photon somente ao solicitar a pesquisa, com cache temporário de resultados.
 
 ## Supabase
 

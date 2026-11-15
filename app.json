@@ -1,34 +1,43 @@
-{
-  "expo": {
-    "name": "Passaporte Local",
-    "slug": "passaporte-local",
-    "version": "0.1.0",
-    "orientation": "portrait",
-    "scheme": "passaportelocal",
-    "userInterfaceStyle": "light",
-    "plugins": [
-      "expo-router",
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Permita selecionar fotos para suas visitas no Passaporte Local.",
-          "cameraPermission": "Permita usar a câmera para fotografar suas visitas.",
-          "microphonePermission": false
-        }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "icon": "./assets/identidade/icone.png",
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/identidade/adaptativo.png",
-        "backgroundColor": "#F8F5EC"
-      }
-    },
-    "web": {
-      "favicon": "./assets/identidade/icone.png"
-    }
-  }
-}
+{
+  "expo": {
+    "name": "Passaporte Local",
+    "slug": "passaporte-local",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "passaportelocal",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permita selecionar fotos para suas visitas no Passaporte Local.",
+          "cameraPermission": "Permita usar a câmera para fotografar suas visitas.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Permita usar sua localização para marcar o lugar da visita no mapa.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "icon": "./assets/identidade/icone.png",
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/identidade/adaptativo.png",
+        "backgroundColor": "#F8F5EC"
+      }
+    },
+    "web": {
+      "favicon": "./assets/identidade/icone.png"
+    }
+  }
+}
