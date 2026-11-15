@@ -32,7 +32,7 @@ export async function entrarComGoogle(): Promise<'conectado' | 'cancelado' | 're
   }
   const redirectTo = retornoGoogle();
   const { data, error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: {
-    redirectTo, skipBrowserRedirect: true, scopes: 'openid email profile', queryParams: { prompt: 'select_account' },
+    redirectTo, skipBrowserRedirect: true, scopes: 'openid', queryParams: { prompt: 'select_account' },
   } });
   if (error || !data.url) throw new Error('O acesso com Google está indisponível. Tente novamente mais tarde ou use e-mail e senha.');
   if (Platform.OS === 'web') {

@@ -52,6 +52,7 @@ test('cancelar navegador não cria sessão', async()=>{
   assert.equal(opcoes.provider,'google');
   assert.equal(opcoes.options.redirectTo,retorno);
   assert.equal(opcoes.options.skipBrowserRedirect,true);
+  assert.equal(opcoes.options.scopes,'openid');
 });
 test('Expo Go recebe orientação antes de iniciar um login incompatível', async()=>{
   const {servico,chamadas}=preparar({expoGo:true});

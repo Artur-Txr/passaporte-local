@@ -1,5 +1,13 @@
 # Login com Google
 
+## Configuração atual
+
+O projeto Google Cloud [Passaporte Local](https://console.cloud.google.com/auth/overview?project=quixotic-vent-514813-f4) está configurado. O cliente OAuth Web foi vinculado ao Supabase e o provedor Google está ativado. Os retornos `passaportelocal://auth/callback` e `http://localhost:8081/auth/callback` estão autorizados no Supabase.
+
+O aplicativo Google está em modo de testes, com a conta do proprietário incluída na lista de usuários de teste. Os escopos configurados são `openid`, `userinfo.email` e `userinfo.profile`. O segredo do cliente fica no Supabase e não é distribuído com o aplicativo.
+
+Foi verificado que o Supabase inicia o fluxo OAuth com PKCE e redireciona para o Google. O teste completo da autorização e do retorno ao aplicativo instalado ainda está pendente.
+
 ## Integração do aplicativo
 
 As telas de login e cadastro incluem Entrar com Google. A autorização acontece no navegador do sistema, e o Supabase troca o código de autorização por uma sessão com PKCE. O perfil usa o nome da conta Google quando não há um nome definido no aplicativo.
