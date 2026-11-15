@@ -121,6 +121,9 @@ export default function Perfil() {
         </View>
         {!!erro && <Pressable accessibilityRole="button" onPress={recarregarVisitas}><Text accessibilityLiveRegion="polite" style={visual.subtitle}>Não foi possível atualizar suas visitas. Toque para tentar novamente.</Text></Pressable>}
         <AtalhosPessoais />
+        <Pressable accessibilityRole="button" onPress={() => router.push('./sobre')} style={{ minHeight: 44, justifyContent: 'center', marginBottom: 12 }}>
+          <Text style={visual.link}>Sobre o aplicativo</Text>
+        </Pressable>
         <Text style={visual.section}>Minha conta</Text>
         <View
           style={{

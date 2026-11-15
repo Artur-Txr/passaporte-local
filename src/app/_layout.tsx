@@ -42,6 +42,7 @@ function Navegacao({ fontesProntas }: { fontesProntas: boolean }) {
         <Stack.Screen name="editar-visita" />
         <Stack.Screen name="passaporte" />
         <Stack.Screen name="perfil" />
+        <Stack.Screen name="sobre" />
         <Stack.Screen name="editar-perfil" />
         <Stack.Screen name="cidade" />
         <Stack.Screen name="colecao-prototipo" />

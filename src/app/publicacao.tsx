@@ -3,7 +3,6 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AlbumVisita from '../componentes/AlbumVisita';
-import CreditosFotos from '../componentes/CreditosFotos';
 import Avatar from '../componentes/Avatar';
 import InteracoesPublicacao from '../componentes/InteracoesPublicacao';
 import BotaoFavorito from '../componentes/BotaoFavorito';
@@ -37,7 +36,6 @@ export default function DetalhesPublicacao() {
           <Text style={visual.section}>{visita.perfis?.nome ?? 'Viajante'}</Text>
         </Pressable>
         <AlbumVisita fotos={fotosDaVisita({ ...visita, data: visita.data_visita })} />
-        <CreditosFotos fotos={fotosDaVisita({ ...visita, data: visita.data_visita })} />
         <Text style={[visual.title, { marginTop: 14 }]}>{visita.lugar}</Text>
         <Text style={visual.subtitle}>{visita.cidade} · {visita.uf}</Text>
         <Text style={visual.subtitle}>{visita.categoria} · {formatarDataVisita(visita.data_visita.split('-').reverse().join('/'), true)}</Text>

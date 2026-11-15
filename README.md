@@ -271,7 +271,3 @@ A versão de 14 de novembro de 2026 passou nos 27 testes automatizados, na checa
 - `historico/` reúne os registros das etapas anteriores.
 
 O protótipo apresenta 17 telas e estados de navegação. Ele tem armazenamento no navegador e um fluxo de acesso próprio. O aplicativo mobile usa a conta e os serviços do Supabase.
-
-## Créditos
-
-As fotografias e fontes têm seus autores e licenças registrados em [créditos do protótipo](docs/CREDITOS.md), [identidade visual](assets/identidade/CREDITOS.md) e [fotografias da coleção](assets/colecao-prototipo/CREDITOS.md). O app também apresenta os créditos das fotografias nos detalhes das visitas.

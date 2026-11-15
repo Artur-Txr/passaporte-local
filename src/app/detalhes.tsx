@@ -12,7 +12,6 @@ import { Alert, Modal, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useVisitas } from "../contextos/VisitasContext";
 import AlbumVisita from "../componentes/AlbumVisita";
-import CreditosFotos from '../componentes/CreditosFotos';
 import { fotosDaVisita } from "../dados/visitas";
 import { Cabecalho, Decoracao, cores, visual } from "../componentes/Design";
 export default function Detalhes() {
@@ -50,7 +49,6 @@ export default function Detalhes() {
         {visita ? (
           <>
             <AlbumVisita key={visita.id} fotos={fotosDaVisita(visita)} />
-            <CreditosFotos fotos={fotosDaVisita(visita)} />
             <Text style={[visual.title, { fontSize: 27, marginTop: 14 }]}>
               {visita.lugar}
             </Text>
