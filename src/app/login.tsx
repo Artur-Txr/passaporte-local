@@ -1,3 +1,4 @@
+import BotaoEntrarGoogle from '../componentes/BotaoEntrarGoogle';
 import { paleta } from "../lib/paleta";
 import Text from "../componentes/Texto";
 import { mensagemErroAuth } from "../lib/errosAutenticacao";
@@ -183,6 +184,8 @@ export default function Login() {
               {entrando ? "Entrando..." : "Entrar"}
             </Text>
           </Pressable>
+
+          <BotaoEntrarGoogle bloqueado={entrando} controle={envioEmAndamento} aoOcupar={setEntrando} aoErro={setMensagem} />
 
           <View
             style={{

@@ -11,6 +11,7 @@ Aplicativo mobile para registrar passeios, guardar fotos e compartilhar descober
 ## Recursos
 
 - Cadastro, login e recuperação de senha.
+- Integração com Google por OAuth e PKCE, com ativação do provedor descrita em [LOGIN-GOOGLE.md](LOGIN-GOOGLE.md).
 - Perfil com nome e fotografia.
 - Visitas com até cinco fotos e escolha da capa.
 - Busca por lugar ou cidade e filtros por categoria.
@@ -75,6 +76,7 @@ Para configurar um projeto novo, aplique os arquivos de `supabase/migrations/` e
 3. `supabase/resumo-viajante.sql`
 4. `supabase/busca-lugares.sql`
 5. `supabase/favoritos-notificacoes-localizacao.sql`
+6. `supabase/login-google.sql`
 
 As visitas são visíveis para contas conectadas. A edição fica restrita ao autor. Favoritos são pessoais, e cada conta recebe suas próprias notificações. O acesso às fotos é feito por URLs assinadas.
 

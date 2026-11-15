@@ -1,3 +1,4 @@
+import BotaoEntrarGoogle from '../componentes/BotaoEntrarGoogle';
 import { paleta } from "../lib/paleta";
 import Text from "../componentes/Texto";
 import { mensagemErroAuth } from "../lib/errosAutenticacao";
@@ -242,6 +243,8 @@ export default function Cadastro() {
               {cadastrando ? "Criando conta..." : "Criar conta"}
             </Text>
           </Pressable>
+          <BotaoEntrarGoogle bloqueado={cadastrando} controle={envioEmAndamento} aoOcupar={setCadastrando} aoErro={setMensagem} />
+
           <Pressable
             disabled={cadastrando}
             onPress={() => router.replace("/login")}

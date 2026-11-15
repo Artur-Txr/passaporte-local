@@ -24,7 +24,8 @@
           "isAndroidBackgroundLocationEnabled": false,
           "isAndroidForegroundServiceEnabled": false
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
@@ -34,10 +35,14 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/identidade/adaptativo.png",
         "backgroundColor": "#F8F5EC"
-      }
+      },
+      "package": "com.arturtxr.passaportelocal"
     },
     "web": {
       "favicon": "./assets/identidade/icone.png"
+    },
+    "ios": {
+      "bundleIdentifier": "com.arturtxr.passaportelocal"
     }
   }
 }
