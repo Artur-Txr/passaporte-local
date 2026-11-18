@@ -48,7 +48,7 @@ export default function InteracoesPublicacao({ visitaId }: { visitaId: string })
 
   return (
     <View style={{ borderTopWidth: 1, borderColor: paleta.borda, padding: 14 }}>
-      <View style={{ flexDirection: 'row', gap: 20 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 20, rowGap: 4 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={curtidas?.curtida ? 'Descurtir visita' : 'Curtir visita'}
           accessibilityState={{ selected: curtidas?.curtida ?? false, disabled: ocupado || !curtidas }}
           disabled={ocupado || !curtidas} onPress={curtir} style={{ minHeight: 44, justifyContent: 'center' }}>
@@ -172,7 +172,7 @@ function Comentarios({ visitaId, usuarioId, fechar, onAlterar }: { visitaId: str
             renderItem={({ item }) => <View style={{ paddingVertical: 12, borderBottomWidth: 1, borderColor: paleta.borda }}>
               <Pressable accessibilityRole="button" accessibilityLabel={`Abrir perfil de ${item.perfis?.nome ?? 'Viajante'}`} onPress={() => { fechar(); router.push({ pathname: './perfil-publico', params: { id: item.usuario_id } }); }} style={{ flexDirection: 'row', gap: 10, alignItems: 'center', minHeight: 48 }}>
                 <Avatar nome={item.perfis?.nome ?? 'Viajante'} caminho={item.perfis?.avatar_path} tamanho={36} />
-                <Text style={visual.section}>{item.perfis?.nome ?? 'Viajante'}</Text>
+                <Text style={[visual.section, { flex: 1, minWidth: 0 }]}>{item.perfis?.nome ?? 'Viajante'}</Text>
               </Pressable>
               <Text style={visual.meta}>{new Date(item.criado_em).toLocaleString('pt-BR')}</Text>
               <Text style={visual.subtitle}>{item.texto}</Text>

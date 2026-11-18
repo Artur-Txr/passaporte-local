@@ -209,11 +209,13 @@ export function Filtro({
       <Pressable
         accessibilityRole="button"
         onPress={() => setAberto(true)}
+        accessibilityState={{ expanded: aberto }}
+        accessibilityLabel={opcoes.find((o) => o.id === valor)?.nome ?? "Selecionar opção"}
         style={visual.select}
       >
         <Text
           numberOfLines={1}
-          style={{ flex: 1, color: cores.tinta, fontSize: 12 }}
+          style={{ flex: 1, color: cores.tinta, fontSize: 14 }}
         >
           {opcoes.find((o) => o.id === valor)?.nome}
         </Text>

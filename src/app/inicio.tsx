@@ -114,7 +114,7 @@ export default function Inicio() {
             >
               COLEÇÃO DE LUGARES VIVIDOS
             </Text>
-            <View style={{ flexDirection: "row", gap: compacto ? 12 : 28 }}>
+            <View style={{ flexDirection: compacto ? "column" : "row", gap: compacto ? 12 : 28 }}>
               <View>
                 <Text
                   style={{ color: "#FFF", fontSize: 28, fontWeight: "700" }}
@@ -125,9 +125,11 @@ export default function Inicio() {
               </View>
               <View
                 style={{
-                  borderLeftWidth: 1,
+                  borderLeftWidth: compacto ? 0 : 1,
+                  borderTopWidth: compacto ? 1 : 0,
                   borderColor: "#587783",
-                  paddingLeft: compacto ? 12 : 28,
+                  paddingTop: compacto ? 12 : 0,
+                  paddingLeft: compacto ? 0 : 28,
                 }}
               >
                 <Text

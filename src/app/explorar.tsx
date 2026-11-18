@@ -99,7 +99,7 @@ function CartaoPublicacao({ publicacao }: { publicacao: Publicacao }) {
     <View style={{ backgroundColor: '#FFF', borderRadius: 18, borderWidth: 1, borderColor: paleta.borda, overflow: 'hidden', marginBottom: 16 }}>
       <Pressable accessibilityRole="button" accessibilityLabel={`Abrir perfil de ${publicacao.perfis?.nome ?? 'Viajante'}`} onPress={() => router.push({ pathname: './perfil-publico', params: { id: publicacao.usuario_id } })} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
         <Avatar nome={publicacao.perfis?.nome ?? 'Viajante'} caminho={publicacao.perfis?.avatar_path} />
-        <Text style={visual.section}>{publicacao.perfis?.nome ?? 'Viajante'}</Text>
+        <Text style={[visual.section, { flex: 1, minWidth: 0 }]}>{publicacao.perfis?.nome ?? 'Viajante'}</Text>
       </Pressable>
       {url && !falhou && <Pressable accessibilityRole="button" accessibilityLabel={`Ver fotos de ${publicacao.lugar}`} onPress={() => router.push({ pathname: './publicacao', params: { id: publicacao.id } })}><Image source={{ uri: url }} onError={() => setFalhou(true)} style={{ width: '100%', height: 190 }} /></Pressable>}
       {falhou && <Pressable accessibilityRole="button" onPress={() => tentar(valor => valor + 1)} style={{ padding: 16 }}><Text style={visual.link}>Tentar carregar foto</Text></Pressable>}

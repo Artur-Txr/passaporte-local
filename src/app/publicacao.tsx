@@ -34,7 +34,7 @@ export default function DetalhesPublicacao() {
       {erro ? <Pressable accessibilityRole="button" onPress={() => tentar(valor => valor + 1)}><Text style={visual.subtitle}>{erro} Toque para tentar novamente.</Text></Pressable> : !visita ? <ActivityIndicator /> : <>
         <Pressable accessibilityRole="button" accessibilityLabel={`Abrir perfil de ${visita.perfis?.nome ?? 'Viajante'}`} onPress={() => router.push({ pathname: './perfil-publico', params: { id: visita.usuario_id } })} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 }}>
           <Avatar nome={visita.perfis?.nome ?? 'Viajante'} caminho={visita.perfis?.avatar_path} />
-          <Text style={visual.section}>{visita.perfis?.nome ?? 'Viajante'}</Text>
+          <Text style={[visual.section, { flex: 1, minWidth: 0 }]}>{visita.perfis?.nome ?? 'Viajante'}</Text>
         </Pressable>
         <AlbumVisita fotos={fotosDaVisita({ ...visita, data: visita.data_visita })} />
         <Text style={[visual.title, { marginTop: 14 }]}>{visita.lugar}</Text>

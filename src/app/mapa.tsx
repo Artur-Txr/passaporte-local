@@ -25,7 +25,7 @@ export default function Mapa() {
       <CampoTexto icone="busca" accessibilityLabel="Buscar no mapa" placeholder="Buscar lugar ou cidade" value={busca} onChangeText={setBusca} style={{ backgroundColor: '#FFFFFF', borderRadius: 14, marginVertical: 10, paddingRight: 12, color: '#123B4A' }} />
       <Text style={visual.subtitle}>{marcadores.length} {marcadores.length === 1 ? 'lugar marcado' : 'lugares marcados'} · {pendentes.length} sem localização</Text>
       {!filtradas.length && !carregando && <Text style={visual.subtitle}>{busca ? 'Nenhuma visita encontrada.' : 'Cadastre uma visita para começar seu mapa.'}</Text>}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', columnGap: 12, rowGap: 4 }}>
         <Pressable accessibilityRole="button" onPress={() => { setFalhaMapa(false); tentar(valor => valor + 1); }} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={visual.link}>Enquadrar lugares</Text></Pressable>
         {pendentes.length > 0 && <Pressable accessibilityRole="button" accessibilityState={{ expanded: semLocal }} onPress={() => mostrarSemLocal(valor => !valor)} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={visual.link}>{semLocal ? 'Ocultar pendentes' : 'Adicionar localização'}</Text></Pressable>}
       </View>
