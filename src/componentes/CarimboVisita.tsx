@@ -3,7 +3,6 @@ import { AccessibilityInfo, Animated, Easing, Platform, StyleSheet, View } from 
 import { rotuloCidade } from "../lib/cidades";
 import { formatarDataVisita } from "../lib/formatacaoData";
 import { paleta } from "../lib/paleta";
-import Icone from "./Icone";
 import Text from "./Texto";
 
 export type DadosCarimbo = {
@@ -55,18 +54,10 @@ export default function CarimboVisita({ visita, animar = false }: { visita: Dado
       style={[estilos.area, movimento]}
     >
       <View style={estilos.carimbo}>
-        <View style={estilos.molduraInterna} />
-        <View style={estilos.cabecalho}>
-          <Icone nome="lugar" tamanho={12} />
-          <Text style={estilos.local} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.85} maxFontSizeMultiplier={1.15}>{local}</Text>
-        </View>
-        <View style={estilos.faixa}>
-          <View style={estilos.traco} />
-          <Text style={estilos.marca} numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={1.15}>VISITADO</Text>
-          <View style={estilos.traco} />
-        </View>
+        <Text style={estilos.local} numberOfLines={2} maxFontSizeMultiplier={1.2}>{local}</Text>
+        <Text style={estilos.marca} maxFontSizeMultiplier={1.2}>VISITADO</Text>
         <View style={estilos.campoData}>
-          <Text style={estilos.data} numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={1.15}>{dataSelo}</Text>
+          <Text style={estilos.data} maxFontSizeMultiplier={1.2}>{dataSelo}</Text>
         </View>
       </View>
     </Animated.View>
@@ -74,31 +65,22 @@ export default function CarimboVisita({ visita, animar = false }: { visita: Dado
 }
 
 const estilos = StyleSheet.create({
-  area: { alignSelf: "center", flexShrink: 0, padding: 5 },
+  area: { alignSelf: "center", flexShrink: 0 },
   carimbo: {
-    width: 136, minHeight: 96, borderRadius: 9, borderWidth: 2, borderColor: paleta.petroleo,
-    backgroundColor: "#FFFCF7", paddingHorizontal: 12, paddingVertical: 9,
-    justifyContent: "center", alignItems: "center", gap: 3,
-    transform: [{ rotate: "-6deg" }],
+    width: 144, minHeight: 96, borderRadius: 7, borderWidth: 2, borderColor: paleta.petroleo,
+    backgroundColor: "#FFFCF7", paddingHorizontal: 10, paddingVertical: 10,
+    justifyContent: "center", alignItems: "center", gap: 4,
   },
-  molduraInterna: {
-    position: "absolute", top: 3, bottom: 3, left: 3, right: 3,
-    borderRadius: 5, borderWidth: 1, borderColor: "#123B4A66",
-  },
-  cabecalho: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 2, maxWidth: "100%" },
   local: {
-    color: paleta.petroleo, fontSize: 10, lineHeight: 13, fontWeight: "700", letterSpacing: 0.25,
-    textTransform: "uppercase", flexShrink: 1,
+    color: paleta.petroleo, fontSize: 13, lineHeight: 17, fontWeight: "700", textAlign: "center",
   },
-  faixa: { flexDirection: "row", alignItems: "center", alignSelf: "stretch", gap: 4 },
-  traco: { flex: 1, height: 1, backgroundColor: "#123B4A66" },
   marca: {
-    color: paleta.petroleo, fontSize: 16, lineHeight: 21, fontWeight: "800", letterSpacing: 1.15,
-    textAlign: "center", flexShrink: 1,
+    color: paleta.petroleo, fontSize: 18, lineHeight: 23, fontWeight: "800", letterSpacing: 0.4,
+    textAlign: "center",
   },
-  campoData: { backgroundColor: paleta.coralClaro, borderRadius: 3, paddingHorizontal: 6, paddingVertical: 1, maxWidth: "100%" },
+  campoData: { backgroundColor: paleta.coralClaro, borderRadius: 4, paddingHorizontal: 7, paddingVertical: 2, maxWidth: "100%" },
   data: {
-    color: "#963B2B", fontSize: 11, lineHeight: 16, fontWeight: "800", textTransform: "uppercase",
-    fontVariant: ["tabular-nums"], letterSpacing: 0.8, textAlign: "center",
+    color: "#963B2B", fontSize: 12, lineHeight: 16, fontWeight: "800", textTransform: "uppercase",
+    fontVariant: ["tabular-nums"], letterSpacing: 0.35, textAlign: "center",
   },
 });
