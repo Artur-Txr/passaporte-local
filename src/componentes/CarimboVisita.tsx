@@ -16,7 +16,7 @@ export default function CarimboVisita({ visita, animar = false }: { visita: Dado
   const progresso = useRef(new Animated.Value(1)).current;
   const local = rotuloCidade(visita.cidade, visita.uf);
   const data = formatarDataVisita(visita.data);
-  const dataSelo = visita.dataAproximada ? `≈ ${data}` : data;
+  const partesData = /^(\d{2}) ([a-z]{3}) (\d{4})$/i.exec(data);
 
   useEffect(() => {
     if (!animar) return;
@@ -54,33 +54,66 @@ export default function CarimboVisita({ visita, animar = false }: { visita: Dado
       style={[estilos.area, movimento]}
     >
       <View style={estilos.carimbo}>
-        <Text style={estilos.local} numberOfLines={2} maxFontSizeMultiplier={1.2}>{local}</Text>
-        <Text style={estilos.marca} maxFontSizeMultiplier={1.2}>VISITADO</Text>
-        <View style={estilos.campoData}>
-          <Text style={estilos.data} maxFontSizeMultiplier={1.2}>{dataSelo}</Text>
+        <View style={estilos.canhoto}>
+          {partesData ? (
+            <>
+              <View style={estilos.linhaDia}>
+                {visita.dataAproximada && <Text style={estilos.data} maxFontSizeMultiplier={1.2}>≈</Text>}
+                <Text style={[estilos.data, estilos.dia]} maxFontSizeMultiplier={1.2}>{partesData[1]}</Text>
+              </View>
+              <Text style={estilos.data} maxFontSizeMultiplier={1.2}>{partesData[2]}</Text>
+              <Text style={estilos.data} maxFontSizeMultiplier={1.2}>{partesData[3]}</Text>
+            </>
+          ) : <Text style={estilos.data} maxFontSizeMultiplier={1.2}>{visita.dataAproximada ? `≈ ${data}` : data}</Text>}
+          <View style={estilos.picote}>
+            {picotes.map(indice => <View key={indice} style={estilos.ponto} />)}
+          </View>
         </View>
+        <View style={estilos.corpo}>
+          <Text style={estilos.local} numberOfLines={2} maxFontSizeMultiplier={1.2}>{local}</Text>
+          <Text style={estilos.marca} maxFontSizeMultiplier={1.2}>VISITADO</Text>
+        </View>
+        <View style={[estilos.recorte, estilos.recorteSuperior]} />
+        <View style={[estilos.recorte, estilos.recorteInferior]} />
       </View>
     </Animated.View>
   );
 }
 
+const larguraCanhoto = 44;
+const larguraRecorte = 12;
+const picotes = Array.from({ length: 7 }, (_, indice) => indice);
+
 const estilos = StyleSheet.create({
   area: { alignSelf: "center", flexShrink: 0 },
   carimbo: {
-    width: 144, minHeight: 96, borderRadius: 7, borderWidth: 2, borderColor: paleta.petroleo,
-    backgroundColor: "#FFFCF7", paddingHorizontal: 10, paddingVertical: 10,
-    justifyContent: "center", alignItems: "center", gap: 4,
+    width: 146, minHeight: 82, borderRadius: 7, borderWidth: 1, borderColor: paleta.petroleo,
+    backgroundColor: "#FFFCF7", flexDirection: "row",
   },
-  local: {
-    color: paleta.petroleo, fontSize: 13, lineHeight: 17, fontWeight: "700", textAlign: "center",
+  canhoto: {
+    width: larguraCanhoto, justifyContent: "center", alignItems: "center", paddingVertical: 9, paddingHorizontal: 3,
+    backgroundColor: paleta.petroleo, borderTopLeftRadius: 6, borderBottomLeftRadius: 6,
   },
-  marca: {
-    color: paleta.petroleo, fontSize: 18, lineHeight: 23, fontWeight: "800", letterSpacing: 0.4,
-    textAlign: "center",
-  },
-  campoData: { backgroundColor: paleta.coralClaro, borderRadius: 4, paddingHorizontal: 7, paddingVertical: 2, maxWidth: "100%" },
+  linhaDia: { flexDirection: "row", alignItems: "center", gap: 1 },
   data: {
-    color: "#963B2B", fontSize: 12, lineHeight: 16, fontWeight: "800", textTransform: "uppercase",
-    fontVariant: ["tabular-nums"], letterSpacing: 0.35, textAlign: "center",
+    color: "#FFFAF6", fontSize: 11, lineHeight: 14, fontWeight: "700", textTransform: "uppercase",
+    fontVariant: ["tabular-nums"], textAlign: "center",
+  },
+  dia: { fontSize: 22, lineHeight: 25, fontWeight: "800" },
+  picote: { position: "absolute", top: 9, bottom: 9, right: 0, justifyContent: "space-between" },
+  ponto: { width: 1, height: 3, backgroundColor: "#B9D6DB" },
+  corpo: { flex: 1, minWidth: 0, justifyContent: "center", gap: 5, paddingHorizontal: 9, paddingVertical: 9 },
+  local: { color: paleta.petroleo, fontSize: 12, lineHeight: 16, fontWeight: "700" },
+  marca: { color: "#963B2B", fontSize: 13, lineHeight: 17, fontWeight: "800" },
+  recorte: {
+    position: "absolute", left: larguraCanhoto - larguraRecorte / 2,
+    width: larguraRecorte, height: 7, backgroundColor: paleta.papel, borderColor: paleta.petroleo,
+    borderLeftWidth: 1, borderRightWidth: 1,
+  },
+  recorteSuperior: {
+    top: -1, borderBottomWidth: 1, borderBottomLeftRadius: 6, borderBottomRightRadius: 6,
+  },
+  recorteInferior: {
+    bottom: -1, borderTopWidth: 1, borderTopLeftRadius: 6, borderTopRightRadius: 6,
   },
 });
