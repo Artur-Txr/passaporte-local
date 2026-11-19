@@ -49,7 +49,7 @@ export default function Detalhes() {
         <Cabecalho titulo="Detalhes da visita" voltar />
         {visita ? (
           <>
-            <AlbumVisita key={visita.id} fotos={fotosDaVisita(visita)} />
+            <AlbumVisita key={`album-${visita.id}`} fotos={fotosDaVisita(visita)} />
             <Text style={[visual.title, { fontSize: 27, marginTop: 14 }]}>
               {visita.lugar}
             </Text>
@@ -57,7 +57,7 @@ export default function Detalhes() {
               {localizacao.cidade}, {visita.uf}
             </Text>
             {!!localizacao.localidade && <Text style={visual.meta}>Localidade: {localizacao.localidade}</Text>}
-            <LocalizacaoVisita key={visita.id} visita={visita} />
+            <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} />
             <View style={{ marginTop: 14 }}>
             <View
               style={{

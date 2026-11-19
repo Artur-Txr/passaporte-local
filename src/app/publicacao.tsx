@@ -39,10 +39,10 @@ export default function DetalhesPublicacao() {
         <AlbumVisita fotos={fotosDaVisita({ ...visita, data: visita.data_visita })} />
         <Text style={[visual.title, { marginTop: 14 }]}>{visita.lugar}</Text>
         <Text style={visual.subtitle}>{visita.cidade} · {visita.uf}</Text>
-        <LocalizacaoVisita key={visita.id} visita={visita} />
+        <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} />
         <Text style={visual.subtitle}>{visita.categoria} · {formatarDataVisita(visita.data_visita.split('-').reverse().join('/'), true)}</Text>
         <View style={{ marginVertical: 20 }}><Text style={visual.section}>Minha lembrança</Text><Text style={visual.subtitle}>{visita.comentario || 'Uma descoberta para guardar.'}</Text></View>
-        <InteracoesPublicacao key={visita.id} visitaId={visita.id} />
+        <InteracoesPublicacao key={`interacoes-${visita.id}`} visitaId={visita.id} />
         <BotaoFavorito visitaId={visita.id} />
         {visita.usuario_id === sessao?.user.id && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/editar-visita', params: { id: visita.id } })} style={visual.button}><Text style={visual.buttonText}>Editar visita</Text></Pressable>}
       </>}

@@ -1,12 +1,13 @@
 import { Redirect, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native";
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CampoTexto from "../componentes/CampoTexto";
 import { Cabecalho, visual } from "../componentes/Design";
 import Text from "../componentes/Texto";
 import useProtegerFormulario from "../componentes/useProtegerFormulario";
 import { useAutenticacao } from "../contextos/AutenticacaoContext";
+import { paleta } from "../lib/paleta";
 import { supabase } from "../lib/supabase";
 import Avatar from '../componentes/Avatar';
 import SeletorFoto from '../componentes/SeletorFoto';
@@ -100,9 +101,9 @@ function FormularioPerfil({ usuarioId, nomeInicial, emailInicial }: { usuarioId:
           {!perfilPronto && !!erro && <Pressable accessibilityRole="button" onPress={() => tentar(valor => valor + 1)} style={{ paddingVertical: 12 }}><Text style={visual.link}>Tentar novamente</Text></Pressable>}
           <View style={{ gap: 10, marginTop: 20 }}>
             <Text style={visual.section}>Nome</Text>
-            <CampoTexto icone="perfil" accessibilityLabel="Nome" value={nome} onChangeText={setNome} maxLength={80} editable={!bloqueado} />
+            <CampoTexto icone="perfil" accessibilityLabel="Nome" style={estilos.campo} value={nome} onChangeText={setNome} maxLength={80} editable={!bloqueado} />
             <Text style={visual.section}>E-mail</Text>
-            <CampoTexto icone="email" accessibilityLabel="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} maxLength={254} editable={!bloqueado} />
+            <CampoTexto icone="email" accessibilityLabel="E-mail" style={estilos.campo} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} maxLength={254} editable={!bloqueado} />
             {mudouEmail && <Text style={visual.subtitle}>A mudança de e-mail pode exigir confirmação.</Text>}
             {!!erro && <Text accessibilityRole="alert" style={visual.subtitle}>{erro}</Text>}
           </View>
@@ -117,3 +118,15 @@ function FormularioPerfil({ usuarioId, nomeInicial, emailInicial }: { usuarioId:
     </SafeAreaView>
   );
 }
+
+const estilos = StyleSheet.create({
+  campo: {
+    backgroundColor: "#FFFFFF",
+    borderColor: paleta.borda,
+    borderWidth: 1,
+    borderRadius: 12,
+    color: paleta.tinta,
+    paddingRight: 12,
+    fontSize: 16,
+  },
+});

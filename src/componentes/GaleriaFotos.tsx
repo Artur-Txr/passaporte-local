@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Text from './Texto';
@@ -10,7 +10,15 @@ export default function GaleriaFotos({ fotos, inicial, fechar }: {
   fechar: () => void;
 }) {
   const { width } = useWindowDimensions();
+  const lista = useRef<FlatList<string>>(null);
   const [indice, selecionar] = useState(Math.max(0, fotos.indexOf(inicial)));
+
+  function irPara(posicao: number) {
+    if (posicao < 0 || posicao >= fotos.length) return;
+    lista.current?.scrollToIndex({ index: posicao, animated: true });
+    selecionar(posicao);
+  }
+
   return (
     <Modal visible animationType="fade" onRequestClose={fechar} supportedOrientations={['portrait', 'landscape']}>
       <SafeAreaView style={styles.tela} edges={['top', 'bottom']}>
@@ -21,6 +29,7 @@ export default function GaleriaFotos({ fotos, inicial, fechar }: {
           </Pressable>
         </View>
         <FlatList
+          ref={lista}
           key={width}
           data={fotos}
           keyExtractor={caminho => caminho}
@@ -33,7 +42,16 @@ export default function GaleriaFotos({ fotos, inicial, fechar }: {
           renderItem={({ item, index }) => <PaginaFoto caminho={item} largura={width} numero={index + 1} />}
           style={{ flex: 1 }}
         />
-        {fotos.length > 1 && <Text style={[styles.texto, styles.dica]}>Deslize para ver as outras fotos</Text>}
+        {fotos.length > 1 && <View style={styles.rodape}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Foto anterior" disabled={indice === 0}
+            style={[styles.botao, indice === 0 && styles.desabilitado]} onPress={() => irPara(indice - 1)}>
+            <Text style={styles.texto}>Anterior</Text>
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Próxima foto" disabled={indice === fotos.length - 1}
+            style={[styles.botao, indice === fotos.length - 1 && styles.desabilitado]} onPress={() => irPara(indice + 1)}>
+            <Text style={styles.texto}>Próxima</Text>
+          </Pressable>
+        </View>}
       </SafeAreaView>
     </Modal>
   );
@@ -56,5 +74,6 @@ const styles = StyleSheet.create({
   cabecalho: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 },
   texto: { color: '#FFFFFF', fontSize: 15 },
   botao: { padding: 16, minHeight: 48 },
-  dica: { textAlign: 'center', padding: 16 },
+  rodape: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 20 },
+  desabilitado: { opacity: 0.4 },
 });

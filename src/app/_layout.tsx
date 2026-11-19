@@ -53,7 +53,10 @@ function Navegacao({ fontesProntas }: { fontesProntas: boolean }) {
 
 export default function Layout() {
   const [fontes, erroFontes] = useFonts({
-    Manrope: require("../../assets/identidade/Manrope.ttf"),
+    Manrope: require("../../assets/identidade/Manrope-Regular.ttf"),
+    "Manrope-SemiBold": require("../../assets/identidade/Manrope-SemiBold.ttf"),
+    "Manrope-Bold": require("../../assets/identidade/Manrope-Bold.ttf"),
+    "Manrope-ExtraBold": require("../../assets/identidade/Manrope-ExtraBold.ttf"),
     Simbolos: require("../../assets/identidade/Simbolos.ttf"),
   });
   return (
