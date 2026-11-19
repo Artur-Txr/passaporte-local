@@ -12,6 +12,7 @@ import { Alert, Modal, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useVisitas } from "../contextos/VisitasContext";
 import AlbumVisita from "../componentes/AlbumVisita";
+import CarimboVisita from "../componentes/CarimboVisita";
 import LocalizacaoVisita from "../componentes/LocalizacaoVisita";
 import { fotosDaVisita } from "../dados/visitas";
 import { Cabecalho, Decoracao, cores, visual } from "../componentes/Design";
@@ -50,11 +51,14 @@ export default function Detalhes() {
         {visita ? (
           <>
             <AlbumVisita key={`album-${visita.id}`} fotos={fotosDaVisita(visita)} />
-            <Text style={[visual.title, { fontSize: 27, marginTop: 14 }]}>
-              {visita.lugar}
-            </Text>
-            <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} rotulo={`${localizacao.cidade} · ${visita.uf}`} />
-            {!!localizacao.localidade && <Text style={visual.meta}>Localidade: {localizacao.localidade}</Text>}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginTop: 14 }}>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text accessibilityRole="header" style={[visual.title, { fontSize: 27 }]}>{visita.lugar}</Text>
+                <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} rotulo={`${localizacao.cidade} · ${visita.uf}`} />
+                {!!localizacao.localidade && <Text style={visual.meta}>Localidade: {localizacao.localidade}</Text>}
+              </View>
+              <CarimboVisita visita={{ ...visita, dataAproximada: texto.dataAproximada }} />
+            </View>
             <View style={{ marginTop: 14 }}>
             <View
               style={{

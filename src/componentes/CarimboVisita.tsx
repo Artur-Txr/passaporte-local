@@ -1,61 +1,72 @@
-import { paleta } from "../lib/paleta";
-import { StyleSheet, Text, View } from 'react-native';
-import type { Visita } from '../dados/visitas';
+import { useEffect, useRef } from "react";
+import { AccessibilityInfo, Animated, Easing, Platform, StyleSheet, View } from "react-native";
+import { rotuloCidade } from "../lib/cidades";
+import { formatarDataVisita } from "../lib/formatacaoData";
+import Text from "./Texto";
 
-const meses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-function dataCarimbo(data: string) {
-  const [dia, mes, ano] = data.split('/');
-  return meses[Number(mes) - 1] ? `${dia} ${meses[Number(mes) - 1]} ${ano}` : data;
+export type DadosCarimbo = {
+  cidade: string;
+  uf: string;
+  data: string;
+  dataAproximada?: boolean;
+};
+
+export default function CarimboVisita({ visita, animar = false }: { visita: DadosCarimbo; animar?: boolean }) {
+  const escala = useRef(new Animated.Value(1)).current;
+  const local = rotuloCidade(visita.cidade, visita.uf);
+  const data = formatarDataVisita(visita.data);
+  const dataSelo = visita.dataAproximada ? `≈ ${data}` : data;
+
+  useEffect(() => {
+    if (!animar) return;
+    let ativo = true;
+    let movimento: Animated.CompositeAnimation | undefined;
+    const opcoes = { useNativeDriver: Platform.OS !== "web", isInteraction: false };
+    void AccessibilityInfo.isReduceMotionEnabled().then(reduzir => {
+      if (!ativo || reduzir) return;
+      escala.setValue(1.2);
+      movimento = Animated.sequence([
+        Animated.timing(escala, { ...opcoes, toValue: 0.93, duration: 155, easing: Easing.in(Easing.quad) }),
+        Animated.timing(escala, { ...opcoes, toValue: 1, duration: 145, easing: Easing.out(Easing.cubic) }),
+      ]);
+      movimento.start();
+    }).catch(() => {});
+    return () => {
+      ativo = false;
+      movimento?.stop();
+      escala.setValue(1);
+    };
+  }, [animar, escala]);
+
+  return (
+    <Animated.View
+      accessible
+      accessibilityLabel={`Visitado. ${local}, ${visita.dataAproximada ? "data aproximada: " : ""}${formatarDataVisita(visita.data, true)}`}
+      style={[estilos.area, { transform: [{ scale: escala }] }]}
+    >
+      <View style={estilos.carimbo}>
+        <View style={estilos.anel} />
+        <Text style={[estilos.texto, estilos.local]} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.85} maxFontSizeMultiplier={1.2}>{local}</Text>
+        <Text style={estilos.marca} numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={1.2}>VISITADO</Text>
+        <Text style={estilos.texto} numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={1.2}>{dataSelo}</Text>
+      </View>
+    </Animated.View>
+  );
 }
-const tinta = paleta.petroleo;
 
-function Paisagem() {
-  return <View style={styles.paisagem}>
-    {[{ x: 4, h: 22 }, { x: 21, h: 37 }, { x: 39, h: 49 }, { x: 58, h: 29 }, { x: 76, h: 20 }].map(({ x, h }) =>
-      <View key={x} style={[styles.predio, { left: x, height: h }]}>
-        {[0, 1, 2].map(i => <View key={i} style={styles.janelas}><View style={styles.janela} /><View style={styles.janela} /></View>)}
-      </View>)}
-    {[7, 83].map(x => <View key={x} style={[styles.arvore, { left: x }]}>
-      <View style={styles.copa} /><View style={styles.tronco} />
-    </View>)}
-    <View style={styles.chao} />
-  </View>;
-}
-
-export default function CarimboVisita({ visita }: { visita: Visita }) {
-  return <View accessible accessibilityLabel={`Carimbo de ${visita.lugar}, ${visita.cidade}, ${visita.uf}, ${visita.categoria}, visitado em ${visita.data}`} style={styles.carimbo}>
-    <View style={styles.anelInterno} />
-    <View style={styles.anelFalhado} />
-    {'VISITADO'.split('').map((letra, i) => {
-      const angulo = (i - 3.5) * 10;
-      const rad = angulo * Math.PI / 180;
-      return <Text key={i} style={[styles.letra, { left: 74 + Math.sin(rad) * 65, top: 76 - Math.cos(rad) * 65, transform: [{ rotate: `${angulo}deg` }] }]}>{letra}</Text>;
-    })}
-    <View style={styles.miolo}>
-      <Paisagem />
-      <Text style={styles.data}>{dataCarimbo(visita.data)}</Text>
-      <Text numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75} style={styles.cidade}>{visita.lugar.replace(/^DEMONSTRAÇÃO\s*[—-]\s*/i, "").toUpperCase()}</Text>
-    </View>
-    <Text style={[styles.estrela, { left: 11 }]}>✦</Text>
-    <Text style={[styles.estrela, { right: 11 }]}>✦</Text>
-  </View>;
-}
-
-const styles = StyleSheet.create({
-  carimbo: { width: 180, height: 180, borderRadius: 90, borderWidth: 2, borderColor: tinta, backgroundColor: 'transparent', transform: [{ rotate: '-9deg' }] },
-  anelInterno: { position: 'absolute', inset: 5, borderRadius: 85, borderWidth: 1, borderColor: tinta },
-  anelFalhado: { position: 'absolute', inset: 2, borderRadius: 88, borderWidth: 1, borderStyle: 'dashed', borderColor: paleta.borda },
-  letra: { position: 'absolute', width: 28, textAlign: 'center', fontSize: 15, fontWeight: '800', color: tinta },
-  miolo: { position: 'absolute', left: 26, right: 26, top: 43, alignItems: 'center' },
-  paisagem: { width: 104, height: 52 },
-  predio: { position: 'absolute', bottom: 3, width: 13, backgroundColor: tinta, paddingTop: 4, gap: 4 },
-  janelas: { flexDirection: 'row', justifyContent: 'space-evenly' },
-  janela: { width: 2, height: 3, backgroundColor: paleta.papel },
-  arvore: { position: 'absolute', bottom: 4, width: 23, alignItems: 'center' },
-  copa: { width: 23, height: 24, borderRadius: 12, backgroundColor: tinta, borderWidth: 2, borderColor: paleta.papel },
-  tronco: { width: 3, height: 12, backgroundColor: tinta },
-  chao: { position: 'absolute', bottom: 0, width: 104, height: 2, backgroundColor: tinta },
-  data: { fontSize: 14, fontWeight: '800', color: tinta, marginTop: 5, letterSpacing: 0.4 },
-  cidade: { fontSize: 12, lineHeight: 14, fontWeight: '700', color: tinta, textAlign: 'center', marginTop: 4, maxWidth: 128 },
-  estrela: { position: 'absolute', top: 79, fontSize: 12, color: tinta },
+const tinta = "#A54332";
+const estilos = StyleSheet.create({
+  area: { alignSelf: "center", flexShrink: 0, padding: 3 },
+  carimbo: {
+    width: 108, height: 108, borderRadius: 54, borderWidth: 2, borderColor: tinta,
+    paddingHorizontal: 9, justifyContent: "center", alignItems: "center", gap: 3,
+    transform: [{ rotate: "-9deg" }],
+  },
+  anel: { position: "absolute", top: 4, bottom: 4, left: 4, right: 4, borderRadius: 50, borderWidth: 1, borderColor: tinta, opacity: 0.68 },
+  texto: { color: tinta, fontSize: 9, lineHeight: 12, textAlign: "center", fontWeight: "700", letterSpacing: 0.35, textTransform: "uppercase" },
+  local: { maxWidth: 77 },
+  marca: {
+    color: tinta, fontSize: 13, lineHeight: 19, fontWeight: "800", letterSpacing: 0.8,
+    textAlign: "center", borderTopWidth: 1, borderBottomWidth: 1, borderColor: "#A5433266", paddingHorizontal: 2,
+  },
 });

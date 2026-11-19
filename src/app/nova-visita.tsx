@@ -150,7 +150,7 @@ export default function NovaVisita() {
       });
 
       await rascunho.limpar();
-      avisar("Visita guardada!");
+      avisar("Visita guardada!", { cidade: cidade.trim(), uf, data });
       concluirESair(voltar);
     } catch {
       informarErro(
