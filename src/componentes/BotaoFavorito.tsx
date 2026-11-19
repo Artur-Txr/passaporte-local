@@ -1,13 +1,15 @@
 import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Pressable, View } from 'react-native';
+import { paleta } from '../lib/paleta';
 import { useAutenticacao } from '../contextos/AutenticacaoContext';
 import { useFeedback } from '../contextos/FeedbackContext';
 import { consultarFavorito, definirFavorito } from '../servicos/socialService';
 import { visual } from './Design';
+import Icone from './Icone';
 import Text from './Texto';
 
-export default function BotaoFavorito({ visitaId }: { visitaId: string }) {
+export default function BotaoFavorito({ visitaId, compacto = false }: { visitaId: string; compacto?: boolean }) {
   const { sessao } = useAutenticacao();
   const usuarioId = sessao?.user.id;
   const [salvo, setSalvo] = useState<boolean | null>(null);
@@ -34,9 +36,24 @@ export default function BotaoFavorito({ visitaId }: { visitaId: string }) {
     } catch { if (ativo.current) { setErro('Não foi possível confirmar o favorito. Toque para atualizar.'); tentar(valor => valor + 1); } }
     finally { trava.current = false; if (ativo.current) setOcupado(false); }
   }
-  return <View>
-    <Pressable accessibilityRole="button" accessibilityState={{ selected: salvo ?? false }} disabled={ocupado || salvo === null} onPress={alternar} style={{ minHeight: 44, justifyContent: 'center' }}>
-      <Text style={visual.link}>{salvo ? 'Salvo em Quero conhecer' : 'Quero conhecer'}</Text>
+  const desabilitado = ocupado || salvo === null;
+  const cor = salvo ? '#A54332' : paleta.petroleo;
+  return <View style={{ maxWidth: '100%' }}>
+    <Pressable accessibilityRole="button"
+      accessibilityLabel={salvo ? 'Remover de Quero conhecer' : 'Salvar em Quero conhecer'}
+      accessibilityState={{ selected: salvo ?? false, disabled: desabilitado }}
+      disabled={desabilitado}
+      onPress={alternar}
+      style={({ pressed }) => ({
+        minHeight: 44, minWidth: 44, flexDirection: 'row', alignItems: 'center',
+        justifyContent: 'center', alignSelf: 'flex-start', paddingHorizontal: 8, gap: 4,
+        borderRadius: 12, backgroundColor: salvo ? paleta.coralClaro : 'transparent',
+        opacity: desabilitado || pressed ? 0.55 : 1,
+      })}>
+      <Icone nome={salvo ? 'salvo' : 'salvar'} tamanho={20} cor={cor} />
+      <Text style={{ color: cor, fontSize: 13, fontWeight: '700', flexShrink: 1 }}>
+        {salvo ? (compacto ? 'Salvo' : 'Salvo em Quero conhecer') : (compacto ? 'Salvar' : 'Quero conhecer')}
+      </Text>
     </Pressable>
     {!!erro && <Pressable accessibilityRole="button" onPress={() => tentar(valor => valor + 1)}><Text style={visual.subtitle}>{erro}</Text></Pressable>}
   </View>;

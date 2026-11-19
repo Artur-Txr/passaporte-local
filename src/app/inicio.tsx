@@ -143,6 +143,19 @@ export default function Inicio() {
           </View>
           <Icone nome="proximo" tamanho={24} cor={paleta.coral} />
         </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          disabled={carregando || !!erro}
+          onPress={() => router.push("/nova-visita")}
+          style={[
+            visual.button,
+            { flexDirection: "row", gap: 8 },
+            (carregando || !!erro) && { opacity: 0.5 },
+          ]}
+        >
+          <Icone nome="adicionar" tamanho={20} cor="#FFF" />
+          <Text style={[visual.buttonText, { flexShrink: 1 }]}>Registrar visita</Text>
+        </Pressable>
         <AtalhosPessoais />
         <View
           style={{
@@ -197,16 +210,6 @@ export default function Inicio() {
         )}
         {!!erro && <BotaoAtualizar carregando={carregando} onPress={recarregarVisitas} />}
       </ScrollView>
-      <View style={{ width: "100%", maxWidth: 600, alignSelf: "center", paddingHorizontal: 22, paddingBottom: 8 }}>
-        <Pressable
-          accessibilityRole="button"
-          disabled={carregando || !!erro}
-          onPress={() => router.push("/nova-visita")}
-          style={visual.button}
-        >
-          <Text style={visual.buttonText}>Registrar visita</Text>
-        </Pressable>
-      </View>
       <NavegacaoInferior ativa="inicio" />
     </SafeAreaView>
   );

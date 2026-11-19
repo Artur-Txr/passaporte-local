@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAutenticacao } from '../contextos/AutenticacaoContext';
 import { paleta } from '../lib/paleta';
@@ -8,9 +8,11 @@ import { consultarCurtidas, definirCurtida, enviarComentario, listarComentarios,
 import { visual } from './Design';
 import Text from './Texto';
 import Avatar from './Avatar';
+import BotaoFavorito from './BotaoFavorito';
+import Icone from './Icone';
 import useRascunho from './useRascunho';
 
-export default function InteracoesPublicacao({ visitaId }: { visitaId: string }) {
+export default function InteracoesPublicacao({ visitaId, compacto = false }: { visitaId: string; compacto?: boolean }) {
   const { sessao } = useAutenticacao();
   const usuarioId = sessao?.user.id;
   const [curtidas, setCurtidas] = useState<Awaited<ReturnType<typeof consultarCurtidas>> | null>(null);
@@ -47,24 +49,48 @@ export default function InteracoesPublicacao({ visitaId }: { visitaId: string })
   }
 
   return (
-    <View style={{ borderTopWidth: 1, borderColor: paleta.borda, padding: 14 }}>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 20, rowGap: 4 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel={curtidas?.curtida ? 'Descurtir visita' : 'Curtir visita'}
+    <View style={estilosAcoes.barra}>
+      <View style={estilosAcoes.linha}>
+        <Pressable accessibilityRole="button"
+          accessibilityLabel={`${curtidas?.curtida ? 'Descurtir visita' : 'Curtir visita'}${curtidas ? `, ${curtidas.total} curtidas` : ''}`}
           accessibilityState={{ selected: curtidas?.curtida ?? false, disabled: ocupado || !curtidas }}
-          disabled={ocupado || !curtidas} onPress={curtir} style={{ minHeight: 44, justifyContent: 'center' }}>
-          <Text style={{ color: curtidas?.curtida ? paleta.petroleo : paleta.suave, fontWeight: '700' }}>
-            {curtidas?.curtida ? '♥' : '♡'} {curtidas ? `${curtidas.total} ${curtidas.total === 1 ? 'curtida' : 'curtidas'}` : 'Carregando…'}
+          disabled={ocupado || !curtidas} onPress={curtir}
+          style={({ pressed }) => [estilosAcoes.botao, curtidas?.curtida && estilosAcoes.ativo, (pressed || ocupado || !curtidas) && estilosAcoes.atenuado]}>
+          <Icone nome={curtidas?.curtida ? 'curtido' : 'curtir'} tamanho={20} cor={curtidas?.curtida ? '#A54332' : paleta.petroleo} />
+          <Text style={[estilosAcoes.rotulo, curtidas?.curtida && estilosAcoes.rotuloAtivo]}>
+            {curtidas?.total ?? '…'}{compacto ? '' : curtidas?.total === 1 ? ' curtida' : ' curtidas'}
           </Text>
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={() => abrir(true)} style={{ minHeight: 44, justifyContent: 'center' }}>
-          <Text style={visual.link}>Comentários{curtidas ? ` (${curtidas.comentarios})` : ''}</Text>
+        <Pressable accessibilityRole="button"
+          accessibilityLabel={`Abrir comentários${curtidas ? ` (${curtidas.comentarios})` : ''}`}
+          onPress={() => abrir(true)}
+          style={({ pressed }) => [estilosAcoes.botao, pressed && estilosAcoes.atenuado]}>
+          <Icone nome="comentar" tamanho={20} />
+          <Text style={estilosAcoes.rotulo}>
+            {compacto ? curtidas?.comentarios ?? '…' : `Comentários${curtidas ? ` (${curtidas.comentarios})` : ''}`}
+          </Text>
         </Pressable>
+        <View style={estilosAcoes.salvar}><BotaoFavorito visitaId={visitaId} compacto={compacto} /></View>
       </View>
       {!!erro && <Pressable accessibilityRole="button" disabled={ocupado} onPress={() => tentar(valor => valor + 1)}><Text accessibilityLiveRegion="polite" style={visual.subtitle}>{erro} Toque para atualizar.</Text></Pressable>}
       {aberto && usuarioId && <Comentarios key={`${visitaId}/${usuarioId}`} visitaId={visitaId} usuarioId={usuarioId} fechar={() => abrir(false)} onAlterar={() => tentar(valor => valor + 1)} />}
     </View>
   );
 }
+
+const estilosAcoes = StyleSheet.create({
+  barra: { borderTopWidth: 1, borderColor: paleta.borda, paddingHorizontal: 10, paddingVertical: 6 },
+  linha: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', columnGap: 6, rowGap: 4 },
+  botao: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
+    minHeight: 44, minWidth: 44, paddingHorizontal: 8, borderRadius: 12, maxWidth: '100%',
+  },
+  rotulo: { color: paleta.petroleo, fontSize: 13, fontWeight: '700', flexShrink: 1 },
+  ativo: { backgroundColor: paleta.coralClaro },
+  rotuloAtivo: { color: '#A54332' },
+  atenuado: { opacity: 0.55 },
+  salvar: { marginLeft: 'auto', maxWidth: '100%' },
+});
 
 function novoId() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, letra => {

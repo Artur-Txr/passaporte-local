@@ -26,6 +26,11 @@ const glifos = {
   notificacoes: "\ue7f4",
   mapa: "\ue55b",
   salvar: "\ue866",
+  salvo: "\ue867",
+  curtir: "\ue87e",
+  curtido: "\ue87d",
+  comentar: "\ue0cb",
+  adicionar: "\ue145",
 };
 export default function Icone({
   nome,

@@ -198,10 +198,12 @@ export function Filtro({
   valor,
   opcoes,
   onChange,
+  destaque = false,
 }: {
   valor: string;
   opcoes: { id: string; nome: string }[];
   onChange: (id: string) => void;
+  destaque?: boolean;
 }) {
   const [aberto, setAberto] = useState(false);
   return (
@@ -209,17 +211,17 @@ export function Filtro({
       <Pressable
         accessibilityRole="button"
         onPress={() => setAberto(true)}
-        accessibilityState={{ expanded: aberto }}
+        accessibilityState={{ expanded: aberto, selected: destaque }}
         accessibilityLabel={opcoes.find((o) => o.id === valor)?.nome ?? "Selecionar opção"}
-        style={visual.select}
+        style={[visual.select, destaque && { backgroundColor: cores.verde, borderColor: cores.verde }]}
       >
         <Text
           numberOfLines={1}
-          style={{ flex: 1, color: cores.tinta, fontSize: 14 }}
+          style={{ flex: 1, color: destaque ? "#FFF" : cores.tinta, fontSize: 14, fontWeight: destaque ? "700" : "400" }}
         >
           {opcoes.find((o) => o.id === valor)?.nome}
         </Text>
-        <Icone nome="expandir" tamanho={18} />
+        <Icone nome="expandir" tamanho={18} cor={destaque ? "#FFF" : cores.verde} />
       </Pressable>
       <Modal
         transparent

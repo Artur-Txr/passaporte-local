@@ -53,11 +53,8 @@ export default function Detalhes() {
             <Text style={[visual.title, { fontSize: 27, marginTop: 14 }]}>
               {visita.lugar}
             </Text>
-            <Text style={visual.subtitle}>
-              {localizacao.cidade}, {visita.uf}
-            </Text>
+            <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} rotulo={`${localizacao.cidade} · ${visita.uf}`} />
             {!!localizacao.localidade && <Text style={visual.meta}>Localidade: {localizacao.localidade}</Text>}
-            <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} />
             <View style={{ marginTop: 14 }}>
             <View
               style={{

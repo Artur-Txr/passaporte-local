@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Icone from './Icone';
 import Text from './Texto';
 import useFotoPrivada from './useFotoPrivada';
 
@@ -44,12 +45,14 @@ export default function GaleriaFotos({ fotos, inicial, fechar }: {
         />
         {fotos.length > 1 && <View style={styles.rodape}>
           <Pressable accessibilityRole="button" accessibilityLabel="Foto anterior" disabled={indice === 0}
-            style={[styles.botao, indice === 0 && styles.desabilitado]} onPress={() => irPara(indice - 1)}>
-            <Text style={styles.texto}>Anterior</Text>
+            style={[styles.navegar, indice === 0 && styles.desabilitado]} onPress={() => irPara(indice - 1)}>
+            <Icone nome="voltar" tamanho={20} cor="#FFF" />
+            <Text style={styles.rotulo}>Anterior</Text>
           </Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel="Próxima foto" disabled={indice === fotos.length - 1}
-            style={[styles.botao, indice === fotos.length - 1 && styles.desabilitado]} onPress={() => irPara(indice + 1)}>
-            <Text style={styles.texto}>Próxima</Text>
+            style={[styles.navegar, indice === fotos.length - 1 && styles.desabilitado]} onPress={() => irPara(indice + 1)}>
+            <Text style={styles.rotulo}>Próxima</Text>
+            <Icone nome="proximo" tamanho={20} cor="#FFF" />
           </Pressable>
         </View>}
       </SafeAreaView>
@@ -74,6 +77,11 @@ const styles = StyleSheet.create({
   cabecalho: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 },
   texto: { color: '#FFFFFF', fontSize: 15 },
   botao: { padding: 16, minHeight: 48 },
-  rodape: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 20 },
+  rodape: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
+  navegar: {
+    flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 48, maxWidth: '100%',
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: '#FFFFFF4D', backgroundColor: '#242424',
+  },
+  rotulo: { color: '#FFF', fontSize: 15, fontWeight: '700', flexShrink: 1 },
   desabilitado: { opacity: 0.4 },
 });

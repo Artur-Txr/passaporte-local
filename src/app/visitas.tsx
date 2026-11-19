@@ -93,11 +93,13 @@ export default function Visitas() {
             >
               <Filtro
                 valor={cidadeAtiva}
+                destaque={!!cidadeAtiva}
                 onChange={setCidade}
                 opcoes={[{ id: "", nome: "Todas as cidades" }, ...cidades]}
               />
               <Filtro
                 valor={categoria}
+                destaque={!!categoria}
                 onChange={setCategoria}
                 opcoes={["", ...categorias].map(
                   (id) => ({ id, nome: id || "Todas as categorias" }),
@@ -108,6 +110,7 @@ export default function Visitas() {
               <Text style={visual.subtitle}>Data da visita</Text>
               <Filtro
                 valor={ordem}
+                destaque={ordem === "asc"}
                 onChange={setOrdem}
                 opcoes={[
                   { id: "desc", nome: "Mais recentes" },
@@ -130,8 +133,8 @@ export default function Visitas() {
               </Pressable>
             )}
             {!carregando && (
-              <Text accessibilityLiveRegion="polite" style={[visual.subtitle, { marginBottom: 12 }]}>
-                {filtradas.length} {filtradas.length === 1 ? "lembrança encontrada" : "lembranças encontradas"}
+              <Text accessibilityLiveRegion="polite" style={estilos.total}>
+                {filtradas.length} {filtradas.length === 1 ? "visita encontrada" : "visitas encontradas"}
               </Text>
             )}
           </>
@@ -169,6 +172,12 @@ export default function Visitas() {
 }
 
 const estilos = StyleSheet.create({
+  total: {
+    color: cores.verde,
+    fontSize: 14,
+    fontWeight: "700",
+    marginTop: 12,
+  },
   chamada: {
     color: cores.laranja,
     fontSize: 11,

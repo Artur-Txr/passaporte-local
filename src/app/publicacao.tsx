@@ -6,12 +6,12 @@ import AlbumVisita from '../componentes/AlbumVisita';
 import LocalizacaoVisita from '../componentes/LocalizacaoVisita';
 import Avatar from '../componentes/Avatar';
 import InteracoesPublicacao from '../componentes/InteracoesPublicacao';
-import BotaoFavorito from '../componentes/BotaoFavorito';
 import { Cabecalho, visual } from '../componentes/Design';
 import Text from '../componentes/Texto';
 import { useAutenticacao } from '../contextos/AutenticacaoContext';
 import { fotosDaVisita } from '../dados/visitas';
 import { formatarDataVisita } from '../lib/formatacaoData';
+import { rotuloCidade } from '../lib/cidades';
 import { obterPublicacao, type Publicacao } from '../servicos/comunidadeService';
 
 export default function DetalhesPublicacao() {
@@ -38,12 +38,10 @@ export default function DetalhesPublicacao() {
         </Pressable>
         <AlbumVisita fotos={fotosDaVisita({ ...visita, data: visita.data_visita })} />
         <Text style={[visual.title, { marginTop: 14 }]}>{visita.lugar}</Text>
-        <Text style={visual.subtitle}>{visita.cidade} · {visita.uf}</Text>
-        <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} />
+        <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} rotulo={rotuloCidade(visita.cidade, visita.uf)} />
         <Text style={visual.subtitle}>{visita.categoria} · {formatarDataVisita(visita.data_visita.split('-').reverse().join('/'), true)}</Text>
         <View style={{ marginVertical: 20 }}><Text style={visual.section}>Minha lembrança</Text><Text style={visual.subtitle}>{visita.comentario || 'Uma descoberta para guardar.'}</Text></View>
         <InteracoesPublicacao key={`interacoes-${visita.id}`} visitaId={visita.id} />
-        <BotaoFavorito visitaId={visita.id} />
         {visita.usuario_id === sessao?.user.id && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/editar-visita', params: { id: visita.id } })} style={visual.button}><Text style={visual.buttonText}>Editar visita</Text></Pressable>}
       </>}
     </ScrollView>
