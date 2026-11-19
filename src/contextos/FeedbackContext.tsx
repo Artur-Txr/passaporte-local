@@ -13,7 +13,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
   const avisar = useCallback((texto: string, carimbo?: DadosCarimbo) => {
     clearTimeout(temporizador.current);
     setFeedback({ id: ++sequencia.current, texto, carimbo });
-    temporizador.current = setTimeout(() => setFeedback(null), carimbo ? 2500 : 4000);
+    temporizador.current = setTimeout(() => setFeedback(null), carimbo ? 3600 : 4000);
   }, []);
   useEffect(() => () => clearTimeout(temporizador.current), []);
   return <FeedbackContext.Provider value={avisar}>
