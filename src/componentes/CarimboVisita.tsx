@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { AccessibilityInfo, Animated, Easing, Platform, StyleSheet, View } from "react-native";
 import { rotuloCidade } from "../lib/cidades";
 import { formatarDataVisita } from "../lib/formatacaoData";
+import { paleta } from "../lib/paleta";
+import Icone from "./Icone";
 import Text from "./Texto";
 
 export type DadosCarimbo = {
@@ -53,39 +55,50 @@ export default function CarimboVisita({ visita, animar = false }: { visita: Dado
       style={[estilos.area, movimento]}
     >
       <View style={estilos.carimbo}>
-        <View style={estilos.anel} />
+        <View style={estilos.molduraInterna} />
         <View style={estilos.cabecalho}>
-          <View style={estilos.ponto} />
-          <Text style={[estilos.texto, estilos.local]} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.85} maxFontSizeMultiplier={1.15}>{local}</Text>
-          <View style={estilos.ponto} />
+          <Icone nome="lugar" tamanho={12} />
+          <Text style={estilos.local} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.85} maxFontSizeMultiplier={1.15}>{local}</Text>
         </View>
         <View style={estilos.faixa}>
+          <View style={estilos.traco} />
           <Text style={estilos.marca} numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={1.15}>VISITADO</Text>
+          <View style={estilos.traco} />
         </View>
-        <Text style={[estilos.texto, estilos.data]} numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={1.15}>{dataSelo}</Text>
+        <View style={estilos.campoData}>
+          <Text style={estilos.data} numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={1.15}>{dataSelo}</Text>
+        </View>
       </View>
     </Animated.View>
   );
 }
 
-const tinta = "#963B2B";
 const estilos = StyleSheet.create({
-  area: { alignSelf: "center", flexShrink: 0, padding: 3 },
+  area: { alignSelf: "center", flexShrink: 0, padding: 5 },
   carimbo: {
-    width: 124, height: 124, borderRadius: 62, borderWidth: 2, borderColor: tinta,
-    backgroundColor: "#FFF6F2", paddingHorizontal: 9,
-    justifyContent: "center", alignItems: "center", gap: 5,
-    transform: [{ rotate: "-8deg" }],
+    width: 136, minHeight: 96, borderRadius: 9, borderWidth: 2, borderColor: paleta.petroleo,
+    backgroundColor: "#FFFCF7", paddingHorizontal: 12, paddingVertical: 9,
+    justifyContent: "center", alignItems: "center", gap: 3,
+    transform: [{ rotate: "-6deg" }],
   },
-  anel: { position: "absolute", top: 5, bottom: 5, left: 5, right: 5, borderRadius: 57, borderWidth: 1, borderStyle: "dashed", borderColor: "#B3614D" },
-  cabecalho: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, maxWidth: 96 },
-  ponto: { width: 3, height: 3, borderRadius: 2, backgroundColor: tinta, flexShrink: 0 },
-  texto: { color: tinta, fontSize: 10, lineHeight: 13, textAlign: "center", fontWeight: "700", letterSpacing: 0.25, textTransform: "uppercase" },
-  local: { flexShrink: 1 },
-  faixa: { width: 96, alignItems: "center", paddingHorizontal: 3, paddingVertical: 2, borderRadius: 4, backgroundColor: tinta },
+  molduraInterna: {
+    position: "absolute", top: 3, bottom: 3, left: 3, right: 3,
+    borderRadius: 5, borderWidth: 1, borderColor: "#123B4A66",
+  },
+  cabecalho: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 2, maxWidth: "100%" },
+  local: {
+    color: paleta.petroleo, fontSize: 10, lineHeight: 13, fontWeight: "700", letterSpacing: 0.25,
+    textTransform: "uppercase", flexShrink: 1,
+  },
+  faixa: { flexDirection: "row", alignItems: "center", alignSelf: "stretch", gap: 4 },
+  traco: { flex: 1, height: 1, backgroundColor: "#123B4A66" },
   marca: {
-    color: "#FFF9F7", fontSize: 15, lineHeight: 20, fontWeight: "800", letterSpacing: 0.9,
-    textAlign: "center",
+    color: paleta.petroleo, fontSize: 16, lineHeight: 21, fontWeight: "800", letterSpacing: 1.15,
+    textAlign: "center", flexShrink: 1,
   },
-  data: { fontVariant: ["tabular-nums"], letterSpacing: 0.6 },
+  campoData: { backgroundColor: paleta.coralClaro, borderRadius: 3, paddingHorizontal: 6, paddingVertical: 1, maxWidth: "100%" },
+  data: {
+    color: "#963B2B", fontSize: 11, lineHeight: 16, fontWeight: "800", textTransform: "uppercase",
+    fontVariant: ["tabular-nums"], letterSpacing: 0.8, textAlign: "center",
+  },
 });

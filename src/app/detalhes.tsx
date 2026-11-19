@@ -14,9 +14,11 @@ import { useVisitas } from "../contextos/VisitasContext";
 import AlbumVisita from "../componentes/AlbumVisita";
 import CarimboVisita from "../componentes/CarimboVisita";
 import LocalizacaoVisita from "../componentes/LocalizacaoVisita";
+import useLayoutResponsivo from "../componentes/useLayoutResponsivo";
 import { fotosDaVisita } from "../dados/visitas";
 import { Cabecalho, Decoracao, cores, visual } from "../componentes/Design";
 export default function Detalhes() {
+  const { compacto } = useLayoutResponsivo();
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const { visitas, excluirVisita, carregando, erro, recarregarVisitas } = useVisitas();
   const visita = visitas.find((v) => v.id === (Array.isArray(id) ? id[0] : id));
@@ -51,13 +53,16 @@ export default function Detalhes() {
         {visita ? (
           <>
             <AlbumVisita key={`album-${visita.id}`} fotos={fotosDaVisita(visita)} />
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginTop: 14 }}>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text accessibilityRole="header" style={[visual.title, { fontSize: 27 }]}>{visita.lugar}</Text>
-                <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} rotulo={`${localizacao.cidade} · ${visita.uf}`} />
-                {!!localizacao.localidade && <Text style={visual.meta}>Localidade: {localizacao.localidade}</Text>}
+            <View style={{ gap: 6, marginTop: 14 }}>
+              {compacto && <Text accessibilityRole="header" style={[visual.title, { fontSize: 27 }]}>{visita.lugar}</Text>}
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  {!compacto && <Text accessibilityRole="header" style={[visual.title, { fontSize: 27 }]}>{visita.lugar}</Text>}
+                  <LocalizacaoVisita key={`mapa-${visita.id}`} visita={visita} rotulo={`${localizacao.cidade} · ${visita.uf}`} />
+                  {!!localizacao.localidade && <Text style={visual.meta}>Localidade: {localizacao.localidade}</Text>}
+                </View>
+                <CarimboVisita visita={{ ...visita, dataAproximada: texto.dataAproximada }} />
               </View>
-              <CarimboVisita visita={{ ...visita, dataAproximada: texto.dataAproximada }} />
             </View>
             <View style={{ marginTop: 14 }}>
             <View
